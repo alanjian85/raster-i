@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sdkproject:SdkProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" name="xdpdma_video_example_1" location="/home/alanjian85/trinity/xdpdma_video_example_1" platform="/home/alanjian85/trinity/trinity_platform/export/trinity_platform/trinity_platform.xpfm" platformUID="xilinx:kv260_som_som240_1_connector_kv260_carrier_som240_1_connector::0.0(custom)" systemProject="xdpdma_video_example_1_system" sysConfig="trinity_platform" runtime="C/C++" cpu="standalone_psu_cortexa53_0" cpuInstance="psu_cortexa53_0" os="standalone" mssSignature="edcceeca0babf9293b545ffb9180ddf7">
+  <configuration name="Debug" id="xilinx.gnu.arm.a53.exe.debug.531284569" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <configuration name="Release" id="xilinx.gnu.arm.a53.exe.release.1335362684" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <template appTemplateName="empty_application"/>
+</sdkproject:SdkProject>

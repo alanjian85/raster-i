@@ -1,0 +1,70 @@
+#######################################################################
+# This is file which used to generate QEMU(which emulates A53 cores) 
+# commandline(start_qemu.sh script) which used in ZynqMP HW-EMU. 
+# This is a template file which is packaged in platform and it gets 
+# processed by Vitis tool to generate meaningful file.
+#
+# This file contains flag and value pairs and they must be seperated 
+# into two lines value followed by flag. Below are the common/mandated 
+# flag and value pairs used for emulating ZynqMP. User can add more 
+# commandline args to this file depends on requirements.
+# 
+# For more details on the QEMU commandline, please refer to 
+# the QEMU user guide UG1169.
+########################################################################
+#
+#
+# selects emulated machine
+-M
+arm-generic-fdt
+#
+#
+# redirect the serial port to specified char dev (i.e stdio, tcp port, file etc)
+-serial
+mon:stdio
+#
+#
+# Make the specified cpu come out of reset (ZynqMP specific)
+-global
+xlnx,zynqmp-boot.cpu-num=0
+#
+#
+# Handovers static pmc config data to pmufw  (ZynqMP specific)
+-global
+xlnx,zynqmp-boot.use-pmufw=true
+#
+#
+# initialize network interface gem0
+-net
+nic
+#
+#
+# initialize network interface gem1
+-net
+nic
+#
+#
+# initialize network interface gem2
+-net
+nic
+#
+#
+# initialize network interface gem3
+-net
+nic
+#
+#
+# Connect the previous mentioned network adaptor to user mode network
+-net
+user
+#
+#
+# Mention the ddr size according to support ddr address space
+-m
+4G
+#
+#
+# Dtb file which describes PS which is emulated by QEMU can be specifed using -hw-dtb 
+# (By default Vitis tool provides standard dtb, But user can specify dtb).
+#-hw-dtb
+#<path-to-ps-dtb>

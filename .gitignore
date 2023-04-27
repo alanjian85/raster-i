@@ -52,9 +52,14 @@ Mkfile.old
 dkms.conf
 
 *.log
+.metadata
+.analytics
+RemoteSystemsTempFiles
 rtl
 core/.apc
 core/.vitis_hls_log_all.xml
 core/solution1/.autopilot
+core/solution1/.debug
 core/solution1/csim
+core/solution1/syn
 core/solution1/impl
