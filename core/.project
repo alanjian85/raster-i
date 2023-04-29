@@ -37,6 +37,11 @@
 			<location>/home/alanjian85/trinity/core/.apc/.tb</location>
 		</link>
 		<link>
+			<name>.reference/imgproc.hpp</name>
+			<type>1</type>
+			<location>/usr/include/opencv4/opencv2/imgproc.hpp</location>
+		</link>
+		<link>
 			<name>solution1/constraints</name>
 			<type>2</type>
 			<location>/home/alanjian85/trinity/core/solution1/.tcls</location>

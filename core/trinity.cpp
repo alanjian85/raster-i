@@ -1,49 +1,50 @@
-#include <hls_stream.h>
-#include <ap_axi_sdata.h>
-#include <stdint.h>
-#include <math.h>
 #include "trinity.hpp"
 
-ap_axiu<24, 1, 1, 1> video;
+#include <hls_stream.h>
+#include <cstdint>
+#include <cmath>
+#include <algorithm>
 
-void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine, float cosine) {
-#pragma HLS interface mode=axis port=m_axis_video register_mode=both
-#pragma HLS interface mode=s_axilite port=sine
-#pragma HLS interface mode=s_axilite port=cosine
-#pragma HLS interface mode=s_axilite port=return
+void do_cmd_vertex(vec2 vertex, volatile uint32_t* framebuffer) {
+	static vec2 vertices[3];
+	static size_t index = 0;
 
-	vec2 a(0.0, 0.86), b(-1.0, -0.86), c(1.0, -0.86);
-	a = a.x * vec2(cosine, sine) + a.y * vec2(-sine, cosine);
-	b = b.x * vec2(cosine, sine) + b.y * vec2(-sine, cosine);
-	c = c.x * vec2(cosine, sine) + c.y * vec2(-sine, cosine);
+	vertices[index++] = vertex;
+	index %= 3;
 
-	for (int i = 0; i < HEIGHT; i++) {
-		for (int j = 0; j < WIDTH; j++) {
-			if (i == 0 && j == 0)
-				video.user = 1;
-			else
-				video.user = 0;
+	if (index != 0)
+		return;
 
-			if (j == WIDTH - 1)
-				video.last = 1;
-			else
-				video.last = 0;
-
+	for (size_t i = 0; i < HEIGHT; i++) {
+		for (size_t j = 0; j < WIDTH; j++) {
 			vec2 coord;
-			coord.x = static_cast<float>((j << 1) - WIDTH) / HEIGHT;
+			coord.x = (static_cast<float>(j << 1) - WIDTH) / HEIGHT;
 			coord.y = (1 - static_cast<float>(i) / (HEIGHT - 1)) * 2 - 1;
-			vec3 bary = barycentric(a, b, c, coord);
-			uint8_t color_r = 0;
-			uint8_t color_g = 0;
-			uint8_t color_b = 0;
-			if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
-				color_r = bary.x * 255;
-				color_g = bary.y * 255;
-				color_b = bary.z * 255;
-			}
 
-			video.data = color_r << 16 | color_g << 8 | color_b;
-			m_axis_video << video;
+			vec3 bary = barycentric(vertices[0], vertices[1], vertices[2], coord);
+			if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
+				uint8_t color_r = bary.x * 255;
+				uint8_t color_g = bary.y * 255;
+				uint8_t color_b = bary.z * 255;
+				framebuffer[i * WIDTH + j] = color_r << 24 | color_g << 16 | color_b << 8 | 0xff;
+			}
+		}
+	}
+}
+
+void trinity(hls::stream<command>& s_axis_command, volatile uint32_t* m_axi_mm_video) {
+#pragma HLS INTERFACE mode=m_axi port=m_axi_mm_video offset=slave depth=WIDTH*HEIGHT
+#pragma HLS INTERFACE mode=axis register_mode=both port=s_axis_command
+	bool end = false;;
+	while (!end) {
+		command cmd = s_axis_command.read();
+		switch (cmd.cmd) {
+		case CMD_VERTEX:
+			do_cmd_vertex(cmd.vertex, m_axi_mm_video);
+			break;
+		case CMD_END:
+			end = true;
+			break;
 		}
 	}
 }
