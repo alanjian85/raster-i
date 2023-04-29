@@ -6,14 +6,13 @@
 
 ap_axiu<24, 1, 1, 1> video;
 
-void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine) {
+void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine, float cosine) {
 #pragma HLS interface mode=axis port=m_axis_video register_mode=both
 #pragma HLS interface mode=s_axilite port=sine
+#pragma HLS interface mode=s_axilite port=cosine
 #pragma HLS interface mode=s_axilite port=return
 
-	float cosine = sqrt(1 - sine * sine);
 	vec2 a(0.0, 0.86), b(-1.0, -0.86), c(1.0, -0.86);
-
 	a = a.x * vec2(cosine, sine) + a.y * vec2(-sine, cosine);
 	b = b.x * vec2(cosine, sine) + b.y * vec2(-sine, cosine);
 	c = c.x * vec2(cosine, sine) + c.y * vec2(-sine, cosine);

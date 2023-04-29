@@ -111,8 +111,9 @@ int main()
 	for (;;) {
 		Xil_Out32(TRINITY_BASEADDR + 0x00, 0x01);
 		while (!(Xil_In32(TRINITY_BASEADDR + 0x00) & 0x02));
-		float sine = sin(elapsed);
+		float sine = sin(elapsed), cosine = cos(elapsed);
 		Xil_Out32(TRINITY_BASEADDR + 0x10, *(uint32_t*) &sine);
+		Xil_Out32(TRINITY_BASEADDR + 0x18, *(uint32_t*) &cosine);
 		elapsed += 0.02f;
 	}
 

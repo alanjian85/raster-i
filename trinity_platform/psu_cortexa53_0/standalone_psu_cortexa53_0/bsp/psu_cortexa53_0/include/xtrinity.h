@@ -90,6 +90,8 @@ void XTrinity_DisableAutoRestart(XTrinity *InstancePtr);
 
 void XTrinity_Set_sine(XTrinity *InstancePtr, u32 Data);
 u32 XTrinity_Get_sine(XTrinity *InstancePtr);
+void XTrinity_Set_cosine(XTrinity *InstancePtr, u32 Data);
+u32 XTrinity_Get_cosine(XTrinity *InstancePtr);
 
 void XTrinity_InterruptGlobalEnable(XTrinity *InstancePtr);
 void XTrinity_InterruptGlobalDisable(XTrinity *InstancePtr);

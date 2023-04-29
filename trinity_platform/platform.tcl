@@ -29,3 +29,9 @@ platform generate
 platform active {trinity_platform}
 platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
 platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 

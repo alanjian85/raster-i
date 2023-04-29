@@ -91,6 +91,23 @@ u32 XTrinity_Get_sine(XTrinity *InstancePtr) {
     return Data;
 }
 
+void XTrinity_Set_cosine(XTrinity *InstancePtr, u32 Data) {
+    Xil_AssertVoid(InstancePtr != NULL);
+    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_COSINE_DATA, Data);
+}
+
+u32 XTrinity_Get_cosine(XTrinity *InstancePtr) {
+    u32 Data;
+
+    Xil_AssertNonvoid(InstancePtr != NULL);
+    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
+
+    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_COSINE_DATA);
+    return Data;
+}
+
 void XTrinity_InterruptGlobalEnable(XTrinity *InstancePtr) {
     Xil_AssertVoid(InstancePtr != NULL);
     Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
