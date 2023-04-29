@@ -31,6 +31,8 @@
 
 #include "xdpdma_video.h"
 
+#include <math.h>
+
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "xil_cache.h"
@@ -48,6 +50,7 @@
 #define DPPSU_BASEADDR		XPAR_PSU_DP_BASEADDR
 #define AVBUF_BASEADDR		XPAR_PSU_DP_BASEADDR
 #define DPDMA_BASEADDR		XPAR_PSU_DPDMA_BASEADDR
+#define TRINITY_BASEADDR    0xa0010000
 
 #define BUFFERSIZE			1920 * 1080 * 4		/* HTotal * VTotal * BPP */
 #define LINESIZE			1920 * 4			/* HTotal * BPP */
@@ -103,6 +106,15 @@ int main()
 	XV_frmbufwr_Set_HwReg_frm_buffer_V(&frmbufwr, FrameBuffer.Address);
 	XV_frmbufwr_EnableAutoRestart(&frmbufwr);
 	XV_frmbufwr_Start(&frmbufwr);
+
+	float elapsed = 0;
+	for (;;) {
+		Xil_Out32(TRINITY_BASEADDR + 0x00, 0x01);
+		while (!(Xil_In32(TRINITY_BASEADDR + 0x00) & 0x02));
+		float sine = sin(elapsed);
+		Xil_Out32(TRINITY_BASEADDR + 0x10, *(uint32_t*) &sine);
+		elapsed += 0.02f;
+	}
 
     return XST_SUCCESS;
 }

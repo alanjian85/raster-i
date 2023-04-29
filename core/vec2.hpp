@@ -11,8 +11,16 @@ struct vec2 {
 	float y;
 };
 
+inline vec2 operator+(vec2 lhs, vec2 rhs) {
+	return vec2(lhs.x + rhs.x, lhs.y + rhs.y);
+}
+
 inline vec2 operator-(vec2 lhs, vec2 rhs) {
 	return vec2(lhs.x - rhs.x, lhs.y - rhs.y);
+}
+
+inline vec2 operator*(float lhs, vec2 rhs) {
+	return vec2(lhs * rhs.x, lhs * rhs.y);
 }
 
 #endif // VEC2_HPP

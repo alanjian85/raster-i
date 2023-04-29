@@ -1207,6 +1207,25 @@
 /******************************************************************/
 
 #define XPAR_XSYSMONPSU_0_REF_FREQMHZ 49.999500
+/* Definitions for driver TRINITY */
+#define XPAR_XTRINITY_NUM_INSTANCES 1
+
+/* Definitions for peripheral TRINITY_0 */
+#define XPAR_TRINITY_0_DEVICE_ID 0
+#define XPAR_TRINITY_0_S_AXI_CONTROL_BASEADDR 0xA0010000
+#define XPAR_TRINITY_0_S_AXI_CONTROL_HIGHADDR 0xA001FFFF
+
+
+/******************************************************************/
+
+/* Canonical definitions for peripheral TRINITY_0 */
+#define XPAR_XTRINITY_0_DEVICE_ID XPAR_TRINITY_0_DEVICE_ID
+#define XPAR_XTRINITY_0_S_AXI_CONTROL_BASEADDR 0xA0010000
+#define XPAR_XTRINITY_0_S_AXI_CONTROL_HIGHADDR 0xA001FFFF
+
+
+/******************************************************************/
+
 /* Definitions for driver TTCPS */
 #define XPAR_XTTCPS_NUM_INSTANCES 12U
 

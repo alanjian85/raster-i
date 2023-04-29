@@ -8,6 +8,6 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video);
+void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine);
 
 #endif // TRINITY_HPP

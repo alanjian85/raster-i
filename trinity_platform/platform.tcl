@@ -22,3 +22,10 @@ domain active {standalone_psu_cortexa53_0}
 platform generate -quick
 bsp reload
 platform generate
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+bsp reload
+platform generate
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
