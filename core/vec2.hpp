@@ -2,6 +2,13 @@
 #define VEC2_HPP
 
 struct vec2 {
+	vec2() = default;
+
+	vec2(float f) {
+		x = f;
+		y = f;
+	}
+
 	vec2(float x, float y) {
 		this->x = x;
 		this->y = y;

@@ -12,15 +12,11 @@ void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine) {
 #pragma HLS interface mode=s_axilite port=return
 
 	float cosine = sqrt(1 - sine * sine);
-	vec2 a(0.0, 0.5), b(-0.5, -0.5), c(0.5, -0.5);
+	vec2 a(0.0, 0.86), b(-1.0, -0.86), c(1.0, -0.86);
 
 	a = a.x * vec2(cosine, sine) + a.y * vec2(-sine, cosine);
 	b = b.x * vec2(cosine, sine) + b.y * vec2(-sine, cosine);
 	c = c.x * vec2(cosine, sine) + c.y * vec2(-sine, cosine);
-
-	a.x = (WIDTH - 1) * (a.x * 0.5 + 0.5); a.y = (HEIGHT - 1) * (a.y * 0.5 + 0.5);
-	b.x = (WIDTH - 1) * (b.x * 0.5 + 0.5); b.y = (HEIGHT - 1) * (b.y * 0.5 + 0.5);
-	c.x = (WIDTH - 1) * (c.x * 0.5 + 0.5); c.y = (HEIGHT - 1) * (c.y * 0.5 + 0.5);
 
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
@@ -34,18 +30,20 @@ void trinity(hls::stream<ap_axiu<24, 1, 1, 1>>& m_axis_video, float sine) {
 			else
 				video.last = 0;
 
-			vec3 coord = barycentric(a, b, c, vec2(j, HEIGHT - 1 - i));
+			vec2 coord;
+			coord.x = static_cast<float>((j << 1) - WIDTH) / HEIGHT;
+			coord.y = (1 - static_cast<float>(i) / (HEIGHT - 1)) * 2 - 1;
+			vec3 bary = barycentric(a, b, c, coord);
 			uint8_t color_r = 0;
 			uint8_t color_g = 0;
 			uint8_t color_b = 0;
-			if (coord.x >= 0 && coord.y >= 0 && coord.z >= 0) {
-				color_r = coord.x * 255;
-				color_g = coord.y * 255;
-				color_b = coord.z * 255;
+			if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
+				color_r = bary.x * 255;
+				color_g = bary.y * 255;
+				color_b = bary.z * 255;
 			}
 
 			video.data = color_r << 16 | color_g << 8 | color_b;
-
 			m_axis_video << video;
 		}
 	}
