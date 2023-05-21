@@ -19,147 +19,22 @@ int XTrinity_CfgInitialize(XTrinity *InstancePtr, XTrinity_Config *ConfigPtr) {
 }
 #endif
 
-void XTrinity_Start(XTrinity *InstancePtr) {
-    u32 Data;
-
+void XTrinity_Set_m_axi_mm_video(XTrinity *InstancePtr, u64 Data) {
     Xil_AssertVoid(InstancePtr != NULL);
     Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL) & 0x80;
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL, Data | 0x01);
+    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_M_AXI_MM_VIDEO_DATA, (u32)(Data));
+    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_M_AXI_MM_VIDEO_DATA + 4, (u32)(Data >> 32));
 }
 
-u32 XTrinity_IsDone(XTrinity *InstancePtr) {
-    u32 Data;
+u64 XTrinity_Get_m_axi_mm_video(XTrinity *InstancePtr) {
+    u64 Data;
 
     Xil_AssertNonvoid(InstancePtr != NULL);
     Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
 
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL);
-    return (Data >> 1) & 0x1;
-}
-
-u32 XTrinity_IsIdle(XTrinity *InstancePtr) {
-    u32 Data;
-
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL);
-    return (Data >> 2) & 0x1;
-}
-
-u32 XTrinity_IsReady(XTrinity *InstancePtr) {
-    u32 Data;
-
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL);
-    // check ap_start to see if the pcore is ready for next input
-    return !(Data & 0x1);
-}
-
-void XTrinity_EnableAutoRestart(XTrinity *InstancePtr) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL, 0x80);
-}
-
-void XTrinity_DisableAutoRestart(XTrinity *InstancePtr) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_AP_CTRL, 0);
-}
-
-void XTrinity_Set_sine(XTrinity *InstancePtr, u32 Data) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_SINE_DATA, Data);
-}
-
-u32 XTrinity_Get_sine(XTrinity *InstancePtr) {
-    u32 Data;
-
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_SINE_DATA);
+    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_M_AXI_MM_VIDEO_DATA);
+    Data += (u64)XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_M_AXI_MM_VIDEO_DATA + 4) << 32;
     return Data;
-}
-
-void XTrinity_Set_cosine(XTrinity *InstancePtr, u32 Data) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_COSINE_DATA, Data);
-}
-
-u32 XTrinity_Get_cosine(XTrinity *InstancePtr) {
-    u32 Data;
-
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Data = XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_COSINE_DATA);
-    return Data;
-}
-
-void XTrinity_InterruptGlobalEnable(XTrinity *InstancePtr) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_GIE, 1);
-}
-
-void XTrinity_InterruptGlobalDisable(XTrinity *InstancePtr) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_GIE, 0);
-}
-
-void XTrinity_InterruptEnable(XTrinity *InstancePtr, u32 Mask) {
-    u32 Register;
-
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Register =  XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_IER);
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_IER, Register | Mask);
-}
-
-void XTrinity_InterruptDisable(XTrinity *InstancePtr, u32 Mask) {
-    u32 Register;
-
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    Register =  XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_IER);
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_IER, Register & (~Mask));
-}
-
-void XTrinity_InterruptClear(XTrinity *InstancePtr, u32 Mask) {
-    Xil_AssertVoid(InstancePtr != NULL);
-    Xil_AssertVoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    XTrinity_WriteReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_ISR, Mask);
-}
-
-u32 XTrinity_InterruptGetEnabled(XTrinity *InstancePtr) {
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    return XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_IER);
-}
-
-u32 XTrinity_InterruptGetStatus(XTrinity *InstancePtr) {
-    Xil_AssertNonvoid(InstancePtr != NULL);
-    Xil_AssertNonvoid(InstancePtr->IsReady == XIL_COMPONENT_IS_READY);
-
-    return XTrinity_ReadReg(InstancePtr->Control_BaseAddress, XTRINITY_CONTROL_ADDR_ISR);
 }
 

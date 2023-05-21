@@ -37,7 +37,7 @@
 #include "xil_printf.h"
 #include "xil_cache.h"
 
-#include "xv_frmbufwr.h"
+#include "xaxidma.h"
 
 /************************** Constant Definitions *****************************/
 #define DPPSU_DEVICE_ID		XPAR_PSU_DP_DEVICE_ID
@@ -52,10 +52,8 @@
 #define DPDMA_BASEADDR		XPAR_PSU_DPDMA_BASEADDR
 #define TRINITY_BASEADDR    0xa0010000
 
-#define BUFFERSIZE			1920 * 1080 * 4		/* HTotal * VTotal * BPP */
-#define LINESIZE			1920 * 4			/* HTotal * BPP */
-#define STRIDE				LINESIZE			/* The stride value should
-													be aligned to 256*/
+#define WIDTH 1920
+#define HEIGHT 1080
 
 /************************** Variable Declarations ***************************/
 XDpDma DpDma;
@@ -64,7 +62,8 @@ XAVBuf AVBuf;
 XScuGic Intr;
 Run_Config RunCfg;
 
-u8 Frame[BUFFERSIZE] __attribute__ ((__aligned__(256)));
+u32 Frame[WIDTH * HEIGHT] __attribute__ ((__aligned__(256)));
+u32 Commands[4 * 7] __attribute__((__aligned__(128)));
 XDpDma_FrameBuffer FrameBuffer;
 
 /**************************** Type Definitions *******************************/
@@ -81,6 +80,25 @@ XDpDma_FrameBuffer FrameBuffer;
 * @note		None
 *
 ******************************************************************************/
+enum {
+	CMD_VERTEX = 0x00,
+	CMD_END  = 0x01
+};
+
+u32 float2bits(float x) {
+	return *(u32*) &x;
+}
+
+void make_cmd_vertex(u32 *cmd, float x, float y) {
+	cmd[0] = CMD_VERTEX;
+	cmd[1] = float2bits(x);
+	cmd[2] = float2bits(y);
+}
+
+void make_cmd_end(u32 *cmd) {
+	cmd[0] = CMD_END;
+}
+
 int main()
 {
 	int Status;
@@ -97,25 +115,20 @@ int main()
 
 	xil_printf("Successfully ran DPDMA Video Example Test\r\n");
 
-	XV_frmbufwr frmbufwr;
-	XV_frmbufwr_Initialize(&frmbufwr, XPAR_V_FRMBUF_WR_0_DEVICE_ID);
-	XV_frmbufwr_Set_HwReg_width(&frmbufwr, 1920);
-	XV_frmbufwr_Set_HwReg_height(&frmbufwr, 1080);
-	XV_frmbufwr_Set_HwReg_stride(&frmbufwr, LINESIZE);
-	XV_frmbufwr_Set_HwReg_video_format(&frmbufwr, XVIDC_CSF_MEM_RGBX8);
-	XV_frmbufwr_Set_HwReg_frm_buffer_V(&frmbufwr, FrameBuffer.Address);
-	XV_frmbufwr_EnableAutoRestart(&frmbufwr);
-	XV_frmbufwr_Start(&frmbufwr);
+	make_cmd_vertex(Commands + 0, -0.5,  0.5);
+	make_cmd_vertex(Commands + 4, -0.5, -0.5);
+	make_cmd_vertex(Commands + 8,  0.5, -0.5);
+	make_cmd_vertex(Commands + 12, -0.5,  0.5);
+	make_cmd_vertex(Commands + 16,  0.5,  0.5);
+	make_cmd_vertex(Commands + 20,  0.5, -0.5);
+	make_cmd_end(Commands + 24);
 
-	float elapsed = 0;
-	for (;;) {
-		Xil_Out32(TRINITY_BASEADDR + 0x00, 0x01);
-		while (!(Xil_In32(TRINITY_BASEADDR + 0x00) & 0x02));
-		float sine = sin(elapsed), cosine = cos(elapsed);
-		Xil_Out32(TRINITY_BASEADDR + 0x10, *(uint32_t*) &sine);
-		Xil_Out32(TRINITY_BASEADDR + 0x18, *(uint32_t*) &cosine);
-		elapsed += 0.02f;
-	}
+	XAxiDma dma;
+	XAxiDma_Config *config = XAxiDma_LookupConfig(XPAR_AXIDMA_0_DEVICE_ID);
+	XAxiDma_CfgInitialize(&dma, config);
+
+	Xil_Out64(0xb0000000, (u64) Frame);
+	XAxiDma_SimpleTransfer(&dma, (uintptr_t) Commands, sizeof(Commands), XAXIDMA_DMA_TO_DEVICE);
 
     return XST_SUCCESS;
 }
@@ -146,9 +159,9 @@ int DpdmaVideoExample(Run_Config *RunCfgPtr)
 
 	/* Populate the FrameBuffer structure with the frame attributes */
 	FrameBuffer.Address = (INTPTR)Frame;
-	FrameBuffer.Stride = STRIDE;
-	FrameBuffer.LineSize = LINESIZE;
-	FrameBuffer.Size = BUFFERSIZE;
+	FrameBuffer.Stride = WIDTH * 4;
+	FrameBuffer.LineSize = WIDTH * 4;
+	FrameBuffer.Size = WIDTH * HEIGHT * 4;
 
 	SetupInterrupts(RunCfgPtr);
 

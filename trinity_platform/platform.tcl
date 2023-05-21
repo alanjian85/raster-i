@@ -35,3 +35,47 @@ platform generate -domains
 platform active {trinity_platform}
 platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
 platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+domain active {zynqmp_pmufw}
+bsp reload
+domain active {standalone_psu_cortexa53_0}
+bsp reload
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+domain active {zynqmp_fsbl}
+catch {bsp regenerate}
+catch {bsp regenerate}
+domain active {zynqmp_pmufw}
+domain active {zynqmp_pmufw}
+bsp reload
+catch {bsp regenerate}
+domain active {zynqmp_pmufw}
+bsp reload
+catch {bsp regenerate}
+domain active {standalone_psu_cortexa53_0}
+catch {bsp regenerate}
+platform active {trinity_platform}
+platform clean
+platform generate
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 
+platform active {trinity_platform}
+platform config -updatehw {/home/alanjian85/trinity/rtl/trinity_rtl.xsa}
+platform generate -domains 

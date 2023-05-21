@@ -81,25 +81,9 @@ int XTrinity_Initialize(XTrinity *InstancePtr, const char* InstanceName);
 int XTrinity_Release(XTrinity *InstancePtr);
 #endif
 
-void XTrinity_Start(XTrinity *InstancePtr);
-u32 XTrinity_IsDone(XTrinity *InstancePtr);
-u32 XTrinity_IsIdle(XTrinity *InstancePtr);
-u32 XTrinity_IsReady(XTrinity *InstancePtr);
-void XTrinity_EnableAutoRestart(XTrinity *InstancePtr);
-void XTrinity_DisableAutoRestart(XTrinity *InstancePtr);
 
-void XTrinity_Set_sine(XTrinity *InstancePtr, u32 Data);
-u32 XTrinity_Get_sine(XTrinity *InstancePtr);
-void XTrinity_Set_cosine(XTrinity *InstancePtr, u32 Data);
-u32 XTrinity_Get_cosine(XTrinity *InstancePtr);
-
-void XTrinity_InterruptGlobalEnable(XTrinity *InstancePtr);
-void XTrinity_InterruptGlobalDisable(XTrinity *InstancePtr);
-void XTrinity_InterruptEnable(XTrinity *InstancePtr, u32 Mask);
-void XTrinity_InterruptDisable(XTrinity *InstancePtr, u32 Mask);
-void XTrinity_InterruptClear(XTrinity *InstancePtr, u32 Mask);
-u32 XTrinity_InterruptGetEnabled(XTrinity *InstancePtr);
-u32 XTrinity_InterruptGetStatus(XTrinity *InstancePtr);
+void XTrinity_Set_m_axi_mm_video(XTrinity *InstancePtr, u64 Data);
+u64 XTrinity_Get_m_axi_mm_video(XTrinity *InstancePtr);
 
 #ifdef __cplusplus
 }
