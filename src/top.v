@@ -28,13 +28,19 @@ module top(
         .active(active)
     );
 
-    wire [3:0] r, g, b;
-    pix_gen pix_gen_inst(
+    wire visible;
+    rasterizer rasterizer_inst(
         .x(x),
         .y(y),
-        .r(r),
-        .g(g),
-        .b(b)
+        .visible(visible)
+    );
+
+    wire [3:0] r, g, b;
+    shader shader_inst(
+        .visible(visible),
+	.r(r),
+	.g(g),
+	.b(b)
     );
 
     always @(posedge clk_pix) begin

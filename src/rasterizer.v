@@ -1,9 +1,7 @@
-(* use_dsp = "yes" *) module pix_gen(
+(* use_dsp = "yes" *) module rasterizer(
         input [9:0] x,
         input [9:0] y,
-        output [3:0] r,
-        output [3:0] g,
-        output [3:0] b
+        output visible
     );
 
     localparam AX = 320;
@@ -39,10 +37,6 @@
     wire u = A > 0 && A > va + wa ||
              A < 0 && A < va + wa;
 
-    wire visible = u && v && w;
-
-    assign r = visible ? 4'hF : 4'h1;
-    assign g = visible ? 4'hF : 4'h3;
-    assign b = visible ? 4'hF : 4'h7;
+    assign visible = u && v && w;
 
 endmodule

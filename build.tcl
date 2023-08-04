@@ -15,35 +15,18 @@
 #   run results please launch the synthesis/implementation runs as needed.
 #
 #*****************************************************************************************
-# NOTE: In order to use this script for source control purposes, please make sure that the
-#       following files are added to the source control system:-
-#
-# 1. This project restoration tcl script (build.tcl) that was generated.
-#
-# 2. The following source(s) files that were local or imported into the original project.
-#    (Please see the '$orig_proj_dir' and '$origin_dir' variable setting below at the start of the script)
-#
-#    "/home/alanjian85/temp/trinity/trinity.srcs/sources_1/new/pix_gen.v"
-#    "/home/alanjian85/temp/trinity/trinity.srcs/sources_1/new/signal_480p60.v"
-#    "/home/alanjian85/temp/trinity/trinity.srcs/sources_1/new/top.v"
-#    "/home/alanjian85/temp/trinity/trinity.srcs/sources_1/ip/clock_480p60/clock_480p60.xci"
-#    "/home/alanjian85/temp/trinity/trinity.srcs/constrs_1/new/arty.xdc"
-#
-# 3. The following remote source files that were added to the original project:-
-#
-#    <none>
-#
-#*****************************************************************************************
+
 
 # Check file required for this script exists
 proc checkRequiredFiles { origin_dir} {
   set status true
   set files [list \
- "[file normalize "$origin_dir/src/pix_gen.v"]"\
  "[file normalize "$origin_dir/src/signal_480p60.v"]"\
  "[file normalize "$origin_dir/src/top.v"]"\
  "[file normalize "$origin_dir/ip/clock_480p60/clock_480p60.xci"]"\
  "[file normalize "$origin_dir/src/arty.xdc"]"\
+ "[file normalize "$origin_dir/src/rasterizer.v"]"\
+ "[file normalize "$origin_dir/src/shader.v"]"\
   ]
   foreach ifile $files {
     if { ![file isfile $ifile] } {
@@ -174,9 +157,10 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 set obj [get_filesets sources_1]
 # Import local files from the original project
 set files [list \
- [file normalize "${origin_dir}/src/pix_gen.v" ]\
  [file normalize "${origin_dir}/src/signal_480p60.v" ]\
  [file normalize "${origin_dir}/src/top.v" ]\
+ [file normalize "${origin_dir}/src/rasterizer.v" ]\
+ [file normalize "${origin_dir}/src/shader.v" ]\
 ]
 set imported_files [import_files -fileset sources_1 $files]
 
