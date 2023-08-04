@@ -1,3 +1,6 @@
+// Copyright (C) 2023 Alan Jian (alanjian85@outlook.com)
+// SPDX-License-Identifier: GPL-3.0
+
 (* use_dsp = "yes" *) module rasterizer(
         input [9:0] x,
         input [9:0] y,

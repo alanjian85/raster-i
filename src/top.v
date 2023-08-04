@@ -1,3 +1,6 @@
+// Copyright (C) 2023 Alan Jian (alanjian85@outlook.com)
+// SPDX-License-Identifier: GPL-3.0
+
 module top(
         input clk_100m,
         input resetn,
