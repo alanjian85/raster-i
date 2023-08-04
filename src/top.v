@@ -7,7 +7,7 @@ module top(
         output reg vga_hsync,
         output reg vga_vsync
     );
-    
+
     wire clk_pix, clk_pix_locked;
     clock_480p60 clock_inst(
         .clk_100m(clk_100m),
@@ -15,7 +15,7 @@ module top(
         .clk_pix(clk_pix),
         .clk_pix_locked(clk_pix_locked)
     );
-    
+
     wire [9:0] x, y;
     wire hsync, vsync, active;
     signal_480p60 signal_inst(
@@ -27,7 +27,7 @@ module top(
         .vsync(vsync),
         .active(active)
     );
-    
+
     wire [3:0] r, g, b;
     pix_gen pix_gen_inst(
         .x(x),
@@ -36,7 +36,7 @@ module top(
         .g(g),
         .b(b)
     );
-    
+
     always @(posedge clk_pix) begin
         vga_r <= active ? r : 4'h0;
         vga_g <= active ? g : 4'h0;
@@ -44,5 +44,5 @@ module top(
         vga_hsync <= hsync;
         vga_vsync <= vsync;
     end
-    
+
 endmodule
