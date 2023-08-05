@@ -26,7 +26,8 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/ip/clock_480p60/clock_480p60.xci"]"\
  "[file normalize "$origin_dir/src/arty.xdc"]"\
  "[file normalize "$origin_dir/src/rasterizer.v"]"\
- "[file normalize "$origin_dir/src/shader.v"]"\
+ "[file normalize "$origin_dir/src/vertex_shader.v"]"\
+ "[file normalize "$origin_dir/src/fragment_shader.v"]"\
   ]
   foreach ifile $files {
     if { ![file isfile $ifile] } {
@@ -160,7 +161,8 @@ set files [list \
  [file normalize "${origin_dir}/src/signal_480p60.v" ]\
  [file normalize "${origin_dir}/src/top.v" ]\
  [file normalize "${origin_dir}/src/rasterizer.v" ]\
- [file normalize "${origin_dir}/src/shader.v" ]\
+ [file normalize "${origin_dir}/src/vertex_shader.v" ]\
+ [file normalize "${origin_dir}/src/fragment_shader.v" ]\
 ]
 set imported_files [import_files -fileset sources_1 $files]
 

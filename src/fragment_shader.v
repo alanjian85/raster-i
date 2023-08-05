@@ -1,7 +1,7 @@
 // Copyright (C) 2023 Alan Jian (alanjian85@outlook.com)
 // SPDX-License-Identifier: GPL-3.0
 
-module divider_16x(
+(* use_dsp = "yes" *) module divider_16x(
         input [19:0] dividend,
         input [19:0] divisor,
         output reg [3:0] quotient);
@@ -84,7 +84,7 @@ module divider_16x(
 
 endmodule
 
-(* use_dsp = "yes" *) module shader(
+module fragment_shader(
         input visible,
         input [19:0] ua,
         input [19:0] va,
