@@ -3,35 +3,55 @@
 
 (* use_dsp = "yes" *) module vertex_shader(
         input clk_pix,
-        output reg [9:0] ax = 320,
-        output [9:0] ay,
-        output reg [9:0] bx = 112,
-        output [9:0] by,
-        output reg [9:0] cx = 528,
-        output [9:0] cy
+        output reg [9:0] ax,
+        output reg [9:0] ay,
+        output reg [9:0] bx,
+        output reg [9:0] by,
+        output reg [9:0] cx,
+        output reg [9:0] cy
     );
 
-    assign ay = 60;
-    assign by = 420;
-    assign cy = 420;
+    initial begin
+        ax = 320;
+        ay = 120;
+        bx = 181;
+        by = 360;
+        cx = 459;
+        cy = 360;
+    end
 
     reg [17:0] cnt = 0;
-    reg inc = 1;
+    reg inc_x = 1, inc_y = 1;
     always @(posedge clk_pix) begin
          if (cnt == 18'd225_000) begin
             cnt <= 0;
-            if (inc) begin
+
+            if (inc_x) begin
                 ax <= ax + 1;
                 bx <= bx + 1;
                 cx <= cx + 1;
-                if (cx == 640)
-                    inc <= 0;
+                if (cx == 639)
+                    inc_x <= 0;
             end else begin
                 ax <= ax - 1;
                 bx <= bx - 1;
                 cx <= cx - 1;
                 if (bx == 0)
-                    inc <= 1;
+                    inc_x <= 1;
+            end
+
+            if (inc_y) begin
+                ay <= ay + 1;
+                by <= by + 1;
+                cy <= cy + 1;
+                if (cy == 479)
+                    inc_y <= 0;
+            end else begin
+                ay <= ay - 1;
+                by <= by - 1;
+                cy <= cy - 1;
+                if (ay == 0)
+                    inc_y <= 1;
             end
         end else begin
             cnt <= cnt + 1;
