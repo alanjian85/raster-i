@@ -31,19 +31,28 @@ module top(
         .active(active)
     );
 
+    wire [19:0] ua, va, wa, a;
     wire visible;
     rasterizer rasterizer_inst(
         .x(x),
         .y(y),
+        .ua(ua),
+        .va(va),
+        .wa(wa),
+        .a(a),
         .visible(visible)
     );
 
     wire [3:0] r, g, b;
     shader shader_inst(
         .visible(visible),
-	.r(r),
-	.g(g),
-	.b(b)
+        .ua(ua),
+        .va(va),
+        .wa(wa),
+        .a(a),
+        .r(r),
+        .g(g),
+        .b(b)
     );
 
     always @(posedge clk_pix) begin

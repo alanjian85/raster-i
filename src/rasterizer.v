@@ -4,6 +4,10 @@
 (* use_dsp = "yes" *) module rasterizer(
         input [9:0] x,
         input [9:0] y,
+        output [19:0] ua,
+        output [19:0] va,
+        output [19:0] wa,
+        output [19:0] a,
         output visible
     );
 
@@ -22,24 +26,22 @@
 
     localparam ABXACY = ABX * ACY;
     localparam ABYACX = ABY * ACX;
-    localparam A = ABXACY - ABYACX;
+    localparam SA = ABXACY - ABYACX;
+    assign a = SA > 0 ? SA : -SA;
 
     wire signed [9:0] apx = x - AX;
     wire signed [9:0] apy = y - AY;
 
     wire signed [19:0] abxapy = ABX * apy;
     wire signed [19:0] abyapx = ABY * apx;
-    wire signed [19:0] va = abxapy - abyapx;
-    wire v = va > 0 && A > 0 || va < 0 && A < 0;
+    assign va = SA > 0 ? abxapy - abyapx : abyapx - abxapy;
 
     wire signed [19:0] apxacy = apx * ACY;
     wire signed [19:0] apyacx = apy * ACX;
-    wire signed [19:0] wa = apxacy - apyacx;
-    wire w = wa > 0 && A > 0 || wa < 0 && A < 0;
+    assign wa = SA > 0 ? apxacy - apyacx : apyacx - apxacy;
 
-    wire u = A > 0 && A > va + wa ||
-             A < 0 && A < va + wa;
+    assign ua = a - va - wa;
 
-    assign visible = u && v && w;
+    assign visible = !(ua[19] || va[19] || wa[19]);
 
 endmodule
