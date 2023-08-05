@@ -31,9 +31,21 @@ module top(
         .active(active)
     );
 
+    reg [9:0] ax = 320;
+    reg [9:0] ay = 60;
+    reg [9:0] bx = 112;
+    reg [9:0] by = 420;
+    reg [9:0] cx = 528;
+    reg [9:0] cy = 420;
     wire [19:0] ua, va, wa, a;
     wire visible;
     rasterizer rasterizer_inst(
+        .ax(ax),
+        .ay(ay),
+        .bx(bx),
+        .by(by),
+        .cx(cx),
+        .cy(cy),
         .x(x),
         .y(y),
         .ua(ua),
@@ -50,12 +62,33 @@ module top(
         .va(va),
         .wa(wa),
         .a(a),
-        .r(r),
-        .g(g),
-        .b(b)
+	    .r(r),
+	    .g(g),
+	    .b(b)
     );
 
+    reg [17:0] cnt = 0;
+    reg inc = 1;
     always @(posedge clk_pix) begin
+        if (cnt == 18'd225_000) begin
+            cnt <= 0;
+            if (inc) begin
+                ax <= ax + 1;
+                bx <= bx + 1;
+                cx <= cx + 1;
+                if (cx == 640)
+                    inc <= 0;
+            end else begin
+                ax <= ax - 1;
+                bx <= bx - 1;
+                cx <= cx - 1;
+                if (bx == 0)
+                    inc <= 1;
+            end
+        end else begin
+            cnt <= cnt + 1;
+        end
+
         vga_r <= active ? r : 4'h0;
         vga_g <= active ? g : 4'h0;
         vga_b <= active ? b : 4'h0;
