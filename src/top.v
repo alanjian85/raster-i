@@ -21,7 +21,7 @@ module top(
 
     wire [9:0] x, y;
     wire hsync, vsync, active;
-    signal_480p60 signal_inst(
+    signal_480p signal_inst(
         clk_pix,
         clk_pix_locked,
         x,
@@ -45,7 +45,7 @@ module top(
     );
 
     wire [9:0] ax, ay, bx, by, cx, cy;
-    vertex_shader vertex_shader_inst(
+    vert_shader vert_shader_inst(
         clk_pix,
         angle,
         sin,
@@ -77,7 +77,7 @@ module top(
     );
 
     wire [3:0] r, g, b;
-    fragment_shader fragment_shader_inst(
+    frag_shader frag_shader_inst(
         visible,
         ua,
         va,

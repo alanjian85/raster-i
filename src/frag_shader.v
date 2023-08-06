@@ -84,7 +84,7 @@
 
 endmodule
 
-module fragment_shader(
+module frag_shader(
         input visible,
         input [19:0] ua,
         input [19:0] va,

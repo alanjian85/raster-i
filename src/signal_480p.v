@@ -1,7 +1,7 @@
 // Copyright (C) 2023 Alan Jian (alanjian85@outlook.com)
 // SPDX-License-Identifier: GPL-3.0
 
-module signal_480p60(
+module signal_480p(
         input clk_pix,
         input resetn,
         output reg [9:0] x,

@@ -1,7 +1,7 @@
 // Copyright (C) 2023 Alan Jian (alanjian85@outlook.com)
 // SPDX-License-Identifier: GPL-3.0
 
-(* use_dsp = "yes" *) module vertex_shader(
+(* use_dsp = "yes" *) module vert_shader(
         input clk_pix,
         output reg [8:0] angle,
         input signed [11:0] sin,

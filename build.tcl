@@ -29,10 +29,10 @@
 #
 #    "/home/alanjian85/workspace/trinity/ip/sin_rom/sin_rom.xci"
 #    "/home/alanjian85/workspace/trinity/ip/clock_480p60/clock_480p60.xci"
-#    "/home/alanjian85/workspace/trinity/src/fragment_shader.v"
+#    "/home/alanjian85/workspace/trinity/src/frag_shader.v"
 #    "/home/alanjian85/workspace/trinity/src/rasterizer.v"
-#    "/home/alanjian85/workspace/trinity/src/signal_480p60.v"
-#    "/home/alanjian85/workspace/trinity/src/vertex_shader.v"
+#    "/home/alanjian85/workspace/trinity/src/signal_480p.v"
+#    "/home/alanjian85/workspace/trinity/src/vert_shader.v"
 #    "/home/alanjian85/workspace/trinity/src/top.v"
 #    "/home/alanjian85/workspace/trinity/rom/cos_rom.coe"
 #    "/home/alanjian85/workspace/trinity/rom/sin_rom.coe"
@@ -47,10 +47,10 @@ proc checkRequiredFiles { origin_dir} {
   set files [list \
  "[file normalize "$origin_dir/ip/sin_rom/sin_rom.xci"]"\
  "[file normalize "$origin_dir/ip/clock_480p60/clock_480p60.xci"]"\
- "[file normalize "$origin_dir/src/fragment_shader.v"]"\
+ "[file normalize "$origin_dir/src/frag_shader.v"]"\
  "[file normalize "$origin_dir/src/rasterizer.v"]"\
- "[file normalize "$origin_dir/src/signal_480p60.v"]"\
- "[file normalize "$origin_dir/src/vertex_shader.v"]"\
+ "[file normalize "$origin_dir/src/signal_480p.v"]"\
+ "[file normalize "$origin_dir/src/vert_shader.v"]"\
  "[file normalize "$origin_dir/src/top.v"]"\
  "[file normalize "$origin_dir/rom/cos_rom.coe"]"\
  "[file normalize "$origin_dir/rom/sin_rom.coe"]"\
@@ -180,10 +180,10 @@ set obj [get_filesets sources_1]
 set files [list \
  [file normalize "${origin_dir}/ip/sin_rom/sin_rom.xci"] \
  [file normalize "${origin_dir}/ip/clock_480p60/clock_480p60.xci"] \
- [file normalize "${origin_dir}/src/fragment_shader.v"] \
+ [file normalize "${origin_dir}/src/frag_shader.v"] \
  [file normalize "${origin_dir}/src/rasterizer.v"] \
- [file normalize "${origin_dir}/src/signal_480p60.v"] \
- [file normalize "${origin_dir}/src/vertex_shader.v"] \
+ [file normalize "${origin_dir}/src/signal_480p.v"] \
+ [file normalize "${origin_dir}/src/vert_shader.v"] \
  [file normalize "${origin_dir}/src/top.v"] \
  [file normalize "${origin_dir}/rom/cos_rom.coe"] \
  [file normalize "${origin_dir}/rom/sin_rom.coe"] \
