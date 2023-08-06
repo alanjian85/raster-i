@@ -3,6 +3,8 @@
 
 (* use_dsp = "yes" *) module vertex_shader(
         input clk_pix,
+        output reg [8:0] sine_rom_addr,
+        input signed [11:0] sine,
         output reg [9:0] ax,
         output reg [9:0] ay,
         output reg [9:0] bx,
@@ -12,6 +14,7 @@
     );
 
     initial begin
+        sine_rom_addr = 0;
         ax = 320;
         ay = 120;
         bx = 181;
@@ -20,39 +23,22 @@
         cy = 360;
     end
 
-    reg [17:0] cnt = 0;
-    reg inc_x = 1, inc_y = 1;
+    wire signed [19:0] sine180_fixed = 180 * sine;
+    wire signed [9:0] sine180 = sine180_fixed[19:10];
+    always @(sine) begin
+        ax = 320 + sine180;
+        bx = 181 + sine180;
+        cx = 459 + sine180;
+    end
+
+    reg [16:0] cnt = 0;
     always @(posedge clk_pix) begin
-         if (cnt == 18'd225_000) begin
+        if (cnt == 17'd66667) begin
             cnt <= 0;
-
-            if (inc_x) begin
-                ax <= ax + 1;
-                bx <= bx + 1;
-                cx <= cx + 1;
-                if (cx == 639)
-                    inc_x <= 0;
-            end else begin
-                ax <= ax - 1;
-                bx <= bx - 1;
-                cx <= cx - 1;
-                if (bx == 0)
-                    inc_x <= 1;
-            end
-
-            if (inc_y) begin
-                ay <= ay + 1;
-                by <= by + 1;
-                cy <= cy + 1;
-                if (cy == 479)
-                    inc_y <= 0;
-            end else begin
-                ay <= ay - 1;
-                by <= by - 1;
-                cy <= cy - 1;
-                if (ay == 0)
-                    inc_y <= 1;
-            end
+            if (sine_rom_addr == 9'd359) begin
+                sine_rom_addr <= 0;
+            end else
+                sine_rom_addr <= sine_rom_addr + 1;
         end else begin
             cnt <= cnt + 1;
         end

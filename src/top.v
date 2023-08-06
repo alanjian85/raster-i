@@ -31,9 +31,18 @@ module top(
         .active(active)
     );
 
+    wire [8:0] sine_rom_addr;
+    wire [11:0] sine;
+    sine_rom sine_rom_table (
+        .a(sine_rom_addr),
+        .spo(sine)
+    );
+
     wire [9:0] ax, ay, bx, by, cx, cy;
     vertex_shader vertex_shader_inst(
         .clk_pix(clk_pix),
+        .sine_rom_addr(sine_rom_addr),
+        .sine(sine),
         .ax(ax),
         .ay(ay),
         .bx(bx),
