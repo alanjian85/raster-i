@@ -32,24 +32,24 @@ module top(
     );
 
     wire [8:0] rom_addr;
-    wire [11:0] sine;
-    sine_rom sine_rom_table (
+    wire [11:0] sin;
+    sin_rom sin_rom_inst (
         .a(rom_addr),
-        .spo(sine)
+        .spo(sin)
     );
 
-    wire [11:0] cosine;
-    cosine_rom cosine_rom_table (
+    wire [11:0] cos;
+    cos_rom cos_rom_inst (
         .a(rom_addr),
-        .spo(cosine)
+        .spo(cos)
     );
 
     wire [9:0] ax, ay, bx, by, cx, cy;
     vertex_shader vertex_shader_inst(
         .clk_pix(clk_pix),
         .rom_addr(rom_addr),
-        .sine(sine),
-        .cosine(cosine),
+        .sin(sin),
+        .cos(cos),
         .ax(ax),
         .ay(ay),
         .bx(bx),

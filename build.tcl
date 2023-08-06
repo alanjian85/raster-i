@@ -27,16 +27,16 @@
 #
 # 3. The following remote source files that were added to the original project:-
 #
-#    "/home/alanjian85/workspace/trinity/ip/sine_rom/sine_rom.xci"
+#    "/home/alanjian85/workspace/trinity/ip/sin_rom/sin_rom.xci"
 #    "/home/alanjian85/workspace/trinity/ip/clock_480p60/clock_480p60.xci"
 #    "/home/alanjian85/workspace/trinity/src/fragment_shader.v"
 #    "/home/alanjian85/workspace/trinity/src/rasterizer.v"
 #    "/home/alanjian85/workspace/trinity/src/signal_480p60.v"
 #    "/home/alanjian85/workspace/trinity/src/vertex_shader.v"
 #    "/home/alanjian85/workspace/trinity/src/top.v"
-#    "/home/alanjian85/workspace/trinity/rom/cosine_rom.coe"
-#    "/home/alanjian85/workspace/trinity/rom/sine_rom.coe"
-#    "/home/alanjian85/workspace/trinity/ip/cosine_rom/cosine_rom.xci"
+#    "/home/alanjian85/workspace/trinity/rom/cos_rom.coe"
+#    "/home/alanjian85/workspace/trinity/rom/sin_rom.coe"
+#    "/home/alanjian85/workspace/trinity/ip/cos_rom/cos_rom.xci"
 #    "/home/alanjian85/workspace/trinity/src/arty.xdc"
 #
 #*****************************************************************************************
@@ -45,16 +45,16 @@
 proc checkRequiredFiles { origin_dir} {
   set status true
   set files [list \
- "[file normalize "$origin_dir/ip/sine_rom/sine_rom.xci"]"\
+ "[file normalize "$origin_dir/ip/sin_rom/sin_rom.xci"]"\
  "[file normalize "$origin_dir/ip/clock_480p60/clock_480p60.xci"]"\
  "[file normalize "$origin_dir/src/fragment_shader.v"]"\
  "[file normalize "$origin_dir/src/rasterizer.v"]"\
  "[file normalize "$origin_dir/src/signal_480p60.v"]"\
  "[file normalize "$origin_dir/src/vertex_shader.v"]"\
  "[file normalize "$origin_dir/src/top.v"]"\
- "[file normalize "$origin_dir/rom/cosine_rom.coe"]"\
- "[file normalize "$origin_dir/rom/sine_rom.coe"]"\
- "[file normalize "$origin_dir/ip/cosine_rom/cosine_rom.xci"]"\
+ "[file normalize "$origin_dir/rom/cos_rom.coe"]"\
+ "[file normalize "$origin_dir/rom/sin_rom.coe"]"\
+ "[file normalize "$origin_dir/ip/cos_rom/cos_rom.xci"]"\
  "[file normalize "$origin_dir/src/arty.xdc"]"\
   ]
   foreach ifile $files {
@@ -178,20 +178,20 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 # Set 'sources_1' fileset object
 set obj [get_filesets sources_1]
 set files [list \
- [file normalize "${origin_dir}/ip/sine_rom/sine_rom.xci"] \
+ [file normalize "${origin_dir}/ip/sin_rom/sin_rom.xci"] \
  [file normalize "${origin_dir}/ip/clock_480p60/clock_480p60.xci"] \
  [file normalize "${origin_dir}/src/fragment_shader.v"] \
  [file normalize "${origin_dir}/src/rasterizer.v"] \
  [file normalize "${origin_dir}/src/signal_480p60.v"] \
  [file normalize "${origin_dir}/src/vertex_shader.v"] \
  [file normalize "${origin_dir}/src/top.v"] \
- [file normalize "${origin_dir}/rom/cosine_rom.coe"] \
- [file normalize "${origin_dir}/rom/sine_rom.coe"] \
+ [file normalize "${origin_dir}/rom/cos_rom.coe"] \
+ [file normalize "${origin_dir}/rom/sin_rom.coe"] \
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'sources_1' fileset file properties for remote files
-set file "$origin_dir/ip/sine_rom/sine_rom.xci"
+set file "$origin_dir/ip/sin_rom/sin_rom.xci"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "generate_files_for_reference" -value "0" -objects $file_obj
@@ -221,12 +221,12 @@ set_property -name "top" -value "top" -objects $obj
 # Set 'sources_1' fileset object
 set obj [get_filesets sources_1]
 set files [list \
- [file normalize "${origin_dir}/ip/cosine_rom/cosine_rom.xci"] \
+ [file normalize "${origin_dir}/ip/cos_rom/cos_rom.xci"] \
 ]
 add_files -norecurse -fileset $obj $files
 
 # Set 'sources_1' fileset file properties for remote files
-set file "$origin_dir/ip/cosine_rom/cosine_rom.xci"
+set file "$origin_dir/ip/cos_rom/cos_rom.xci"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "generate_files_for_reference" -value "0" -objects $file_obj

@@ -4,38 +4,36 @@
 (* use_dsp = "yes" *) module vertex_shader(
         input clk_pix,
         output reg [8:0] rom_addr,
-        input signed [11:0] sine,
-        input signed [11:0] cosine,
-        output reg [9:0] ax,
-        output reg [9:0] ay,
-        output reg [9:0] bx,
-        output reg [9:0] by,
-        output reg [9:0] cx,
-        output reg [9:0] cy
+        input signed [11:0] sin,
+        input signed [11:0] cos,
+        output [9:0] ax,
+        output [9:0] ay,
+        output [9:0] bx,
+        output [9:0] by,
+        output [9:0] cx,
+        output [9:0] cy
     );
 
     initial begin
         rom_addr = 0;
     end
 
-    wire signed [18:0] sine120_fixed = 120 * sine;
-    wire signed [8:0] sine120 = sine120_fixed[18:10];
-    wire signed [18:0] cosine120_fixed = 120 * cosine;
-    wire signed [8:0] cosine120 = cosine120_fixed[18:10];
+    wire signed [18:0] sin120_fixed = 120 * sin;
+    wire signed [8:0] sin120 = sin120_fixed[18:10];
+    wire signed [18:0] cos120_fixed = 120 * cos;
+    wire signed [8:0] cos120 = cos120_fixed[18:10];
 
-    wire signed [19:0] sine140_fixed = 140 * sine;
-    wire signed [9:0] sine140 = sine140_fixed[19:10];
-    wire signed [19:0] cosine140_fixed = 140 * cosine;
-    wire signed [9:0] cosine140 = cosine140_fixed[19:10];
+    wire signed [19:0] sin140_fixed = 140 * sin;
+    wire signed [9:0] sin140 = sin140_fixed[19:10];
+    wire signed [19:0] cos140_fixed = 140 * cos;
+    wire signed [9:0] cos140 = cos140_fixed[19:10];
 
-    always @(sine) begin
-        ax = 320 - sine120;
-        ay = 240 + cosine120;
-        bx = 320 - cosine140 + sine120;
-        by = 240 - sine140 - cosine120;
-        cx = 320 + cosine140 + sine120;
-        cy = 240 + sine140 - cosine120;
-    end
+    assign ax = 320 - sin120;
+    assign ay = 240 + cos120;
+    assign bx = 320 - cos140 + sin120;
+    assign by = 240 - sin140 - cos120;
+    assign cx = 320 + cos140 + sin120;
+    assign cy = 240 + sin140 - cos120;
 
     reg [18:0] cnt = 0;
     always @(posedge clk_pix) begin
