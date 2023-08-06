@@ -41,6 +41,6 @@
 
     assign ua = a - va - wa;
 
-    assign visible = !(ua[19] || va[19] || wa[19]);
+    assign visible = !(ua[19] || va[19] || wa[19] || a == 0);
 
 endmodule

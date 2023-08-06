@@ -28,12 +28,12 @@
     wire signed [19:0] cos140_fixed = 140 * cos;
     wire signed [9:0] cos140 = cos140_fixed[19:10];
 
-    assign ax = 320 - sin120;
-    assign ay = 240 + cos120;
-    assign bx = 320 - cos140 + sin120;
-    assign by = 240 - sin140 - cos120;
-    assign cx = 320 + cos140 + sin120;
-    assign cy = 240 + sin140 - cos120;
+    assign ax = 320;
+    assign ay = 120;
+    assign bx = 320 - cos140;
+    assign by = 360;
+    assign cx = 320 + cos140;
+    assign cy = 360;
 
     reg [18:0] cnt = 0;
     always @(posedge clk_pix) begin
