@@ -3,8 +3,9 @@
 
 (* use_dsp = "yes" *) module vertex_shader(
         input clk_pix,
-        output reg [8:0] sine_rom_addr,
+        output reg [8:0] rom_addr,
         input signed [11:0] sine,
+        input signed [11:0] cosine,
         output reg [9:0] ax,
         output reg [9:0] ay,
         output reg [9:0] bx,
@@ -14,31 +15,36 @@
     );
 
     initial begin
-        sine_rom_addr = 0;
-        ax = 320;
-        ay = 120;
-        bx = 181;
-        by = 360;
-        cx = 459;
-        cy = 360;
+        rom_addr = 0;
     end
 
-    wire signed [19:0] sine180_fixed = 180 * sine;
-    wire signed [9:0] sine180 = sine180_fixed[19:10];
+    wire signed [18:0] sine120_fixed = 120 * sine;
+    wire signed [8:0] sine120 = sine120_fixed[18:10];
+    wire signed [18:0] cosine120_fixed = 120 * cosine;
+    wire signed [8:0] cosine120 = cosine120_fixed[18:10];
+
+    wire signed [19:0] sine140_fixed = 140 * sine;
+    wire signed [9:0] sine140 = sine140_fixed[19:10];
+    wire signed [19:0] cosine140_fixed = 140 * cosine;
+    wire signed [9:0] cosine140 = cosine140_fixed[19:10];
+
     always @(sine) begin
-        ax = 320 + sine180;
-        bx = 181 + sine180;
-        cx = 459 + sine180;
+        ax = 320 - sine120;
+        ay = 240 + cosine120;
+        bx = 320 - cosine140 + sine120;
+        by = 240 - sine140 - cosine120;
+        cx = 320 + cosine140 + sine120;
+        cy = 240 + sine140 - cosine120;
     end
 
-    reg [16:0] cnt = 0;
+    reg [18:0] cnt = 0;
     always @(posedge clk_pix) begin
-        if (cnt == 17'd66667) begin
+        if (cnt == 19'd333333) begin
             cnt <= 0;
-            if (sine_rom_addr == 9'd359) begin
-                sine_rom_addr <= 0;
+            if (rom_addr == 9'd359) begin
+                rom_addr <= 0;
             end else
-                sine_rom_addr <= sine_rom_addr + 1;
+                rom_addr <= rom_addr + 1;
         end else begin
             cnt <= cnt + 1;
         end
