@@ -3,7 +3,7 @@
 
 (* use_dsp = "yes" *) module vertex_shader(
         input clk_pix,
-        output reg [8:0] rom_addr,
+        output reg [8:0] angle,
         input signed [11:0] sin,
         input signed [11:0] cos,
         output [9:0] ax,
@@ -15,7 +15,7 @@
     );
 
     initial begin
-        rom_addr = 0;
+        angle = 0;
     end
 
     wire signed [18:0] sin120_fixed = 120 * sin;
@@ -39,10 +39,10 @@
     always @(posedge clk_pix) begin
         if (cnt == 19'd333333) begin
             cnt <= 0;
-            if (rom_addr == 9'd359) begin
-                rom_addr <= 0;
+            if (angle == 9'd359) begin
+                angle <= 0;
             end else
-                rom_addr <= rom_addr + 1;
+                angle <= angle + 1;
         end else begin
             cnt <= cnt + 1;
         end

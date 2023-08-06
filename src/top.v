@@ -13,79 +13,79 @@ module top(
 
     wire clk_pix, clk_pix_locked;
     clock_480p60 clock_inst(
-        .clk_100m(clk_100m),
-        .resetn(resetn),
-        .clk_pix(clk_pix),
-        .clk_pix_locked(clk_pix_locked)
+        clk_pix,
+        resetn,
+        clk_pix_locked,
+        clk_100m
     );
 
     wire [9:0] x, y;
     wire hsync, vsync, active;
     signal_480p60 signal_inst(
-        .clk_pix(clk_pix),
-        .resetn(clk_pix_locked),
-        .x(x),
-        .y(y),
-        .hsync(hsync),
-        .vsync(vsync),
-        .active(active)
+        clk_pix,
+        clk_pix_locked,
+        x,
+        y,
+        hsync,
+        vsync,
+        active
     );
 
-    wire [8:0] rom_addr;
+    wire [8:0] angle;
     wire [11:0] sin;
     sin_rom sin_rom_inst (
-        .a(rom_addr),
-        .spo(sin)
+        angle,
+        sin
     );
 
     wire [11:0] cos;
     cos_rom cos_rom_inst (
-        .a(rom_addr),
-        .spo(cos)
+        angle,
+        cos
     );
 
     wire [9:0] ax, ay, bx, by, cx, cy;
     vertex_shader vertex_shader_inst(
-        .clk_pix(clk_pix),
-        .rom_addr(rom_addr),
-        .sin(sin),
-        .cos(cos),
-        .ax(ax),
-        .ay(ay),
-        .bx(bx),
-        .by(by),
-        .cx(cx),
-        .cy(cy)
+        clk_pix,
+        angle,
+        sin,
+        cos,
+        ax,
+        ay,
+        bx,
+        by,
+        cx,
+        cy
     );
 
     wire [19:0] ua, va, wa, a;
     wire visible;
     rasterizer rasterizer_inst(
-        .ax(ax),
-        .ay(ay),
-        .bx(bx),
-        .by(by),
-        .cx(cx),
-        .cy(cy),
-        .x(x),
-        .y(y),
-        .ua(ua),
-        .va(va),
-        .wa(wa),
-        .a(a),
-        .visible(visible)
+        ax,
+        ay,
+        bx,
+        by,
+        cx,
+        cy,
+        x,
+        y,
+        ua,
+        va,
+        wa,
+        a,
+        visible
     );
 
     wire [3:0] r, g, b;
     fragment_shader fragment_shader_inst(
-        .visible(visible),
-        .ua(ua),
-        .va(va),
-        .wa(wa),
-        .a(a),
-	    .r(r),
-	    .g(g),
-	    .b(b)
+        visible,
+        ua,
+        va,
+        wa,
+        a,
+	    r,
+	    g,
+	    b
     );
 
     always @(posedge clk_pix) begin
