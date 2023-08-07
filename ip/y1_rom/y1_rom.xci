@@ -8,7 +8,7 @@
     "parameters": {
       "component_parameters": {
         "depth": [ { "value": "368", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "data_width": [ { "value": "12", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "all" } ],
+        "data_width": [ { "value": "8", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "Component_Name": [ { "value": "y1_rom", "resolve_type": "user", "usage": "all" } ],
         "memory_type": [ { "value": "rom", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
         "input_options": [ { "value": "non_registered", "resolve_type": "user", "usage": "all" } ],
@@ -65,7 +65,7 @@
         "C_REG_A_D_INPUTS": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_REG_DPRA_INPUT": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_SYNC_ENABLE": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
-        "C_WIDTH": [ { "value": "12", "resolve_type": "generated", "format": "long", "usage": "all" } ],
+        "C_WIDTH": [ { "value": "8", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_PARSER_TYPE": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ]
       },
       "project_parameters": {
@@ -95,7 +95,7 @@
     "boundary": {
       "ports": {
         "a": [ { "direction": "in", "size_left": "8", "size_right": "0", "driver_value": "0" } ],
-        "spo": [ { "direction": "out", "size_left": "11", "size_right": "0" } ]
+        "spo": [ { "direction": "out", "size_left": "7", "size_right": "0" } ]
       }
     }
   }

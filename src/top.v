@@ -38,13 +38,13 @@ module top(
         cos
     );
 
-    wire signed [11:0] y1;
+    wire signed [7:0] y1;
     y1_rom y1_rom_inst (
         angle,
         y1
     );
 
-    wire signed [11:0] y2;
+    wire signed [7:0] y2;
     y2_rom y2_rom_inst (
         angle,
         y2
@@ -55,8 +55,8 @@ module top(
         clk_pix,
         angle,
         cos,
-        y1[11:3],
-        y2[11:3],
+        y1,
+        y2,
         ax,
         ay,
         bx,
