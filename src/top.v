@@ -53,6 +53,7 @@ module top(
     wire [9:0] ax, ay, bx, by, cx, cy;
     vert_shader vert_shader_inst(
         clk_pix,
+        clk_pix_locked,
         angle,
         cos,
         bz,

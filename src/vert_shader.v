@@ -3,6 +3,7 @@
 
 module vert_shader(
         input clk_pix,
+        input resetn,
         output reg [8:0] angle,
         input signed [11:0] cos,
         input [6:0] bz,
@@ -14,10 +15,6 @@ module vert_shader(
         output [9:0] cx,
         output [9:0] cy
     );
-
-    initial begin
-        angle = 0;
-    end
 
     assign ax = 320;
     assign ay = 120;
@@ -35,7 +32,7 @@ module vert_shader(
     assign cy = 240 + cz;
 
     reg [18:0] cnt = 0;
-    always @(posedge clk_pix) begin
+    always @(posedge clk_pix, negedge resetn) begin
         if (cnt == 19'd333333) begin
             cnt <= 0;
             if (angle == 9'd359) begin
@@ -44,6 +41,11 @@ module vert_shader(
                 angle <= angle + 1;
         end else begin
             cnt <= cnt + 1;
+        end
+
+        if (!resetn) begin
+            angle <= 0;
+            cnt <= 0;
         end
     end
 
