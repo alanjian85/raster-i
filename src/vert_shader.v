@@ -9,27 +9,25 @@ module vert_shader(
         input [6:0] bz,
         input [6:0] cz,
         output [8:0] ax,
-        output [8:0] ay,
-        output [8:0] bx,
-        output [8:0] by,
-        output [8:0] cx,
-        output [8:0] cy
+        output [6:0] ay,
+        output signed [7:0] abx,
+        output signed [8:0] aby,
+        output signed [7:0] acx,
+        output signed [8:0] acy
     );
 
     assign ax = 320;
     assign ay = 120;
 
     wire signed [7:0] bz_signed = {1'h0, bz};
-    wire signed [18:0] bx_fixed = bz_signed * -cos;
-    wire signed [8:0] bx_norm = bx_fixed[18:10];
-    assign bx = 320 + bx_norm;
-    assign by = 240 + bz;
+    wire signed [17:0] bx_fixed = bz_signed * -cos;
+    assign abx = bx_fixed[17:10];
+    assign aby = bz + 120;
 
     wire signed [7:0] cz_signed = {1'h0, cz};
-    wire signed [18:0] cx_fixed = cz_signed * cos;
-    wire signed [8:0] cx_norm = cx_fixed[18:10];
-    assign cx = 320 + cx_norm;
-    assign cy = 240 + cz;
+    wire signed [17:0] cx_fixed = cz_signed * cos;
+    assign acx = cx_fixed[17:10];
+    assign acy = cz + 120;
 
     reg [18:0] cnt = 0;
     always @(posedge clk_pix, negedge resetn) begin

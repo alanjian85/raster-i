@@ -3,12 +3,12 @@
 
 module rasterizer(
         input [8:0] ax,
-        input [8:0] ay,
-        input [8:0] bx,
-        input [8:0] by,
+        input [6:0] ay,
+        input signed [7:0] abx,
+        input signed [8:0] aby,
         input [6:0] bz,
-        input [8:0] cx,
-        input [8:0] cy,
+        input signed [7:0] acx,
+        input signed [8:0] acy,
         input [6:0] cz,
         input [9:0] x,
         input [9:0] y,
@@ -18,12 +18,6 @@ module rasterizer(
         output [18:0] aw,
         output visible
     );
-
-    wire signed [7:0] abx = bx - ax;
-    wire signed [8:0] aby = by - ay;
-
-    wire signed [7:0] acx = cx - ax;
-    wire signed [8:0] acy = cy - ay;
 
     wire signed [9:0] apx = x - ax;
     wire signed [9:0] apy = y - ay;

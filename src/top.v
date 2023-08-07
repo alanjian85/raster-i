@@ -50,7 +50,10 @@ module top(
         cz
     );
 
-    wire [8:0] ax, ay, bx, by, cx, cy;
+    wire [8:0] ax;
+    wire [6:0] ay;
+    wire signed [8:0] aby, acy;
+    wire signed [7:0] abx, acx;
     vert_shader vert_shader_inst(
         clk_pix,
         clk_pix_locked,
@@ -60,10 +63,10 @@ module top(
         cz,
         ax,
         ay,
-        bx,
-        by,
-        cx,
-        cy
+        abx,
+        aby,
+        acx,
+        acy
     );
 
     wire [17:0] uw, vw, ww;
@@ -72,11 +75,11 @@ module top(
     rasterizer rasterizer_inst(
         ax,
         ay,
-        bx,
-        by,
+        abx,
+        aby,
         bz,
-        cx,
-        cy,
+        acx,
+        acy,
         cz,
         x,
         y,
