@@ -6,10 +6,10 @@ module rasterizer(
         input [9:0] ay,
         input [9:0] bx,
         input [9:0] by,
-        input [7:0] bz,
+        input [6:0] bz,
         input [9:0] cx,
         input [9:0] cy,
-        input [7:0] cz,
+        input [6:0] cz,
         input [9:0] x,
         input [9:0] y,
         output [19:0] uw,
@@ -44,10 +44,10 @@ module rasterizer(
     wire [19:0] u = a - v - w;
 
     assign uw = u[19:1];
-    wire [27:0] vw_fixed = v * bz;
-    assign vw = vw_fixed[27:7];
-    wire [27:0] ww_fixed = w * cz;
-    assign ww = ww_fixed[27:7];
+    wire [26:0] vw_fixed = v * bz;
+    assign vw = vw_fixed[26:7];
+    wire [26:0] ww_fixed = w * cz;
+    assign ww = ww_fixed[26:7];
     assign aw = uw + vw + ww;
 
     assign visible = !(u[19] || v[19] || w[19] || a == 0);
