@@ -31,13 +31,13 @@ module rasterizer(
     wire signed [19:0] sa = abxacy - abyacx;
     assign a = sa > 0 ? sa : -sa;
 
-    wire signed [19:0] abxapy = abx * apy;
-    wire signed [19:0] abyapx = aby * apx;
-    assign va = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
-
     wire signed [19:0] apxacy = apx * acy;
     wire signed [19:0] apyacx = apy * acx;
-    assign wa = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
+    assign va = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
+
+    wire signed [19:0] abxapy = abx * apy;
+    wire signed [19:0] abyapx = aby * apx;
+    assign wa = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
 
     assign ua = a - va - wa;
 
