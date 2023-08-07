@@ -8,12 +8,12 @@ module vert_shader(
         input signed [11:0] cos,
         input [6:0] bz,
         input [6:0] cz,
-        output [9:0] ax,
-        output [9:0] ay,
-        output [9:0] bx,
-        output [9:0] by,
-        output [9:0] cx,
-        output [9:0] cy
+        output [8:0] ax,
+        output [8:0] ay,
+        output [8:0] bx,
+        output [8:0] by,
+        output [8:0] cx,
+        output [8:0] cy
     );
 
     assign ax = 320;

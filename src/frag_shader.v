@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0
 
 module divider_16x(
-        input [19:0] dividend,
-        input [19:0] divisor,
+        input [17:0] dividend,
+        input [18:0] divisor,
         output reg [3:0] quotient);
 
-    wire [23:0] dividend_16x = {dividend, 4'h0};
+    wire [21:0] dividend_16x = {dividend, 4'h0};
 
-    wire [23:0] multiples [15:0];
+    wire [22:0] multiples [15:0];
     assign multiples[0]  = 0;
     assign multiples[1]  = divisor;
     assign multiples[2]  = {divisor, 1'h0};
@@ -86,10 +86,10 @@ endmodule
 
 module frag_shader(
         input visible,
-        input [19:0] ua,
-        input [19:0] va,
-        input [19:0] wa,
-        input [19:0] a,
+        input [17:0] ua,
+        input [17:0] va,
+        input [17:0] wa,
+        input [18:0] a,
         output [3:0] r,
         output [3:0] g,
         output [3:0] b
