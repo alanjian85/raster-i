@@ -65,31 +65,33 @@ module top(
         cy
     );
 
-    wire [19:0] ua, va, wa, a;
+    wire [19:0] uw, vw, ww, aw;
     wire visible;
     rasterizer rasterizer_inst(
         ax,
         ay,
         bx,
         by,
+        y1,
         cx,
         cy,
+        y2,
         x,
         y,
-        ua,
-        va,
-        wa,
-        a,
+        uw,
+        vw,
+        ww,
+        aw,
         visible
     );
 
     wire [3:0] r, g, b;
     frag_shader frag_shader_inst(
         visible,
-        ua,
-        va,
-        wa,
-        a,
+        uw,
+        vw,
+        ww,
+        aw,
 	    r,
 	    g,
 	    b
