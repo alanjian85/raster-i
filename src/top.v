@@ -32,24 +32,31 @@ module top(
     );
 
     wire [8:0] angle;
-    wire [11:0] sin;
-    sin_rom sin_rom_inst (
-        angle,
-        sin
-    );
-
-    wire [11:0] cos;
+    wire signed [11:0] cos;
     cos_rom cos_rom_inst (
         angle,
         cos
+    );
+
+    wire signed [11:0] y1;
+    y1_rom y1_rom_inst (
+        angle,
+        y1
+    );
+
+    wire signed [11:0] y2;
+    y2_rom y2_rom_inst (
+        angle,
+        y2
     );
 
     wire [9:0] ax, ay, bx, by, cx, cy;
     vert_shader vert_shader_inst(
         clk_pix,
         angle,
-        sin,
         cos,
+        y1,
+        y2,
         ax,
         ay,
         bx,

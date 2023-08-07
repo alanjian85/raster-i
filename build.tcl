@@ -45,16 +45,18 @@
 proc checkRequiredFiles { origin_dir} {
   set status true
   set files [list \
- "[file normalize "$origin_dir/ip/sin_rom/sin_rom.xci"]"\
+ "[file normalize "$origin_dir/ip/y1_rom/y1_rom.xci"]"\
+ "[file normalize "$origin_dir/ip/y2_rom/y2_rom.xci"]"\
+ "[file normalize "$origin_dir/ip/cos_rom/cos_rom.xci"]"\
  "[file normalize "$origin_dir/ip/clock_480p60/clock_480p60.xci"]"\
  "[file normalize "$origin_dir/src/frag_shader.v"]"\
  "[file normalize "$origin_dir/src/rasterizer.v"]"\
  "[file normalize "$origin_dir/src/signal_480p.v"]"\
  "[file normalize "$origin_dir/src/vert_shader.v"]"\
  "[file normalize "$origin_dir/src/top.v"]"\
+ "[file normalize "$origin_dir/rom/y1_rom.coe"]"\
+ "[file normalize "$origin_dir/rom/y2_rom.coe"]"\
  "[file normalize "$origin_dir/rom/cos_rom.coe"]"\
- "[file normalize "$origin_dir/rom/sin_rom.coe"]"\
- "[file normalize "$origin_dir/ip/cos_rom/cos_rom.xci"]"\
  "[file normalize "$origin_dir/src/arty.xdc"]"\
   ]
   foreach ifile $files {
