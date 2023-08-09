@@ -11,9 +11,9 @@ module vert_shader(
         output [8:0] ax,
         output [6:0] ay,
         output signed [7:0] abx,
-        output signed [8:0] aby,
+        output [7:0] aby,
         output signed [7:0] acx,
-        output signed [8:0] acy
+        output [7:0] acy
     );
 
     assign ax = 320;

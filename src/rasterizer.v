@@ -5,10 +5,10 @@ module rasterizer(
         input [8:0] ax,
         input [6:0] ay,
         input signed [7:0] abx,
-        input signed [8:0] aby,
+        input [7:0] aby,
         input [6:0] bz,
         input signed [7:0] acx,
-        input signed [8:0] acy,
+        input [7:0] acy,
         input [6:0] cz,
         input [9:0] x,
         input [9:0] y,
@@ -22,17 +22,20 @@ module rasterizer(
     wire signed [9:0] apx = x - ax;
     wire signed [9:0] apy = y - ay;
 
-    wire signed [15:0] abxacy = abx * acy;
-    wire signed [15:0] abyacx = aby * acx;
+    wire signed [8:0] aby_signed = {1'h0, aby};
+    wire signed [8:0] acy_signed = {1'h0, acy};
+
+    wire signed [15:0] abxacy = abx * acy_signed;
+    wire signed [15:0] abyacx = aby_signed * acx;
     wire signed [16:0] sa = abxacy - abyacx;
     wire [15:0] a = sa > 0 ? sa : -sa;
 
-    wire signed [17:0] apxacy = apx * acy;
-    wire signed [18:0] apyacx = apy * acx;
+    wire signed [17:0] apxacy = apx * acy_signed;
+    wire signed [17:0] apyacx = apy * acx;
     wire signed [18:0] v = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
 
     wire signed [17:0] abxapy = abx * apy;
-    wire signed [18:0] abyapx = aby * apx;
+    wire signed [17:0] abyapx = aby_signed * apx;
     wire signed [18:0] w = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
 
     wire signed [18:0] u = a - v - w;

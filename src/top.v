@@ -52,8 +52,8 @@ module top(
 
     wire [8:0] ax;
     wire [6:0] ay;
-    wire signed [8:0] aby, acy;
     wire signed [7:0] abx, acx;
+    wire [7:0] aby, acy;
     vert_shader vert_shader_inst(
         clk_pix,
         clk_pix_locked,
