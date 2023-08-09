@@ -112,8 +112,8 @@ module frag_shader(
         .quotient(bar_b)
     );
 
-    assign r = visible ? bar_r : 4'h1;
-    assign g = visible ? bar_g : 4'h3;
-    assign b = visible ? bar_b : 4'h7;
+    assign r = visible ? bar_r : 4'h0;
+    assign g = visible ? bar_g : 4'h0;
+    assign b = visible ? bar_b : 4'h0;
 
 endmodule
