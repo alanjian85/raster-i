@@ -32,7 +32,7 @@ module top(
     );
 
     wire [8:0] angle;
-    wire signed [11:0] cos;
+    wire signed [10:0] cos;
     cos_rom cos_rom_inst (
         angle,
         cos

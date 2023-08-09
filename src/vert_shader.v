@@ -5,7 +5,7 @@ module vert_shader(
         input clk_pix,
         input resetn,
         output reg [8:0] angle,
-        input signed [11:0] cos,
+        input signed [10:0] cos,
         input [6:0] bz,
         input [6:0] cz,
         output [8:0] ax,

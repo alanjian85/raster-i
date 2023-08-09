@@ -28,11 +28,11 @@ module rasterizer(
     wire [15:0] a = sa > 0 ? sa : -sa;
 
     wire signed [17:0] apxacy = apx * acy;
-    wire signed [17:0] apyacx = apy * acx;
+    wire signed [18:0] apyacx = apy * acx;
     wire signed [18:0] v = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
 
     wire signed [17:0] abxapy = abx * apy;
-    wire signed [17:0] abyapx = aby * apx;
+    wire signed [18:0] abyapx = aby * apx;
     wire signed [18:0] w = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
 
     wire signed [18:0] u = a - v - w;
