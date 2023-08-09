@@ -29,21 +29,21 @@ module rasterizer(
 
     wire signed [17:0] apxacy = apx * acy;
     wire signed [17:0] apyacx = apy * acx;
-    wire [18:0] v = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
+    wire signed [18:0] v = sa > 0 ? apxacy - apyacx : apyacx - apxacy;
 
     wire signed [17:0] abxapy = abx * apy;
     wire signed [17:0] abyapx = aby * apx;
-    wire [18:0] w = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
+    wire signed [18:0] w = sa > 0 ? abxapy - abyapx : abyapx - abxapy;
 
-    wire [18:0] u = a - v - w;
+    wire signed [18:0] u = a - v - w;
 
     assign uw = u[18:1];
-    wire [24:0] vw_fixed = v[17:0] * bz;
+    wire [24:0] vw_fixed = v * bz;
     assign vw = vw_fixed[24:7];
-    wire [24:0] ww_fixed = w[17:0] * cz;
+    wire [24:0] ww_fixed = w * cz;
     assign ww = ww_fixed[24:7];
     assign aw = uw + vw + ww;
 
-    assign visible = !(u[18] || v[18] || w[18] || a == 0);
+    assign visible = !(u < 0 || v < 0 || w < 0 || a == 0);
 
 endmodule
