@@ -1,0 +1,19 @@
+name: Test CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install the JVM
+      run: sudo apt-get install default-jdk
+    - name: Test
+      run: sbt test
