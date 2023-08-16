@@ -1,7 +1,8 @@
-trinity
-.Xil
-*.jou
+generated
+project
+target
+vivado/trinity
+vivado/.Xil
 *.log
+*.jou
 *.str
-*.mif
-*.zip
