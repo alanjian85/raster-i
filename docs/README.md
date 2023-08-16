@@ -12,14 +12,16 @@ On the contrary with other open-source GPUs, the ambition of this project is to 
 
 ## Build instructions
 
-To build and run this project on an [AMD Xilinx](https://www.amd.com/en/products/xilinx) FPGA board, the first step is to follow the [Chisel setup manual](https://github.com/chipsalliance/chisel/blob/main/SETUP.md) and install the required tools. Then you can clone the GitHub repository and compile the Chisel code in the project directory:
+Before building this project, the EDA tool [AMD Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) must be installed and the required platform files must be downloaded and put to the appropriate place (See [Installing Vivado, Vitis, and Digilent Board Files](https://digilent.com/reference/programmable-logic/guides/installing-vivado-and-vitis)). Additionally, instructions in [the Chisel setup manual](https://github.com/chipsalliance/chisel/blob/main/SETUP.md) should be followed to have the correct environment for Chisel.
+
+If all dependencies are installed and set up properly, the first step is to clone the GitHub repository and compile the Chisel code in the project directory:
 
 ```
 git clone https://github.com/alanjian85/trinity && cd trinity
 sbt run
 ```
 
-There should now be some SystemVerilog files in the `generated` directory. And the third step is to run Vivado in the `vivado` directory and execute the TCL script `build.tcl`. If you click the `Generate Bitstream` button now, you will get a file that can be loaded into FPGA. Have fun!
+There should now be some SystemVerilog files in the `generated` directory. And the second step is to run Vivado in the `vivado` directory and execute the TCL script `build.tcl`. If you click the `Generate Bitstream` button now, you will get a file that can be loaded into FPGA. Then you can see the result on the screen connected to your FPGA board.
 
 ## License (MIT)
 <a href="https://opensource.org/licenses/MIT" target="_blank">
