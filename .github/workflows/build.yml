@@ -24,5 +24,5 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: Trinity.sv
-        path: generated/Trinity.sv
+        name: Top.sv
+        path: generated/Top.sv

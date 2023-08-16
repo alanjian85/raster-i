@@ -16,7 +16,3 @@ class Trinity extends Module {
     cntReg := 0.U
   }
 }
-
-object Main extends App {
-  emitVerilog(new Trinity(), Array("--target-dir", "generated"))
-}
