@@ -3,20 +3,29 @@
 
 import chisel3._
 
+class RGB444 extends Bundle {
+  val r = UInt(4.W)
+  val g = UInt(4.W)
+  val b = UInt(4.W)
+}
+
 class Shader extends Module {
   val io = IO(new Bundle {
-    val x = Input(UInt(11.W))
-    val y = Input(UInt(11.W))
-    val r = Output(UInt(4.W))
-    val g = Output(UInt(4.W))
-    val b = Output(UInt(4.W))
+    val pos = Input(new ScreenPos())
+    val pix = Output(new RGB444())
   })
 
-  val sx = io.x.asSInt - 400.S
-  val sy = io.y.asSInt - 300.S
+  val sx = io.pos.x.asSInt - 400.S
+  val sy = io.pos.y.asSInt - 300.S
   val r = sx * sx + sy * sy
   val visible = r <= 10000.S
-  io.r := Mux(visible, "hf".U, "h1".U)
-  io.g := Mux(visible, "hf".U, "h3".U)
-  io.b := Mux(visible, "hf".U, "h7".U)
+  when (visible) {
+    io.pix.r := "hf".U
+    io.pix.g := "hf".U
+    io.pix.b := "hf".U
+  } .otherwise {
+    io.pix.r := "h1".U
+    io.pix.g := "h3".U
+    io.pix.b := "h7".U
+  }
 }

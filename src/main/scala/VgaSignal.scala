@@ -3,10 +3,14 @@
 
 import chisel3._
 
+class ScreenPos extends Bundle {
+  val x = UInt(11.W)
+  val y = UInt(11.W)
+}
+
 class VgaSignal extends Module {
   val io = IO(new Bundle {
-    val x = Output(UInt(11.W))
-    val y = Output(UInt(11.W))
+    val pos = Output(new ScreenPos)
     val hsync = Output(Bool())
     val vsync = Output(Bool())
     val active = Output(Bool())
@@ -22,20 +26,21 @@ class VgaSignal extends Module {
   val VS_END = VF_END + 4
   val VB_END = VS_END + 23
 
-  val xReg = RegInit(0.U(11.W))
-  val yReg = RegInit(0.U(11.W))
-  xReg := xReg + 1.U
-  when (xReg === (HB_END - 1).U) {
-    xReg := 0.U
-    yReg := yReg + 1.U
+  val posInit = Wire(new ScreenPos())
+  posInit.x := 0.U
+  posInit.y := 0.U
+  val posReg = RegInit(posInit)
+  posReg.x := posReg.x + 1.U
+  when (posReg.x === (HB_END - 1).U) {
+    posReg.x := 0.U
+    posReg.y := posReg.y + 1.U
   }
-  when (yReg === (VB_END - 1).U) {
-    yReg := 0.U
+  when (posReg.y === (VB_END - 1).U) {
+    posReg.y := 0.U
   }
-  io.x := xReg
-  io.y := yReg
+  io.pos := posReg
 
-  io.hsync := HF_END.U <= xReg && xReg < HS_END.U
-  io.vsync := VF_END.U <= yReg && yReg < VS_END.U
-  io.active := xReg < HA_END.U && yReg < VA_END.U
+  io.hsync := HF_END.U <= posReg.x && posReg.x < HS_END.U
+  io.vsync := VF_END.U <= posReg.y && posReg.y < VS_END.U
+  io.active := posReg.x < HA_END.U && posReg.y < VA_END.U
 }

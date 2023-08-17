@@ -4,9 +4,7 @@
 import chisel3._
 
 class TrinityIO extends Bundle {
-  val r = Output(UInt(4.W))
-  val g = Output(UInt(4.W))
-  val b = Output(UInt(4.W))
+  val pix = Output(new RGB444())
   val hsync = Output(Bool())
   val vsync = Output(Bool())
 }
@@ -21,10 +19,13 @@ class Trinity extends Module {
     io.hsync := vgaSignal.io.hsync
     io.vsync := vgaSignal.io.vsync
     val shader = Module(new Shader())
-    shader.io.x := vgaSignal.io.x
-    shader.io.y := vgaSignal.io.y
-    io.r := Mux(vgaSignal.io.active, shader.io.r, "h0".U)
-    io.g := Mux(vgaSignal.io.active, shader.io.g, "h0".U)
-    io.b := Mux(vgaSignal.io.active, shader.io.b, "h0".U)
+    shader.io.pos := vgaSignal.io.pos
+    when (vgaSignal.io.active) {
+      io.pix := shader.io.pix
+    } .otherwise {
+      io.pix.r := 0.U
+      io.pix.g := 0.U
+      io.pix.b := 0.U
+    }
   }
 }
