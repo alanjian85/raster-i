@@ -12,7 +12,3 @@ class Top extends Module {
     io <> trinity.io
   }
 }
-
-object Main extends App {
-  emitVerilog(new Top(), Array("--target-dir", "generated"))
-}

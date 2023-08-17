@@ -6,3 +6,4 @@ vivado/.Xil
 *.log
 *.jou
 *.str
+verilator/obj_dir
