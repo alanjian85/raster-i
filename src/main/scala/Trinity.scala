@@ -17,11 +17,11 @@ class Trinity extends Module {
     val vgaSignal = Module(new VgaSignal())
     io.hsync := vgaSignal.io.hsync
     io.vsync := vgaSignal.io.vsync
-    val renderer = Module(new Renderer())
-    renderer.io.x := vgaSignal.io.x
-    renderer.io.y := vgaSignal.io.y
-    io.r := renderer.io.r
-    io.g := renderer.io.g
-    io.b := renderer.io.b
+    val shader = Module(new Shader())
+    shader.io.x := vgaSignal.io.x
+    shader.io.y := vgaSignal.io.y
+    io.r := Mux(vgaSignal.io.active, shader.io.r, "h0".U)
+    io.g := Mux(vgaSignal.io.active, shader.io.g, "h0".U)
+    io.b := Mux(vgaSignal.io.active, shader.io.b, "h0".U)
   }
 }

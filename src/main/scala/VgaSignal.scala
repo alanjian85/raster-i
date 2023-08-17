@@ -6,6 +6,7 @@ class VgaSignal extends Module {
     val y = Output(UInt(11.W))
     val hsync = Output(Bool())
     val vsync = Output(Bool())
+    val active = Output(Bool())
   })
 
   val HA_END = 800
@@ -33,4 +34,5 @@ class VgaSignal extends Module {
 
   io.hsync := HF_END.U <= xReg && xReg < HS_END.U
   io.vsync := VF_END.U <= yReg && yReg < VS_END.U
+  io.active := xReg < HA_END.U && yReg < VA_END.U
 }
