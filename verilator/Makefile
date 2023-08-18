@@ -12,6 +12,9 @@ LDFLAGS = -lSDL2
 
 all: obj_dir/$(PRODUCT)
 
+run: obj_dir/$(PRODUCT)
+	obj_dir/$(PRODUCT)
+
 obj_dir: $(HDL_SRCS) $(CPP_SRCS)
 	@printf " RM\tobj_dir\n"
 	@rm -rf obj_dir

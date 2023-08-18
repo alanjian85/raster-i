@@ -3,27 +3,25 @@
 
 import chisel3._
 
-class ScreenPos extends UVec2(11)
-
 object ScreenPosInit {
   def apply(x: UInt = 0.U) = {
-    val result = Wire(new ScreenPos)
-    result.x := x
-    result.y := x
-    result
+    val xTemp = Wire(UInt(11.W))
+    xTemp := x
+    UVec2Init(xTemp)
   }
 
   def apply(x: UInt, y: UInt) = {
-    val result = Wire(new ScreenPos)
-    result.x := x
-    result.y := y
-    result
+    val xTemp = Wire(UInt(11.W))
+    xTemp := x
+    val yTemp = Wire(UInt(11.W))
+    yTemp := y
+    UVec2Init(xTemp, yTemp)
   }
 }
 
 class VgaSignal extends Module {
   val io = IO(new Bundle {
-    val pos = Output(new ScreenPos)
+    val pos = Output(new UVec2)
     val hsync = Output(Bool())
     val vsync = Output(Bool())
     val active = Output(Bool())

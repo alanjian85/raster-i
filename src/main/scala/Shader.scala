@@ -4,7 +4,7 @@ import chisel3._
 
 class Shader extends Module {
   val io = IO(new Bundle {
-    val pos = Input(new ScreenPos)
+    val pos = Input(new UVec2)
     val pix = Output(new RGB4)
   })
 
