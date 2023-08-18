@@ -48,13 +48,13 @@ int main() {
         trinity->eval();
 
         if (trinity->io_active) {
-            uint8_t r = trinity->io_r | trinity->io_r << 4;
-            uint8_t g = trinity->io_g | trinity->io_g << 4;
-            uint8_t b = trinity->io_b | trinity->io_b << 4;
-            framebuffer[trinity->io_y * 800 + trinity->io_x] = r << 24 | g << 16 | b << 8 | 0xff;
+            uint8_t r = trinity->io_pix_r | trinity->io_pix_r << 4;
+            uint8_t g = trinity->io_pix_g | trinity->io_pix_g << 4;
+            uint8_t b = trinity->io_pix_b | trinity->io_pix_b << 4;
+            framebuffer[trinity->io_pos_y * 800 + trinity->io_pos_x] = r << 24 | g << 16 | b << 8 | 0xff;
         }
 
-        if (trinity->io_x == 0 && trinity->io_y == 600) {
+        if (trinity->io_pos_x == 0 && trinity->io_pos_y == 600) {
             SDL_Event event;
             SDL_PollEvent(&event);
             if (event.type == SDL_QUIT) {
