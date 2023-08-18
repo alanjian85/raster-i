@@ -13,6 +13,8 @@ LDFLAGS = -lSDL2
 all: obj_dir/$(PRODUCT)
 
 obj_dir: $(HDL_SRCS) $(CPP_SRCS)
+	@printf " RM\tobj_dir\n"
+	@rm -rf obj_dir
 	@printf " VERILATOR\t$(HDL_SRCS) $(CPP_SRCS)\n"
 	@verilator --exe $(HDL_SRCS) --cc $(CPP_SRCS) -o $(PRODUCT) \
 			   $(VFLAGS) -LDFLAGS $(LDFLAGS)
