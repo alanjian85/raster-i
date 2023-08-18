@@ -2,7 +2,7 @@ import chisel3._
 
 class TrinitySdl extends Module {
   val io = IO(new TrinityIO {
-    val pos = Output(new ScreenPos)
+    val pos = Output(new ScreenPos())
     val active = Output(Bool())
   });
 

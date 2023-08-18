@@ -15,9 +15,8 @@ class Shader extends Module {
     val pix = Output(new RGB444())
   })
 
-  val sx = io.pos.x.asSInt - 400.S
-  val sy = io.pos.y.asSInt - 300.S
-  val r = sx * sx + sy * sy
+  val diff = io.pos.asSVec2 - ScreenPosInit(400.U, 300.U).asSVec2
+  val r = diff.x * diff.x + diff.y * diff.y
   val visible = r <= 10000.S
   when (visible) {
     io.pix.r := "hf".U
