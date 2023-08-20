@@ -2,7 +2,7 @@ import chisel3._
 
 class TrinitySdl extends Module {
   val io = IO(new TrinityIO {
-    val pos = Output(new UVec2)
+    val pos = Output(UVec2())
     val active = Output(Bool())
   });
 

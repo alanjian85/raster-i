@@ -4,7 +4,7 @@
 import chisel3._
 
 class TrinityIO extends Bundle {
-  val pix = Output(new RGB4)
+  val pix = Output(RGB4())
   val hsync = Output(Bool())
   val vsync = Output(Bool())
 }

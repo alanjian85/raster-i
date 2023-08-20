@@ -4,8 +4,8 @@ import chisel3._
 
 class Shader extends Module {
   val io = IO(new Bundle {
-    val pos = Input(new UVec2)
-    val pix = Output(new RGB4)
+    val pos = Input(UVec2())
+    val pix = Output(RGB4())
   })
 
   val diff = io.pos.asSVec2 - ScreenPosInit(400.U, 300.U).asSVec2

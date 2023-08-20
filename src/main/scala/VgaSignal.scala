@@ -21,7 +21,7 @@ object ScreenPosInit {
 
 class VgaSignal extends Module {
   val io = IO(new Bundle {
-    val pos = Output(new UVec2)
+    val pos = Output(UVec2())
     val hsync = Output(Bool())
     val vsync = Output(Bool())
     val active = Output(Bool())
