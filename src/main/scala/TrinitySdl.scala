@@ -3,11 +3,16 @@
 
 import chisel3._
 
+class TrinitySdlIO extends Bundle {
+  val pix = Output(RGB4())
+  val hsync = Output(Bool())
+  val vsync = Output(Bool())
+  val pos = Output(UVec2())
+  val active = Output(Bool())
+}
+
 class TrinitySdl extends Module {
-  val io = IO(new TrinityIO {
-    val pos = Output(UVec2())
-    val active = Output(Bool())
-  });
+  val io = IO(new TrinitySdlIO);
 
   val vgaSignal = Module(new VgaSignal)
   io.pos := vgaSignal.io.pos
