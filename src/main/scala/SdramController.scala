@@ -1,0 +1,48 @@
+import chisel3._
+import chisel3.experimental._
+
+class SdramController extends BlackBox { 
+    val io = IO(new Bundle {
+        val ddr3_addr           = Output(UInt(14.W))
+        val ddr3_ba             = Output(UInt(3.W))
+        val ddr3_cas_n          = Output(Bool())
+        val ddr3_ck_n           = Output(UInt(1.W))
+        val ddr3_ck_p           = Output(UInt(1.W))
+        val ddr3_cke            = Output(UInt(1.W))
+        val ddr3_ras_n          = Output(Bool())
+        val ddr3_reset_n        = Output(Bool())
+        val ddr3_we_n           = Output(Bool())
+        val ddr3_dq             = Analog(16.W)
+        val ddr3_dqs_n          = Analog(2.W)
+        val ddr3_dqs_p          = Analog(2.W)
+        val init_calib_complete = Output(Bool())
+        val ddr3_cs_n           = Output(UInt(1.W))
+        val ddr3_dm             = Output(UInt(2.W))
+        val ddr3_odt            = Output(UInt(1.W)) 
+
+        val app_addr          = Input(UInt(28.W))
+        val app_cmd           = Input(UInt(3.W))
+        val app_en            = Input(Bool())
+        val app_wdf_data      = Input(UInt(128.W))
+        val app_wdf_end       = Input(Bool())
+        val app_wdf_wren      = Input(Bool())
+        val app_rd_data       = Output(UInt(128.W))
+        val app_rd_data_end   = Output(Bool())
+        val app_rd_data_valid = Output(Bool())
+        val app_rdy           = Output(Bool())
+        val app_wdf_rdy       = Output(Bool())
+        val app_sr_req        = Input(Bool())
+        val app_ref_req       = Input(Bool())
+        val app_zq_req        = Input(Bool())
+        val app_sr_active     = Output(Bool())
+        val app_ref_ack       = Output(Bool())
+        val app_zq_ack        = Output(Bool())
+        val ui_clk            = Output(Bool())
+        val ui_clk_sync_rst   = Output(Bool())
+        val app_wdf_mask      = Input(UInt(16.W))
+
+        val sys_clk_i = Input(Bool())
+        val clk_ref_i = Input(Bool())
+        val sys_rst   = Input(Bool())
+    })
+}
