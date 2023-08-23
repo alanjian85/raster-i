@@ -4,7 +4,7 @@
     "xci_name": "PixelClock",
     "component_reference": "xilinx.com:ip:clk_wiz:6.0",
     "ip_revision": "12",
-    "gen_directory": "../../../../trinity.gen/sources_1/ip/PixelClock",
+    "gen_directory": "../../trinity/trinity.gen/ip/PixelClock",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "PixelClock", "resolve_type": "user", "usage": "all" } ],
@@ -599,7 +599,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "12" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../trinity.gen/sources_1/ip/PixelClock" } ],
+        "OUTPUTDIR": [ { "value": "../../trinity/trinity.gen/ip/PixelClock" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2023.1.1" } ],

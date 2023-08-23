@@ -4,7 +4,7 @@
     "xci_name": "SdramController",
     "component_reference": "xilinx.com:ip:mig_7series:4.2",
     "ip_revision": "1",
-    "gen_directory": "../../../../trinity.gen/sources_1/ip/SdramController",
+    "gen_directory": "../../trinity/trinity.gen/ip/SdramController",
     "parameters": {
       "component_parameters": {
         "XML_INPUT_FILE": [ { "value": "mig_a.prj", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
@@ -1179,7 +1179,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "1" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../trinity.gen/sources_1/ip/SdramController" } ],
+        "OUTPUTDIR": [ { "value": "../../trinity/trinity.gen/ip/SdramController" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2023.1.1" } ],
