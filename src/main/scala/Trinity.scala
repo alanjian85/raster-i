@@ -30,20 +30,24 @@ class Trinity extends Module {
   sdramController.io.app_zq_req    := false.B
   sdramController.io.app_wdf_mask  := 0.U
 
+  val resetSync = RegNext(RegNext(reset))
   sdramController.io.sys_clk_i := clockingWizard.io.sys_clk
   sdramController.io.clk_ref_i := clockingWizard.io.clk_ref
-  sdramController.io.sys_rst   := reset.asBool
+  sdramController.io.sys_rst   := resetSync
 
-  withClockAndReset(clockingWizard.io.clk_pix, reset) {
-    val vgaSignal = Module(new VgaSignal)
-    io.hsync := vgaSignal.io.hsync
-    io.vsync := vgaSignal.io.vsync
-    val shader = Module(new Shader)
-    shader.io.pos := vgaSignal.io.pos
-    when (vgaSignal.io.active) {
-      io.pix := shader.io.pix
-    } .otherwise {
-      io.pix := RGB4Init()
-    }
+  withClock(clockingWizard.io.clk_pix) {
+    val resetSync = RegNext(RegNext(reset))
+    withReset(resetSync) {
+      val vgaSignal = Module(new VgaSignal)
+      io.hsync := vgaSignal.io.hsync
+      io.vsync := vgaSignal.io.vsync
+      val shader = Module(new Shader)
+      shader.io.pos := vgaSignal.io.pos
+      when (vgaSignal.io.active) {
+       io.pix := shader.io.pix
+      } .otherwise {
+        io.pix := RGB4Init()
+      }
+   }
   }
 }
