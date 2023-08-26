@@ -44,7 +44,7 @@ class SdramController extends BlackBox {
         val app_sr_active     = Output(Bool())
         val app_ref_ack       = Output(Bool())
         val app_zq_ack        = Output(Bool())
-        val ui_clk            = Output(Bool())
+        val ui_clk            = Output(Clock())
         val ui_clk_sync_rst   = Output(Bool())
         val app_wdf_mask      = Input(UInt(16.W))
 

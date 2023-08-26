@@ -19,7 +19,7 @@
         "REFCLK_TYPE": [ { "value": "NOBUF", "resolve_type": "generated", "usage": "all" } ],
         "MEM_TYPE": [ { "value": "DDR3", "resolve_type": "generated", "usage": "all" } ],
         "TEMP_MON_CONTROL": [ { "value": "INTERNAL", "resolve_type": "generated", "usage": "all" } ],
-        "POLARITY": [ { "value": "ACTIVE_LOW", "resolve_type": "generated", "usage": "all" } ],
+        "POLARITY": [ { "value": "ACTIVE_HIGH", "resolve_type": "generated", "usage": "all" } ],
         "IS_CLK_SHARED": [ { "value": "FALSE", "resolve_type": "generated", "usage": "all" } ],
         "SYSCLK_TYPE": [ { "value": "NOBUF", "resolve_type": "generated", "usage": "all" } ],
         "USE_AXI": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
@@ -1235,7 +1235,7 @@
           "abstraction_type": "xilinx.com:signal:reset_rtl:1.0",
           "mode": "slave",
           "parameters": {
-            "POLARITY": [ { "value": "ACTIVE_LOW", "resolve_type": "dependent", "usage": "all" } ],
+            "POLARITY": [ { "value": "ACTIVE_HIGH", "resolve_type": "dependent", "usage": "all" } ],
             "BOARD.ASSOCIATED_PARAM": [ { "value": "RESET_BOARD_INTERFACE", "value_src": "constant", "usage": "all" } ],
             "INSERT_VIP": [ { "value": "0", "value_src": "user", "resolve_type": "user", "format": "long", "usage": "simulation.rtl", "is_ips_inferred": true, "is_static_object": false } ]
           },
