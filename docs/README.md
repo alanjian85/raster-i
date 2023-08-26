@@ -36,6 +36,10 @@ make
 
 An executable file `trinity` will then be generated in the `obj_dir` directory. Run it and you will see a window shows up and displays the execution result of this GPU.
 
+## References
+* [Zynq-7000 SoC and 7 Series Devices Memory Interface Solutions (UG586)](https://docs.xilinx.com/v/u/en-US/ug586_7Series_MIS)
+* [7 Series FPGAs AXI Multi-Port Memory Controller Using the Vivado IP Integrator Tool (XAPP1164)](https://docs.xilinx.com/v/u/en-US/xapp1164)
+
 ## License (MIT)
 <a href="https://opensource.org/licenses/MIT" target="_blank">
 <img align="right" src="osi.png">
