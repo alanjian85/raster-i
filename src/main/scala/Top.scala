@@ -7,6 +7,6 @@ class Top extends Module {
   val io = IO(new TrinityIO)
 
   val trinity = Module(new Trinity)
-  trinity.reset := ~reset.asBool
+  trinity.reset := !reset.asBool
   io <> trinity.io
 }
