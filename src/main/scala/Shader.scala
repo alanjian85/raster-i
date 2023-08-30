@@ -9,7 +9,7 @@ class Shader extends Module {
     val pix = Output(RGB4())
   })
 
-  val diff = io.pos.asSVec2 - ScreenPosInit(400.U, 300.U).asSVec2
+  val diff = io.pos.asSVec2 - ScreenPos(400, 300).asSVec2
   val r = diff.x * diff.x + diff.y * diff.y
   val visible = r <= 10000.S
   when (visible) {
