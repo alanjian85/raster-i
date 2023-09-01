@@ -12,7 +12,7 @@ class VgaSignal extends Module {
     val active = Output(Bool())
   })
 
-  val posReg = RegInit(ScreenPos())
+  val posReg = RegInit(ScreenPos(0, Screen.height))
   posReg.x := posReg.x + 1.U
   when (posReg.x === (Screen.hbackEnd - 1).U) {
     posReg.x := 0.U
@@ -23,7 +23,7 @@ class VgaSignal extends Module {
   }
   io.pos := posReg
 
-  io.hsync := Screen.hfrontEnd.U <= posReg.x && posReg.x < Screen.hsyncEnd.U
-  io.vsync := Screen.vfrontEnd.U <= posReg.y && posReg.y < Screen.vsyncEnd.U
+  io.hsync := (Screen.hfrontEnd.U <= posReg.x && posReg.x < Screen.hsyncEnd.U) === Screen.polarity.B
+  io.vsync := (Screen.vfrontEnd.U <= posReg.y && posReg.y < Screen.vsyncEnd.U) === Screen.polarity.B
   io.active := posReg.x < Screen.width.U && posReg.y < Screen.height.U
 }

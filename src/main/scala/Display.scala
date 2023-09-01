@@ -18,26 +18,28 @@ class Display extends Module {
     val vgaSignal = Module(new VgaSignal)
     val vgaData = scanBuffer.read(vgaSignal.io.pos.x >> 2.U)
     io.pix := RGB4Init(0.U)
-    switch (vgaSignal.io.pos.x & "b11".U) {
-        is(0.U) {
-            io.pix.r := vgaData(3, 0)
-            io.pix.g := vgaData(7, 4)
-            io.pix.b := vgaData(11, 8)
-        }
-        is(1.U) {
-            io.pix.r := vgaData(15, 12)
-            io.pix.g := vgaData(19, 16)
-            io.pix.b := vgaData(23, 20)
-        }
-        is(2.U) {
-            io.pix.r := vgaData(27, 24)
-            io.pix.g := vgaData(31, 28)
-            io.pix.b := vgaData(35, 32)
-        }
-        is (3.U) {
-            io.pix.r := vgaData(39, 36)
-            io.pix.g := vgaData(43, 40)
-            io.pix.b := vgaData(47, 44)
+    when (vgaSignal.io.active) {
+        switch (vgaSignal.io.pos.x & "b11".U) {
+            is(0.U) {
+                io.pix.r := vgaData(3, 0)
+                io.pix.g := vgaData(7, 4)
+                io.pix.b := vgaData(11, 8)
+            }
+            is(1.U) {
+                io.pix.r := vgaData(15, 12)
+                io.pix.g := vgaData(19, 16)
+                io.pix.b := vgaData(23, 20)
+            }
+            is(2.U) {
+                io.pix.r := vgaData(27, 24)
+                io.pix.g := vgaData(31, 28)
+                io.pix.b := vgaData(35, 32)
+            }
+            is (3.U) {
+                io.pix.r := vgaData(39, 36)
+                io.pix.g := vgaData(43, 40)
+                io.pix.b := vgaData(47, 44)
+            }
         }
     }
     io.hsync := vgaSignal.io.hsync

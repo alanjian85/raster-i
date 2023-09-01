@@ -5,16 +5,18 @@ import chisel3._
 import chisel3.util._
 
 object Screen {
-    val width = 800
-    val height = 600
+    val width = 1024
+    val height = 768
 
-    val hfrontEnd = width + 40
-    val hsyncEnd = hfrontEnd + 128
-    val hbackEnd = hsyncEnd + 88
+    val hfrontEnd = width + 24
+    val hsyncEnd = hfrontEnd + 136
+    val hbackEnd = hsyncEnd + 160
 
-    val vfrontEnd = height + 1
-    val vsyncEnd = vfrontEnd + 4
-    val vbackEnd = vsyncEnd + 23
+    val vfrontEnd = height + 3
+    val vsyncEnd = vfrontEnd + 6
+    val vbackEnd = vsyncEnd + 29
+
+    val polarity = false
 }
 
 object ScreenPos {

@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x2C0EAC67EC1550C1",
+      "boundary_crc": "0x2C0EAC6762865092",
       "device": "xc7a100tcsg324-1",
       "name": "SdramController",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -490,7 +490,7 @@
             "value": "128"
           },
           "FREQ_HZ": {
-            "value": "40000000"
+            "value": "65000000"
           },
           "HAS_BRESP": {
             "value": "1"
@@ -835,39 +835,6 @@
           }
         }
       },
-      "clock1": {
-        "type": "clk",
-        "direction": "I",
-        "parameters": {
-          "ASSOCIATED_BUSIF": {
-            "value": "axi1",
-            "value_src": "default"
-          },
-          "ASSOCIATED_RESET": {
-            "value": "resetn1:aresetn1",
-            "value_src": "default"
-          },
-          "CLK_DOMAIN": {
-            "value": "SdramController_clock1",
-            "value_src": "default"
-          },
-          "FREQ_HZ": {
-            "value": "40000000"
-          },
-          "FREQ_TOLERANCE_HZ": {
-            "value": "0",
-            "value_src": "default"
-          },
-          "INSERT_VIP": {
-            "value": "0",
-            "value_src": "default"
-          },
-          "PHASE": {
-            "value": "0.0",
-            "value_src": "default"
-          }
-        }
-      },
       "aresetn0": {
         "type": "rst",
         "direction": "I",
@@ -892,6 +859,39 @@
           },
           "POLARITY": {
             "value": "ACTIVE_LOW",
+            "value_src": "default"
+          }
+        }
+      },
+      "clock1": {
+        "type": "clk",
+        "direction": "I",
+        "parameters": {
+          "ASSOCIATED_BUSIF": {
+            "value": "axi1",
+            "value_src": "default"
+          },
+          "ASSOCIATED_RESET": {
+            "value": "aresetn1",
+            "value_src": "default"
+          },
+          "CLK_DOMAIN": {
+            "value": "SdramController_clock1",
+            "value_src": "default"
+          },
+          "FREQ_HZ": {
+            "value": "65000000"
+          },
+          "FREQ_TOLERANCE_HZ": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "PHASE": {
+            "value": "0.0",
             "value_src": "default"
           }
         }

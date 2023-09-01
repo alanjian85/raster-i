@@ -59,7 +59,7 @@ class Trinity extends Module {
     val dataReg = RegInit(0.U(128.W))
     when (sdramController.io.axi0.wvalid && sdramController.io.axi0.wready) {
       addrValidReg := true.B
-      when (addrReg === 60100.U) {
+      when (addrReg === (((Screen.width * Screen.height / 2 + Screen.width / 2) >> 2)).U) {
         dataReg := 0.U
       } .otherwise {
         dataReg := ~0.U(128.W)
