@@ -17,15 +17,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install the JVM and Verilator
-      run: sudo apt-get install default-jdk verilator libsdl2-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install default-jdk verilator libsdl2-dev
     - name: Install Firtool
       run: |
-           wget -q -O - https://github.com/llvm/circt/releases/download/firtool-1.38.0/firrtl-bin-ubuntu-20.04.tar.gz | tar -zx
-           echo "$GITHUB_WORKSPACE/firtool-1.38.0/bin" >> $GITHUB_PATH
+        wget -q -O - https://github.com/llvm/circt/releases/download/firtool-1.38.0/firrtl-bin-ubuntu-20.04.tar.gz | tar -zx
+        echo "$GITHUB_WORKSPACE/firtool-1.38.0/bin" >> $GITHUB_PATH
     - name: Build
       run: |
-           sbt run
-           make -C verilator
+        sbt run
+        make -C verilator
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
