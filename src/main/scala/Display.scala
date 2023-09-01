@@ -43,29 +43,6 @@ class Display extends Module {
     io.hsync := vgaSignal.io.hsync
     io.vsync := vgaSignal.io.vsync
 
-    val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
-    val scanIdxReg = RegInit(0.U(unsignedBitLength(scanSize).W))
-    when (vgaSignal.io.active && vgaSignal.io.pos.x === (Screen.width - 1).U) {
-        lineIdxReg := lineIdxReg + 1.U
-        when (lineIdxReg === (Screen.height - 1).U) {
-            lineIdxReg := 0.U
-        }
-        scanIdxReg := 0.U
-    }
-    when (io.axi.arvalid && io.axi.arready) {
-        scanIdxReg := scanIdxReg + 1.U
-    }
-    io.axi.araddr := (lineIdxReg * scanSize.U + scanIdxReg) << 4.U
-    io.axi.arburst := 0.U
-    io.axi.arcache := 0.U
-    io.axi.arlen := 0.U
-    io.axi.arlock := false.B
-    io.axi.arprot := 0.U
-    io.axi.arqos := 0.U
-    io.axi.arregion := 0.U
-    io.axi.arsize := "b100".U
-    io.axi.arvalid := scanIdxReg =/= scanSize.U
-
     val recvIdxReg = RegInit(0.U(log2Up(scanSize).W))
     io.axi.rready := true.B
     when (io.axi.rvalid) {
@@ -80,7 +57,32 @@ class Display extends Module {
                      rdData( 23,  20) ## rdData( 15,  12) ## rdData(  7,   4)
         scanBuffer.write(recvIdxReg, wrData)
     }
-      
+
+    val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
+    val rdValidReg = RegInit(true.B)
+    when (vgaSignal.io.active &&
+          vgaSignal.io.pos.x === (Screen.width - 1).U)
+    {
+        lineIdxReg := lineIdxReg + 1.U
+        when (lineIdxReg === (Screen.height - 1).U) {
+            lineIdxReg := 0.U
+        }
+        rdValidReg := true.B
+    }
+    when (rdValidReg && io.axi.arready) {
+        rdValidReg := false.B
+    }
+    io.axi.araddr := lineIdxReg * scanSize.U << 4.U
+    io.axi.arburst := "b01".U
+    io.axi.arcache := 0.U
+    io.axi.arlen := (scanSize - 1).U
+    io.axi.arlock := false.B
+    io.axi.arprot := 0.U
+    io.axi.arqos := 0.U
+    io.axi.arregion := 0.U
+    io.axi.arsize := "b100".U
+    io.axi.arvalid := rdValidReg
+
     io.axi.awaddr := 0.U
     io.axi.awburst := 0.U
     io.axi.awcache := 0.U
