@@ -1,0 +1,10 @@
+*
+!.gitignore
+!build.tcl
+!arty.xdc
+!*/
+trinity
+!*.bd
+!*.xci
+!mig_*.prj
+!*.coe

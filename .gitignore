@@ -4,9 +4,4 @@
 generated
 project
 target
-vivado/trinity
-vivado/.Xil
-*.log
-*.jou
-*.str
 verilator/obj_dir

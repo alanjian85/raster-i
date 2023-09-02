@@ -3,6 +3,7 @@
 
 import chisel3._
 import chisel3.util._
+import scala.io.Source
 
 class TrinityIO extends Bundle {
   val pix = Output(RGB4())
@@ -32,20 +33,19 @@ class Trinity extends Module {
 
   sdramController.io.clock0 := clock
   sdramController.io.aresetn0 := renderSystemReset.io.peripheral_aresetn
-  
+
   withClockAndReset(renderSystemReset.io.slowest_sync_clk, renderSystemReset.io.peripheral_reset) {
-    val addrMax = Screen.width * Screen.height >> 2
-    val addrReg = RegInit(0.U(log2Up(addrMax).W))
+    val imgRom = Module(new ImgRom)
+    imgRom.io.clka := renderSystemReset.io.slowest_sync_clk
+
+    val xReg = RegInit(0.U(log2Up(Screen.width).W))
+    val yReg = RegInit(0.U(log2Up(Screen.height).W))
     val addrValidReg = RegInit(true.B)
     when (addrValidReg && sdramController.io.axi0.awready) {
-      addrReg := addrReg + 1.U
-      when (addrReg === (addrMax - 1).U) {
-        addrReg := 0.U
-      }
       addrValidReg := false.B
     }
 
-    sdramController.io.axi0.awaddr := addrReg << 4.U
+    sdramController.io.axi0.awaddr := (yReg * Screen.width.U + xReg) << 2.U
     sdramController.io.axi0.awburst := 0.U
     sdramController.io.axi0.awcache := 0.U
     sdramController.io.axi0.awlen := 0.U
@@ -56,16 +56,34 @@ class Trinity extends Module {
     sdramController.io.axi0.awsize := "b100".U
     sdramController.io.axi0.awvalid := addrValidReg
 
-    val dataReg = RegInit(0.U(128.W))
     when (sdramController.io.axi0.wvalid && sdramController.io.axi0.wready) {
+      xReg := xReg + 4.U
+      when (xReg === (Screen.width - 4).U) {
+        xReg := 0.U
+        yReg := yReg + 1.U
+        when (yReg === (Screen.height - 1).U) {
+          yReg := 0.U
+        }
+      }
       addrValidReg := true.B
-      when (addrReg === (((Screen.width * Screen.height / 2 + Screen.width / 2) >> 2)).U) {
-        dataReg := 0.U
-      } .otherwise {
-        dataReg := ~0.U(128.W)
+    }
+
+    imgRom.io.addra := (yReg >> 2.U) * (Screen.width >> 4).U + (xReg >> 4.U)
+    sdramController.io.axi0.wdata := imgRom.io.douta
+    switch (xReg(3, 2)) {
+      is(0.U) {
+        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(31, 0))
+      }
+      is(1.U) {
+        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(63, 32))
+      }
+      is(2.U) {
+        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(95, 64))
+      }
+      is(3.U) {
+        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(127, 96))
       }
     }
-    sdramController.io.axi0.wdata := dataReg
     sdramController.io.axi0.wlast := true.B
     sdramController.io.axi0.wstrb := "hffff".U
     sdramController.io.axi0.wvalid := !addrValidReg
