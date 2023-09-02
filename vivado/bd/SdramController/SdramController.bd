@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x2C0EAC6762865092",
+      "boundary_crc": "0x2C0EAC67C9051512",
       "device": "xc7a100tcsg324-1",
       "name": "SdramController",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -10,7 +10,6 @@
       "validated": "true"
     },
     "design_tree": {
-      "mig_7series_0": "",
       "axi_interconnect_0": {
         "xbar": "",
         "s00_couplers": {
@@ -23,9 +22,10 @@
           "auto_cc": ""
         }
       },
+      "mig_7series_0": "",
+      "clk_wiz_0": "",
       "proc_sys_reset_0": "",
-      "proc_sys_reset_1": "",
-      "clk_wiz_0": ""
+      "proc_sys_reset_1": ""
     },
     "interface_ports": {
       "ddr3": {
@@ -811,8 +811,7 @@
             "value_src": "default"
           },
           "ASSOCIATED_RESET": {
-            "value": "resetn0:aresetn0",
-            "value_src": "default"
+            "value": "aresetn0"
           },
           "CLK_DOMAIN": {
             "value": "SdramController_clock0",
@@ -820,6 +819,38 @@
           },
           "FREQ_HZ": {
             "value": "100000000"
+          },
+          "FREQ_TOLERANCE_HZ": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "PHASE": {
+            "value": "0.0",
+            "value_src": "default"
+          }
+        }
+      },
+      "clock1": {
+        "type": "clk",
+        "direction": "I",
+        "parameters": {
+          "ASSOCIATED_BUSIF": {
+            "value": "axi1",
+            "value_src": "default"
+          },
+          "ASSOCIATED_RESET": {
+            "value": "aresetn1"
+          },
+          "CLK_DOMAIN": {
+            "value": "SdramController_clock1",
+            "value_src": "default"
+          },
+          "FREQ_HZ": {
+            "value": "65000000"
           },
           "FREQ_TOLERANCE_HZ": {
             "value": "0",
@@ -862,59 +893,9 @@
             "value_src": "default"
           }
         }
-      },
-      "clock1": {
-        "type": "clk",
-        "direction": "I",
-        "parameters": {
-          "ASSOCIATED_BUSIF": {
-            "value": "axi1",
-            "value_src": "default"
-          },
-          "ASSOCIATED_RESET": {
-            "value": "aresetn1",
-            "value_src": "default"
-          },
-          "CLK_DOMAIN": {
-            "value": "SdramController_clock1",
-            "value_src": "default"
-          },
-          "FREQ_HZ": {
-            "value": "65000000"
-          },
-          "FREQ_TOLERANCE_HZ": {
-            "value": "0",
-            "value_src": "default"
-          },
-          "INSERT_VIP": {
-            "value": "0",
-            "value_src": "default"
-          },
-          "PHASE": {
-            "value": "0.0",
-            "value_src": "default"
-          }
-        }
       }
     },
     "components": {
-      "mig_7series_0": {
-        "vlnv": "xilinx.com:ip:mig_7series:4.2",
-        "xci_name": "SdramController_mig_7series_0_0",
-        "xci_path": "ip\\SdramController_mig_7series_0_0\\SdramController_mig_7series_0_0.xci",
-        "inst_hier_path": "mig_7series_0",
-        "parameters": {
-          "BOARD_MIG_PARAM": {
-            "value": "Custom"
-          },
-          "RESET_BOARD_INTERFACE": {
-            "value": "Custom"
-          },
-          "XML_INPUT_FILE": {
-            "value": "mig_a.prj"
-          }
-        }
-      },
       "axi_interconnect_0": {
         "vlnv": "xilinx.com:ip:axi_interconnect:2.1",
         "xci_path": "ip\\SdramController_axi_interconnect_0_0\\SdramController_axi_interconnect_0_0.xci",
@@ -1453,17 +1434,22 @@
           }
         }
       },
-      "proc_sys_reset_0": {
-        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "xci_name": "SdramController_proc_sys_reset_0_0",
-        "xci_path": "ip\\SdramController_proc_sys_reset_0_0\\SdramController_proc_sys_reset_0_0.xci",
-        "inst_hier_path": "proc_sys_reset_0"
-      },
-      "proc_sys_reset_1": {
-        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "xci_name": "SdramController_proc_sys_reset_1_0",
-        "xci_path": "ip\\SdramController_proc_sys_reset_1_0\\SdramController_proc_sys_reset_1_0.xci",
-        "inst_hier_path": "proc_sys_reset_1"
+      "mig_7series_0": {
+        "vlnv": "xilinx.com:ip:mig_7series:4.2",
+        "xci_name": "SdramController_mig_7series_0_0",
+        "xci_path": "ip\\SdramController_mig_7series_0_0\\SdramController_mig_7series_0_0.xci",
+        "inst_hier_path": "mig_7series_0",
+        "parameters": {
+          "BOARD_MIG_PARAM": {
+            "value": "Custom"
+          },
+          "RESET_BOARD_INTERFACE": {
+            "value": "Custom"
+          },
+          "XML_INPUT_FILE": {
+            "value": "mig_a.prj"
+          }
+        }
       },
       "clk_wiz_0": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
@@ -1471,11 +1457,17 @@
         "xci_path": "ip\\SdramController_clk_wiz_0_0\\SdramController_clk_wiz_0_0.xci",
         "inst_hier_path": "clk_wiz_0",
         "parameters": {
+          "CLKOUT1_DRIVES": {
+            "value": "BUFG"
+          },
           "CLKOUT1_JITTER": {
             "value": "114.829"
           },
           "CLKOUT1_REQUESTED_OUT_FREQ": {
             "value": "200"
+          },
+          "CLKOUT2_DRIVES": {
+            "value": "BUFG"
           },
           "CLKOUT2_JITTER": {
             "value": "118.758"
@@ -1484,10 +1476,25 @@
             "value": "98.575"
           },
           "CLKOUT2_REQUESTED_OUT_FREQ": {
-            "value": "166.66667"
+            "value": "166.667"
           },
           "CLKOUT2_USED": {
             "value": "true"
+          },
+          "CLKOUT3_DRIVES": {
+            "value": "BUFG"
+          },
+          "CLKOUT4_DRIVES": {
+            "value": "BUFG"
+          },
+          "CLKOUT5_DRIVES": {
+            "value": "BUFG"
+          },
+          "CLKOUT6_DRIVES": {
+            "value": "BUFG"
+          },
+          "CLKOUT7_DRIVES": {
+            "value": "BUFG"
           },
           "CLK_OUT1_PORT": {
             "value": "clk_ref"
@@ -1504,13 +1511,31 @@
           "NUM_OUT_CLKS": {
             "value": "2"
           },
+          "SECONDARY_SOURCE": {
+            "value": "Single_ended_clock_capable_pin"
+          },
           "USE_LOCKED": {
+            "value": "false"
+          },
+          "USE_PHASE_ALIGNMENT": {
             "value": "false"
           },
           "USE_RESET": {
             "value": "false"
           }
         }
+      },
+      "proc_sys_reset_0": {
+        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "xci_name": "SdramController_proc_sys_reset_0_0",
+        "xci_path": "ip\\SdramController_proc_sys_reset_0_0\\SdramController_proc_sys_reset_0_0.xci",
+        "inst_hier_path": "proc_sys_reset_0"
+      },
+      "proc_sys_reset_1": {
+        "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "xci_name": "SdramController_proc_sys_reset_1_0",
+        "xci_path": "ip\\SdramController_proc_sys_reset_1_0\\SdramController_proc_sys_reset_1_0.xci",
+        "inst_hier_path": "proc_sys_reset_1"
       }
     },
     "interface_nets": {
@@ -1579,43 +1604,43 @@
       "clock_1": {
         "ports": [
           "clock",
-          "proc_sys_reset_1/slowest_sync_clk",
           "axi_interconnect_0/ACLK",
-          "clk_wiz_0/clk_in1"
+          "clk_wiz_0/clk_in1",
+          "proc_sys_reset_0/slowest_sync_clk"
         ]
       },
       "mig_7series_0_mmcm_locked": {
         "ports": [
           "mig_7series_0/mmcm_locked",
-          "proc_sys_reset_0/dcm_locked"
+          "proc_sys_reset_1/dcm_locked"
         ]
       },
       "mig_7series_0_ui_clk": {
         "ports": [
           "mig_7series_0/ui_clk",
-          "proc_sys_reset_0/slowest_sync_clk",
-          "axi_interconnect_0/M00_ACLK"
+          "axi_interconnect_0/M00_ACLK",
+          "proc_sys_reset_1/slowest_sync_clk"
         ]
       },
       "proc_sys_reset_0_peripheral_aresetn": {
         "ports": [
           "proc_sys_reset_0/peripheral_aresetn",
-          "mig_7series_0/aresetn",
-          "axi_interconnect_0/M00_ARESETN"
+          "axi_interconnect_0/ARESETN"
         ]
       },
       "proc_sys_reset_1_peripheral_aresetn": {
         "ports": [
           "proc_sys_reset_1/peripheral_aresetn",
-          "axi_interconnect_0/ARESETN"
+          "axi_interconnect_0/M00_ARESETN",
+          "mig_7series_0/aresetn"
         ]
       },
       "reset_1": {
         "ports": [
           "reset",
-          "proc_sys_reset_1/ext_reset_in",
           "mig_7series_0/sys_rst",
-          "proc_sys_reset_0/ext_reset_in"
+          "proc_sys_reset_0/ext_reset_in",
+          "proc_sys_reset_1/ext_reset_in"
         ]
       }
     },

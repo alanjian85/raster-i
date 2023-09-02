@@ -4,7 +4,7 @@
     "xci_name": "ImgRom",
     "component_reference": "xilinx.com:ip:blk_mem_gen:8.4",
     "ip_revision": "6",
-    "gen_directory": "../../trinity/trinity.gen/sources_1/ip/ImgRom",
+    "gen_directory": ".",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "ImgRom", "resolve_type": "user", "usage": "all" } ],
@@ -51,7 +51,7 @@
         "register_portb_output_of_softecc": [ { "value": "false", "resolve_type": "user", "format": "bool", "enabled": false, "usage": "all" } ],
         "Pipeline_Stages": [ { "value": "0", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "Load_Init_File": [ { "value": "true", "value_src": "user", "resolve_type": "user", "format": "bool", "usage": "all" } ],
-        "Coe_File": [ { "value": "../../../../../image.coe", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
+        "Coe_File": [ { "value": "ImgRom.coe", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
         "Fill_Remaining_Memory_Locations": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "Remaining_Memory_Locations": [ { "value": "0", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "Use_RSTA_Pin": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
@@ -174,7 +174,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "6" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../trinity.gen/sources_1/ip/ImgRom" } ],
+        "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2023.1.1" } ],
