@@ -25,15 +25,15 @@ class Ddr3 extends Bundle {
 class ddr_ctrl extends BlackBox {
     val io = IO(new Bundle {
         val clk = Input(Clock())
-        val rst = Input(Reset())
+        val rst = Input(Bool())
 
         val render_axi = new WrAxiExt(28, 128)
         val render_aclk = Input(Clock())
-        val render_aresetn = Input(Reset())
+        val render_aresetn = Input(Bool())
 
         val display_axi = new RdAxiExt(28, 128)
         val display_aclk = Input(Clock())
-        val display_aresetn = Input(Reset())
+        val display_aresetn = Input(Bool())
 
         val ddr3 = new Ddr3
     })
@@ -43,11 +43,11 @@ class DdrCtrl extends Module {
     val io = IO(new Bundle {
         val axiRender = Flipped(new WrAxi(28, 128))
         val aclkRender = Input(Clock())
-        val arstnRender = Input(Reset())
+        val arstnRender = Input(Bool())
 
         val axiDisplay = Flipped(new RdAxi(28, 128))
         val aclkDisplay = Input(Clock())
-        val arstnDisplay = Input(Reset())
+        val arstnDisplay = Input(Bool())
 
         val ddr3 = new Ddr3
     })
@@ -64,5 +64,5 @@ class DdrCtrl extends Module {
     ddrCtrl.io.display_aclk := io.aclkDisplay
     ddrCtrl.io.display_aresetn := io.arstnDisplay
 
-    ddrCtrl.io.ddr3 <> io.ddr3
+    io.ddr3 <> ddrCtrl.io.ddr3
 }

@@ -1,7 +1,7 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "ProcessorSystemReset",
+    "xci_name": "proc_sys_rst",
     "component_reference": "xilinx.com:ip:proc_sys_reset:5.0",
     "ip_revision": "13",
     "gen_directory": ".",
@@ -15,7 +15,7 @@
         "C_EXT_RESET_HIGH": [ { "value": "1", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_AUX_RST_WIDTH": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_EXT_RST_WIDTH": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "Component_Name": [ { "value": "ProcessorSystemReset", "resolve_type": "user", "usage": "all" } ],
+        "Component_Name": [ { "value": "proc_sys_rst", "resolve_type": "user", "usage": "all" } ],
         "USE_BOARD_FLOW": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "RESET_BOARD_INTERFACE": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ]
       },

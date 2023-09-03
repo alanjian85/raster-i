@@ -1,13 +1,13 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "ImgRom",
+    "xci_name": "img_rom",
     "component_reference": "xilinx.com:ip:blk_mem_gen:8.4",
     "ip_revision": "6",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
-        "Component_Name": [ { "value": "ImgRom", "resolve_type": "user", "usage": "all" } ],
+        "Component_Name": [ { "value": "img_rom", "resolve_type": "user", "usage": "all" } ],
         "Interface_Type": [ { "value": "Native", "resolve_type": "user", "usage": "all" } ],
         "AXI_Type": [ { "value": "AXI4_Full", "resolve_type": "user", "usage": "all" } ],
         "AXI_Slave_Type": [ { "value": "Memory_Slave", "resolve_type": "user", "usage": "all" } ],
@@ -51,7 +51,7 @@
         "register_portb_output_of_softecc": [ { "value": "false", "resolve_type": "user", "format": "bool", "enabled": false, "usage": "all" } ],
         "Pipeline_Stages": [ { "value": "0", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "Load_Init_File": [ { "value": "true", "value_src": "user", "resolve_type": "user", "format": "bool", "usage": "all" } ],
-        "Coe_File": [ { "value": "ImgRom.coe", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
+        "Coe_File": [ { "value": "img_rom.coe", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
         "Fill_Remaining_Memory_Locations": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "Remaining_Memory_Locations": [ { "value": "0", "resolve_type": "user", "enabled": false, "usage": "all" } ],
         "Use_RSTA_Pin": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
@@ -97,8 +97,8 @@
         "C_ALGORITHM": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_PRIM_TYPE": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_LOAD_INIT_FILE": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
-        "C_INIT_FILE_NAME": [ { "value": "ImgRom.mif", "resolve_type": "generated", "usage": "all" } ],
-        "C_INIT_FILE": [ { "value": "ImgRom.mem", "resolve_type": "generated", "usage": "all" } ],
+        "C_INIT_FILE_NAME": [ { "value": "img_rom.mif", "resolve_type": "generated", "usage": "all" } ],
+        "C_INIT_FILE": [ { "value": "img_rom.mem", "resolve_type": "generated", "usage": "all" } ],
         "C_USE_DEFAULT_DATA": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_DEFAULT_DATA": [ { "value": "0", "resolve_type": "generated", "usage": "all" } ],
         "C_HAS_RSTA": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
