@@ -13,13 +13,13 @@ class Display extends Module {
     })
 
     val scanSize = Screen.width >> 2
-    val scanBuffer = Mem(scanSize, UInt(48.W))
+    val scanBuffer = SyncReadMem(scanSize, UInt(48.W))
 
     val vgaSignal = Module(new VgaSignal)
     val vgaData = scanBuffer.read(vgaSignal.io.pos.x >> 2.U)
     io.pix := RGB4Init(0.U)
-    when (vgaSignal.io.active) {
-        switch (vgaSignal.io.pos.x & "b11".U) {
+    when (RegNext(vgaSignal.io.active)) {
+        switch (RegNext(vgaSignal.io.pos.x & "b11".U)) {
             is(0.U) {
                 io.pix.r := vgaData(3, 0)
                 io.pix.g := vgaData(7, 4)
@@ -42,8 +42,8 @@ class Display extends Module {
             }
         }
     }
-    io.hsync := vgaSignal.io.hsync
-    io.vsync := vgaSignal.io.vsync
+    io.hsync := RegNext(vgaSignal.io.hsync)
+    io.vsync := RegNext(vgaSignal.io.vsync)
 
     io.axi.addr.bits.id := DontCare
     val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
