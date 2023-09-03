@@ -6,7 +6,7 @@ import chisel3.util._
 
 class Display extends Module {
     val io = IO(new Bundle {
-        val axi = new Axi
+        val axi = new RdAxi(28, 128)
         val pix = Output(RGB4())
         val hsync = Output(Bool())
         val vsync = Output(Bool())
@@ -45,21 +45,7 @@ class Display extends Module {
     io.hsync := vgaSignal.io.hsync
     io.vsync := vgaSignal.io.vsync
 
-    val recvIdxReg = RegInit(0.U(log2Up(scanSize).W))
-    io.axi.rready := true.B
-    when (io.axi.rvalid) {
-        recvIdxReg := recvIdxReg + 1.U
-        when (recvIdxReg === (scanSize - 1).U) {
-            recvIdxReg := 0.U
-        }
-        val rdData = io.axi.rdata
-        val wrData = rdData(119, 116) ## rdData(111, 108) ## rdData(103, 100) ##
-                     rdData( 87,  84) ## rdData( 79,  76) ## rdData( 71,  68) ##
-                     rdData( 55,  52) ## rdData( 47,  44) ## rdData( 39,  36) ##
-                     rdData( 23,  20) ## rdData( 15,  12) ## rdData(  7,   4)
-        scanBuffer.write(recvIdxReg, wrData)
-    }
-
+    io.axi.addr.bits.id := DontCare
     val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
     val rdValidReg = RegInit(true.B)
     when (vgaSignal.io.active &&
@@ -71,35 +57,28 @@ class Display extends Module {
         }
         rdValidReg := true.B
     }
-    when (rdValidReg && io.axi.arready) {
+    when (rdValidReg && io.axi.addr.ready) {
         rdValidReg := false.B
     }
-    io.axi.araddr := lineIdxReg * scanSize.U << 4.U
-    io.axi.arburst := "b01".U
-    io.axi.arcache := 0.U
-    io.axi.arlen := (scanSize - 1).U
-    io.axi.arlock := false.B
-    io.axi.arprot := 0.U
-    io.axi.arqos := 0.U
-    io.axi.arregion := 0.U
-    io.axi.arsize := "b100".U
-    io.axi.arvalid := rdValidReg
+    io.axi.addr.bits.addr := lineIdxReg * scanSize.U << 4.U
+    io.axi.addr.bits.burst := "b01".U
+    io.axi.addr.bits.len := (scanSize - 1).U
+    io.axi.addr.bits.size := "b100".U
+    io.axi.addr.valid := rdValidReg
 
-    io.axi.awaddr := 0.U
-    io.axi.awburst := 0.U
-    io.axi.awcache := 0.U
-    io.axi.awlen := 0.U
-    io.axi.awlock := false.B
-    io.axi.awprot := 0.U
-    io.axi.awqos := 0.U
-    io.axi.awregion := 0.U
-    io.axi.awsize := 0.U
-    io.axi.awvalid := false.B
-  
-    io.axi.wdata := 0.U
-    io.axi.wlast := false.B
-    io.axi.wstrb := 0.U
-    io.axi.wvalid := false.B
-
-    io.axi.bready := false.B
+    io.axi.data.bits.id := DontCare
+    val recvIdxReg = RegInit(0.U(log2Up(scanSize).W))
+    io.axi.data.ready := true.B
+    when (io.axi.data.valid) {
+        recvIdxReg := recvIdxReg + 1.U
+        when (recvIdxReg === (scanSize - 1).U) {
+            recvIdxReg := 0.U
+        }
+        val rdData = io.axi.data.bits.data
+        val wrData = rdData(119, 116) ## rdData(111, 108) ## rdData(103, 100) ##
+                     rdData( 87,  84) ## rdData( 79,  76) ## rdData( 71,  68) ##
+                     rdData( 55,  52) ## rdData( 47,  44) ## rdData( 39,  36) ##
+                     rdData( 23,  20) ## rdData( 15,  12) ## rdData(  7,   4)
+        scanBuffer.write(recvIdxReg, wrData)
+    }
 }

@@ -1,7 +1,7 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "SdramController_axi_interconnect_0_0",
+    "xci_name": "ddr_ctrl_axi_interconnect_0_0",
     "cell_name": "axi_interconnect_0",
     "component_reference": "xilinx.com:ip:axi_interconnect:2.1",
     "ip_revision": "29",
@@ -322,7 +322,7 @@
         "S13_ARB_PRIORITY": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "S14_ARB_PRIORITY": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "S15_ARB_PRIORITY": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "Component_Name": [ { "value": "SdramController_axi_interconnect_0_0", "resolve_type": "user", "usage": "all" } ]
+        "Component_Name": [ { "value": "ddr_ctrl_axi_interconnect_0_0", "resolve_type": "user", "usage": "all" } ]
       },
       "project_parameters": {
         "ARCHITECTURE": [ { "value": "artix7" } ],

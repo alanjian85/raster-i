@@ -1,8 +1,8 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "SdramController_proc_sys_reset_1_0",
-    "cell_name": "proc_sys_reset_1",
+    "xci_name": "ddr_ctrl_proc_sys_reset_0_0",
+    "cell_name": "proc_sys_reset_0",
     "component_reference": "xilinx.com:ip:proc_sys_reset:5.0",
     "ip_revision": "13",
     "gen_directory": ".",
@@ -16,7 +16,7 @@
         "C_EXT_RESET_HIGH": [ { "value": "1", "value_src": "propagated", "value_permission": "bd", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_AUX_RST_WIDTH": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_EXT_RST_WIDTH": [ { "value": "4", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "Component_Name": [ { "value": "SdramController_proc_sys_reset_1_0", "resolve_type": "user", "usage": "all" } ],
+        "Component_Name": [ { "value": "ddr_ctrl_proc_sys_reset_0_0", "resolve_type": "user", "usage": "all" } ],
         "USE_BOARD_FLOW": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "RESET_BOARD_INTERFACE": [ { "value": "Custom", "resolve_type": "user", "usage": "all" } ]
       },
@@ -75,10 +75,10 @@
           "mode": "slave",
           "parameters": {
             "ASSOCIATED_RESET": [ { "value": "mb_reset:bus_struct_reset:interconnect_aresetn:peripheral_aresetn:peripheral_reset", "value_src": "constant", "value_permission": "bd", "usage": "all" } ],
-            "FREQ_HZ": [ { "value": "83333333", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "user", "format": "long", "usage": "all" } ],
+            "FREQ_HZ": [ { "value": "100000000", "value_src": "user_prop", "value_permission": "bd", "resolve_type": "user", "format": "long", "usage": "all" } ],
             "FREQ_TOLERANCE_HZ": [ { "value": "0", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
-            "PHASE": [ { "value": "0", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "format": "float", "is_ips_inferred": true, "is_static_object": false } ],
-            "CLK_DOMAIN": [ { "value": "SdramController_mig_7series_0_0_ui_clk", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
+            "PHASE": [ { "value": "0.0", "value_permission": "bd", "resolve_type": "generated", "format": "float", "is_ips_inferred": true, "is_static_object": false } ],
+            "CLK_DOMAIN": [ { "value": "ddr_ctrl_clk", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
             "ASSOCIATED_BUSIF": [ { "value": "", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
             "ASSOCIATED_PORT": [ { "value": "", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
             "INSERT_VIP": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "simulation.rtl", "is_ips_inferred": true, "is_static_object": false } ]

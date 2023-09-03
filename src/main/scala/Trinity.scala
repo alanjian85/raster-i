@@ -18,11 +18,8 @@ class Trinity extends Module {
   val clockingWizard = Module(new ClockingWizard)
   clockingWizard.io.clock := clock
     
-  val sdramController = Module(new SdramController)
-  io.ddr3 <> sdramController.io.ddr3
-
-  sdramController.io.clock := clock
-  sdramController.io.reset := reset
+  val ddrCtrl = Module(new DdrCtrl)
+  io.ddr3 <> ddrCtrl.io.ddr3
 
   val renderSystemReset = Module(new ProcessorSystemReset)
   renderSystemReset.io.slowest_sync_clk := clock
@@ -31,32 +28,46 @@ class Trinity extends Module {
   renderSystemReset.io.mb_debug_sys_rst := false.B
   renderSystemReset.io.dcm_locked := true.B
 
-  sdramController.io.clock0 := clock
-  sdramController.io.aresetn0 := renderSystemReset.io.peripheral_aresetn
+  ddrCtrl.io.aclkRender := clock
+  ddrCtrl.io.arstnRender := renderSystemReset.io.peripheral_aresetn
 
   withClockAndReset(renderSystemReset.io.slowest_sync_clk, renderSystemReset.io.peripheral_reset) {
     val imgRom = Module(new ImgRom)
     imgRom.io.clka := renderSystemReset.io.slowest_sync_clk
 
+    ddrCtrl.io.axiRender.addr.bits.id := DontCare
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
-    val addrValidReg = RegInit(true.B)
-    when (addrValidReg && sdramController.io.axi0.awready) {
+    ddrCtrl.io.axiRender.addr.bits.addr := (yReg * Screen.width.U + xReg) << 2.U
+    ddrCtrl.io.axiRender.addr.bits.burst := 0.U
+    ddrCtrl.io.axiRender.addr.bits.len := 0.U
+    ddrCtrl.io.axiRender.addr.bits.size := "b100".U
+    val addrValidReg = RegInit(true.B)    
+    ddrCtrl.io.axiRender.addr.valid := addrValidReg
+    when (ddrCtrl.io.axiRender.addr.valid && ddrCtrl.io.axiRender.addr.ready) {
       addrValidReg := false.B
     }
 
-    sdramController.io.axi0.awaddr := (yReg * Screen.width.U + xReg) << 2.U
-    sdramController.io.axi0.awburst := 0.U
-    sdramController.io.axi0.awcache := 0.U
-    sdramController.io.axi0.awlen := 0.U
-    sdramController.io.axi0.awlock := false.B
-    sdramController.io.axi0.awprot := 0.U
-    sdramController.io.axi0.awqos := 0.U
-    sdramController.io.axi0.awregion := 0.U
-    sdramController.io.axi0.awsize := "b100".U
-    sdramController.io.axi0.awvalid := addrValidReg
-
-    when (sdramController.io.axi0.wvalid && sdramController.io.axi0.wready) {
+    imgRom.io.addra := (yReg >> 2.U) * (Screen.width >> 4).U + (xReg >> 4.U)
+    ddrCtrl.io.axiRender.data.bits.data := imgRom.io.douta
+    switch (xReg(3, 2)) {
+      is(0.U) {
+        ddrCtrl.io.axiRender.data.bits.data := Fill(4, imgRom.io.douta(31, 0))
+      }
+      is(1.U) {
+        ddrCtrl.io.axiRender.data.bits.data := Fill(4, imgRom.io.douta(63, 32))
+      }
+      is(2.U) {
+        ddrCtrl.io.axiRender.data.bits.data := Fill(4, imgRom.io.douta(95, 64))
+      }
+      is(3.U) {
+        ddrCtrl.io.axiRender.data.bits.data := Fill(4, imgRom.io.douta(127, 96))
+      }
+    }
+    ddrCtrl.io.axiRender.data.bits.last := true.B
+    ddrCtrl.io.axiRender.data.bits.strb := "hffff".U
+    ddrCtrl.io.axiRender.data.valid := !addrValidReg
+    when (ddrCtrl.io.axiRender.data.valid && ddrCtrl.io.axiRender.data.ready) {
       xReg := xReg + 4.U
       when (xReg === (Screen.width - 4).U) {
         xReg := 0.U
@@ -67,41 +78,8 @@ class Trinity extends Module {
       }
       addrValidReg := true.B
     }
-
-    imgRom.io.addra := (yReg >> 2.U) * (Screen.width >> 4).U + (xReg >> 4.U)
-    sdramController.io.axi0.wdata := imgRom.io.douta
-    switch (xReg(3, 2)) {
-      is(0.U) {
-        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(31, 0))
-      }
-      is(1.U) {
-        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(63, 32))
-      }
-      is(2.U) {
-        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(95, 64))
-      }
-      is(3.U) {
-        sdramController.io.axi0.wdata := Fill(4, imgRom.io.douta(127, 96))
-      }
-    }
-    sdramController.io.axi0.wlast := true.B
-    sdramController.io.axi0.wstrb := "hffff".U
-    sdramController.io.axi0.wvalid := !addrValidReg
   
-    sdramController.io.axi0.bready  := true.B
-
-    sdramController.io.axi0.araddr := 0.U
-    sdramController.io.axi0.arburst := 0.U
-    sdramController.io.axi0.arcache := 0.U
-    sdramController.io.axi0.arlen := 0.U
-    sdramController.io.axi0.arlock := false.B
-    sdramController.io.axi0.arprot := 0.U
-    sdramController.io.axi0.arqos := 0.U
-    sdramController.io.axi0.arregion := 0.U
-    sdramController.io.axi0.arsize := 0.U
-    sdramController.io.axi0.arvalid := false.B
-
-    sdramController.io.axi0.rready := false.B
+    ddrCtrl.io.axiRender.resp.ready  := true.B
   }
 
   val displaySystemReset = Module(new ProcessorSystemReset)
@@ -111,12 +89,12 @@ class Trinity extends Module {
   displaySystemReset.io.mb_debug_sys_rst := false.B
   displaySystemReset.io.dcm_locked := true.B
 
-  sdramController.io.clock1 := clockingWizard.io.pixelClock
-  sdramController.io.aresetn1 := displaySystemReset.io.peripheral_aresetn
+  ddrCtrl.io.aclkDisplay := clockingWizard.io.pixelClock
+  ddrCtrl.io.arstnDisplay := displaySystemReset.io.peripheral_aresetn
 
   withClockAndReset(displaySystemReset.io.slowest_sync_clk, displaySystemReset.io.peripheral_reset) {
     val display = Module(new Display)
-    sdramController.io.axi1 <> display.io.axi
+    ddrCtrl.io.axiDisplay <> display.io.axi
     io.pix := display.io.pix
     io.hsync := display.io.hsync
     io.vsync := display.io.vsync
