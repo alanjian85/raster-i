@@ -5,7 +5,7 @@ import chisel3._
 
 class proc_sys_rst extends BlackBox { 
     val io = IO(new Bundle {
-        val slowest_sync_clk = Input(Clock())
+        val slowest_sync_clk = Input(Bool())
         val ext_reset_in = Input(Bool())
         val aux_reset_in = Input(Bool())
         val mb_debug_sys_rst = Input(Bool())
@@ -20,13 +20,13 @@ class proc_sys_rst extends BlackBox {
 
 class ProcSysRst extends Module {
     val io = IO(new Bundle {
-        val rst = Output(Bool())
-        val arstn = Output(Bool())
+        val rst = Output(Reset())
+        val arstn = Output(Reset())
     })
 
     val procSysRst = Module(new proc_sys_rst)
-    procSysRst.io.slowest_sync_clk := clock
-    procSysRst.io.ext_reset_in := reset
+    procSysRst.io.slowest_sync_clk := clock.asBool
+    procSysRst.io.ext_reset_in := reset.asBool
     procSysRst.io.aux_reset_in := false.B
     procSysRst.io.mb_debug_sys_rst := false.B
     procSysRst.io.dcm_locked := true.B

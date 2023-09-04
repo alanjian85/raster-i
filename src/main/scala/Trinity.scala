@@ -8,7 +8,7 @@ class TrinityIO extends Bundle {
   val pix = Output(RGB4())
   val hsync = Output(Bool())
   val vsync = Output(Bool())
-  val ddr3 = new Ddr3
+  val ddr3 = new Ddr3Ext
 }
 
 class Trinity extends Module {

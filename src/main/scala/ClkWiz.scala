@@ -5,9 +5,9 @@ import chisel3._
 
 class clk_wiz extends BlackBox {
     val io = IO(new Bundle {
-        val clk = Input(Clock())
-        val clk_render = Output(Clock())
-        val clk_display = Output(Clock())
+        val clk = Input(Bool())
+        val clk_render = Output(Bool())
+        val clk_display = Output(Bool())
     })
 }
 
@@ -18,7 +18,7 @@ class ClkWiz extends Module {
     })
 
     val clkWiz = Module(new clk_wiz)
-    clkWiz.io.clk := clock
-    io.clkRender := clkWiz.io.clk_render
-    io.clkDisplay := clkWiz.io.clk_display
+    clkWiz.io.clk := clock.asBool
+    io.clkRender := clkWiz.io.clk_render.asClock
+    io.clkDisplay := clkWiz.io.clk_display.asClock
 }
