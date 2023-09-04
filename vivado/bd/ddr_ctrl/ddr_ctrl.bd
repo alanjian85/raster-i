@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xE210710A2EEC1125",
+      "boundary_crc": "0xE210710A25D92AB7",
       "device": "xc7a100tcsg324-1",
       "name": "ddr_ctrl",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -1424,6 +1424,12 @@
           "axi_interconnect_0/M00_ACLK"
         ]
       },
+      "mig_7series_0_ui_clk_sync_rst": {
+        "ports": [
+          "mig_7series_0/ui_clk_sync_rst",
+          "proc_sys_reset_0/ext_reset_in"
+        ]
+      },
       "proc_sys_reset_0_peripheral_aresetn": {
         "ports": [
           "proc_sys_reset_0/peripheral_aresetn",
@@ -1452,9 +1458,8 @@
       "rst_1": {
         "ports": [
           "rst",
-          "proc_sys_reset_0/ext_reset_in",
-          "mig_7series_0/sys_rst",
-          "proc_sys_reset_1/ext_reset_in"
+          "proc_sys_reset_1/ext_reset_in",
+          "mig_7series_0/sys_rst"
         ]
       }
     },
