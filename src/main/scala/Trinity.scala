@@ -23,9 +23,16 @@ class Trinity extends Module {
   ddrCtrl.io.aclkRender := clkWiz.io.clkRender
   ddrCtrl.io.arstnRender := renderSysRst.io.arstn
 
+  ddrCtrl.io.aclkDither := clkWiz.io.clkRender
+  ddrCtrl.io.arstnDither := renderSysRst.io.arstn
+
   withClockAndReset(clkWiz.io.clkRender, renderSysRst.io.rst) {
     val render = Module(new Render)
     ddrCtrl.io.axiRender <> render.io.axi
+
+    val dither = Module(new Dither)
+    ddrCtrl.io.axiDither <> dither.io.axi
+    dither.io.renderDone := render.io.done
   }
 
   val displaySysRst = Module(new ProcSysRst)

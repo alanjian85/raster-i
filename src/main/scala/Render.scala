@@ -7,19 +7,22 @@ import chisel3.util._
 class Render extends Module {
     val io = IO(new Bundle {
         val axi = new WrAxi(28, 128)
+        val done = Output(Bool())
     })
 
     val imgRom = Module(new ImgRom)
 
     io.axi.addr.bits.id := DontCare
+    val activeReg = RegInit(true.B)
+    io.done := !activeReg
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
     io.axi.addr.bits.addr := (yReg * Screen.width.U + xReg) << 2.U
-    io.axi.addr.bits.burst := 0.U
+    io.axi.addr.bits.burst := "b01".U
     io.axi.addr.bits.len := 0.U
     io.axi.addr.bits.size := "b100".U
     val addrValidReg = RegInit(true.B)    
-    io.axi.addr.valid := addrValidReg
+    io.axi.addr.valid := addrValidReg && activeReg
     when (io.axi.addr.valid && io.axi.addr.ready) {
       addrValidReg := false.B
     }
@@ -42,14 +45,14 @@ class Render extends Module {
     }
     io.axi.data.bits.last := true.B
     io.axi.data.bits.strb := "hffff".U
-    io.axi.data.valid := !addrValidReg
+    io.axi.data.valid := !addrValidReg && activeReg
     when (io.axi.data.valid && io.axi.data.ready) {
       xReg := xReg + 4.U
       when (xReg === (Screen.width - 4).U) {
         xReg := 0.U
         yReg := yReg + 1.U
         when (yReg === (Screen.height - 1).U) {
-          yReg := 0.U
+          activeReg := false.B
         }
       }
       addrValidReg := true.B
