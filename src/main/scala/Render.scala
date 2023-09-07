@@ -12,34 +12,37 @@ class Render extends Module {
     val fbWriter = Module(new FbWriter)
     io.axi <> fbWriter.io.axi
 
+    val dither = Module(new Dither)
+    fbWriter.io.req <> dither.io.outReq
+
     val validReg = RegInit(true.B)
     validReg := true.B
-    fbWriter.io.req.valid := validReg
+    dither.io.inReq.valid := validReg
 
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
-    fbWriter.io.req.bits.x := xReg
-    fbWriter.io.req.bits.y := yReg
+    dither.io.inReq.bits.x := xReg
+    dither.io.inReq.bits.y := yReg
 
     val imgRom = Module(new ImgRom)
     imgRom.io.addr := (yReg >> 2.U) * (Screen.width >> 4).U + (xReg >> 4.U)
-    fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(0.U(32.W)))
+    dither.io.inReq.bits.pix := VecInit(Seq.fill(4)(0.U(32.W)))
     switch (xReg(3, 2)) {
       is(0.U) {
-        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(31, 0)))
+        dither.io.inReq.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(31, 0)))
       }
       is(1.U) {
-        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(63, 32)))
+        dither.io.inReq.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(63, 32)))
       }
       is(2.U) {
-        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(95, 64)))
+        dither.io.inReq.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(95, 64)))
       }
       is(3.U) {
-        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(127, 96)))
+        dither.io.inReq.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(127, 96)))
       }
     }
 
-    when (fbWriter.io.req.valid && fbWriter.io.req.ready) {
+    when (dither.io.inReq.valid && dither.io.inReq.ready) {
       validReg := false.B
       xReg := xReg + 4.U
       when (xReg === (Screen.width - 4).U) {
