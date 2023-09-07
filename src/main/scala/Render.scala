@@ -6,57 +6,48 @@ import chisel3.util._
 
 class Render extends Module {
     val io = IO(new Bundle {
-        val axi = new WrAxi(28, 128)
-        val done = Output(Bool())
+      val axi = new WrAxi(28, 128)
     })
 
-    val imgRom = Module(new ImgRom)
+    val fbWriter = Module(new FbWriter)
+    io.axi <> fbWriter.io.axi
 
-    io.axi.addr.bits.id := DontCare
-    val activeReg = RegInit(true.B)
-    io.done := !activeReg
+    val validReg = RegInit(true.B)
+    validReg := true.B
+    fbWriter.io.req.valid := validReg
+
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
-    io.axi.addr.bits.addr := (yReg * Screen.width.U + xReg) << 2.U
-    io.axi.addr.bits.burst := "b01".U
-    io.axi.addr.bits.len := 0.U
-    io.axi.addr.bits.size := "b100".U
-    val addrValidReg = RegInit(true.B)    
-    io.axi.addr.valid := addrValidReg && activeReg
-    when (io.axi.addr.valid && io.axi.addr.ready) {
-      addrValidReg := false.B
-    }
+    fbWriter.io.req.bits.x := xReg
+    fbWriter.io.req.bits.y := yReg
 
+    val imgRom = Module(new ImgRom)
     imgRom.io.addr := (yReg >> 2.U) * (Screen.width >> 4).U + (xReg >> 4.U)
-    io.axi.data.bits.data := imgRom.io.data
+    fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(0.U(32.W)))
     switch (xReg(3, 2)) {
       is(0.U) {
-        io.axi.data.bits.data := Fill(4, imgRom.io.data(31, 0))
+        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(31, 0)))
       }
       is(1.U) {
-        io.axi.data.bits.data := Fill(4, imgRom.io.data(63, 32))
+        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(63, 32)))
       }
       is(2.U) {
-        io.axi.data.bits.data := Fill(4, imgRom.io.data(95, 64))
+        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(95, 64)))
       }
       is(3.U) {
-        io.axi.data.bits.data := Fill(4, imgRom.io.data(127, 96))
+        fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(imgRom.io.data(127, 96)))
       }
     }
-    io.axi.data.bits.last := true.B
-    io.axi.data.bits.strb := "hffff".U
-    io.axi.data.valid := !addrValidReg && activeReg
-    when (io.axi.data.valid && io.axi.data.ready) {
+
+    when (fbWriter.io.req.valid && fbWriter.io.req.ready) {
+      validReg := false.B
       xReg := xReg + 4.U
       when (xReg === (Screen.width - 4).U) {
         xReg := 0.U
         yReg := yReg + 1.U
         when (yReg === (Screen.height - 1).U) {
-          activeReg := false.B
+          yReg := 0.U
         }
       }
-      addrValidReg := true.B
     }
-  
-    io.axi.resp.ready  := true.B
 }

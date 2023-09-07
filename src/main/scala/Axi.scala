@@ -5,11 +5,11 @@ import chisel3._
 import chisel3.util._
 
 class AxiRdAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
-    val id     = UInt(idWidth.W)
-    val addr   = UInt(addrWidth.W)
-    val len    = UInt(8.W)
-    val size   = UInt(3.W)
-    val burst  = UInt(2.W)
+    val id    = UInt(idWidth.W)
+    val addr  = UInt(addrWidth.W)
+    val len   = UInt(8.W)
+    val size  = UInt(3.W)
+    val burst = UInt(2.W)
 }
 
 class AxiRdData(dataWidth: Int, idWidth: Int = 0) extends Bundle {
@@ -20,11 +20,11 @@ class AxiRdData(dataWidth: Int, idWidth: Int = 0) extends Bundle {
 }
 
 class AxiWrAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
-    val id     = UInt(idWidth.W)
-    val addr   = UInt(addrWidth.W)
-    val len    = UInt(8.W)
-    val size   = UInt(3.W)
-    val burst  = UInt(2.W)
+    val id    = UInt(idWidth.W)
+    val addr  = UInt(addrWidth.W)
+    val len   = UInt(8.W)
+    val size  = UInt(3.W)
+    val burst = UInt(2.W)
 }
 
 class AxiWrData(dataWidth: Int) extends Bundle {

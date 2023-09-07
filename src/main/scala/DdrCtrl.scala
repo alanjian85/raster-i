@@ -35,10 +35,6 @@ class ddr_ctrl extends BlackBox {
         val display_aclk = Input(Bool())
         val display_aresetn = Input(Bool())
 
-        val dither_axi = new RdWrAxiExt(28, 32)
-        val dither_aclk = Input(Bool())
-        val dither_aresetn = Input(Bool())
-
         val ddr3 = new Ddr3Ext
     })
 }
@@ -52,10 +48,6 @@ class DdrCtrl extends Module {
         val axiDisplay = Flipped(new RdAxi(28, 128))
         val aclkDisplay = Input(Clock())
         val arstnDisplay = Input(Reset())
-
-        val axiDither = Flipped(new RdWrAxi(28, 32))
-        val aclkDither = Input(Clock())
-        val arstnDither = Input(Reset())
 
         val ddr3 = new Ddr3Ext
     })
@@ -71,10 +63,6 @@ class DdrCtrl extends Module {
     ddrCtrl.io.display_axi.connect(io.axiDisplay)
     ddrCtrl.io.display_aclk := io.aclkDisplay.asBool
     ddrCtrl.io.display_aresetn := io.arstnDisplay.asBool
-
-    ddrCtrl.io.dither_axi.connect(io.axiDither)
-    ddrCtrl.io.dither_aclk := io.aclkDisplay.asBool
-    ddrCtrl.io.dither_aresetn := io.arstnDither.asBool
 
     io.ddr3 <> ddrCtrl.io.ddr3
 }
