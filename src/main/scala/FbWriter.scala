@@ -5,9 +5,9 @@ import chisel3._
 import chisel3.util._
 
 class FbWrReq extends Bundle {
-    val pix = Vec(4, UInt(32.W))
     val x = UInt(log2Up(Screen.width).W)
     val y = UInt(log2Up(Screen.height).W)
+    val pixVec = Vec(4, UInt(32.W))
 }
 
 class FbWriter extends Module {
@@ -44,7 +44,7 @@ class FbWriter extends Module {
     when (io.req.valid && io.req.ready) {
         addrReg := (io.req.bits.y * Screen.width.U + io.req.bits.x) << 2.U
         addrEmptyReg := false.B
-        dataReg := io.req.bits.pix.reverse.reduce(_ ## _)
+        dataReg := io.req.bits.pixVec.reverse.reduce(_ ## _)
         dataEmptyReg := false.B
     }
 }

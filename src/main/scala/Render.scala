@@ -17,32 +17,50 @@ class Render extends Module {
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
 
-    val pixels = Wire(Vec(4, UInt(32.W)))
+    val pixVec = Wire(Vec(4, UInt(32.W)))
     for (i <- 0 until 4) {
       val shader = Module(new Shader)
       shader.io.x := xReg | i.U
       shader.io.y := yReg
-      pixels(i) := shader.io.pix
+      pixVec(i) := shader.io.pix
     }
 
-    val dither = Module(new Dither)
-    dither.io.inReq.bits.x := xReg
-    dither.io.inReq.bits.y := yReg
-    dither.io.inReq.bits.pix := pixels
-    dither.io.inReq.valid := true.B
+    val ditherer = Module(new Ditherer)
+    ditherer.io.y := yReg
+    ditherer.io.inPixVec := RegNext(pixVec)
 
     val fbWriter = Module(new FbWriter)
-    fbWriter.io.req <> dither.io.outReq
-
+    fbWriter.io.req.valid := false.B
+    fbWriter.io.req.bits.x := xReg
+    fbWriter.io.req.bits.y := yReg
+    fbWriter.io.req.bits.pixVec := RegNext(ditherer.io.outPixVec)
     io.axi <> fbWriter.io.axi
 
-    when (dither.io.inReq.valid && dither.io.inReq.ready) {
-      xReg := xReg + 4.U
-      when (xReg === (Screen.width - 4).U) {
-        xReg := 0.U
-        yReg := yReg + 1.U
-        when (yReg === (Screen.height - 1).U) {
-          yReg := 0.U
+    object State extends ChiselEnum {
+      val shading, dithering, writing = Value
+    }
+    import State._
+
+    val stateReg = RegInit(shading)
+    switch (stateReg) {
+      is(shading) {
+        stateReg := dithering
+      }
+      is(dithering) {
+        stateReg := writing        
+      }
+      is(writing) {
+        fbWriter.io.req.valid := true.B
+        when (fbWriter.io.req.ready) {
+          stateReg := State.shading
+          xReg := xReg + 4.U
+          when (xReg === (Screen.width - 4).U) {
+            xReg := 0.U
+            yReg := yReg + 1.U
+            when (yReg === (Screen.height - 1).U) {
+              yReg := 0.U
+            }
+          }
         }
       }
     }
