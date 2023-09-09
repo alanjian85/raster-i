@@ -12,8 +12,8 @@ class TrinitySdlIO extends Bundle {
 }
 
 class TrinitySdl extends Module {
-  val io = IO(new TrinitySdlIO);
-
+  val io = IO(new Bundle {});
+/*
   val vgaSignal = Module(new VgaSignal)
   io.pos := vgaSignal.io.pos
   io.hsync := vgaSignal.io.hsync
@@ -22,4 +22,5 @@ class TrinitySdl extends Module {
   val shader = Module(new Shader)
   shader.io.pos := vgaSignal.io.pos
   io.pix := shader.io.pix
+*/
 }

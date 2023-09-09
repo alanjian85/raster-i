@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
+import chisel3.util._
 
 class Shader extends Module {
   val io = IO(new Bundle {
-    val pos = Input(UVec2())
-    val pix = Output(RGB4())
+    val x = Input(UInt(log2Up(Screen.width).W))
+    val y = Input(UInt(log2Up(Screen.height).W))
+    val pix = Output(UInt(32.W))
   })
 
-  val diff = io.pos.asSVec2 - ScreenPos(400, 300).asSVec2
-  val r = diff.x * diff.x + diff.y * diff.y
-  val visible = r <= 10000.S
-  when (visible) {
-    io.pix := RGB4Init("hf".U)
+  val diffX = io.x.zext - 512.S
+  val diffY = io.y.zext - 384.S
+  val r = diffX * diffX + diffY * diffY
+  when (r <= 10000.S) {
+    io.pix := "hffffffff".U
   } .otherwise {
-    io.pix := RGB4Init("h1".U, "h3".U, "h7".U)
+    io.pix := "hff703010".U
   }
 }

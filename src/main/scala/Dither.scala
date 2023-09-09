@@ -10,11 +10,20 @@ class Dither extends Module {
         val outReq = Decoupled(new FbWrReq)
     })
 
+    def clampAdd(x: UInt, y: UInt) = {
+        val sum = (0.U ## x) + y
+        val result = WireDefault(sum(7, 0))
+        when (sum(8)) {
+            result := 255.U
+        }
+        result
+    }
+
     def vecScalarAdd(x: UInt, y: UInt) = {
-        (x(31, 24) + y) ##
-        (x(23, 16) + y) ##
-        (x(15,  8) + y) ##
-        (x( 7,  0) + y)
+        clampAdd(x(31, 24),  y) ##
+        clampAdd(x(23, 16),  y) ##
+        clampAdd(x(15,  8),  y) ##
+        clampAdd(x( 7,  0),  y)
     }
 
     val kernel = VecInit(
