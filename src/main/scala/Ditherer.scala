@@ -6,7 +6,7 @@ import chisel3.util._
 
 class Ditherer extends Module {
     val io = IO(new Bundle {
-        val y = Input(UInt(log2Up(Screen.height).W))
+        val py = Input(UInt(log2Up(Screen.height).W))
         val inPixVec = Input(Vec(4, UInt(32.W)))
         val outPixVec = Output(Vec(4, UInt(32.W)))
     })
@@ -34,7 +34,7 @@ class Ditherer extends Module {
         VecInit(15.U,  7.U, 13.U,  5.U)
     )
 
-    val row = io.y & "b11".U
+    val row = io.py & "b11".U
     io.outPixVec(0) := vecScalarAdd(io.inPixVec(0), kernel(row)(0))
     io.outPixVec(1) := vecScalarAdd(io.inPixVec(1), kernel(row)(1))
     io.outPixVec(2) := vecScalarAdd(io.inPixVec(2), kernel(row)(2))
