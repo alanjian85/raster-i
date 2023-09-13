@@ -10,8 +10,10 @@ class Rasterizer extends Module {
     val ay = Input(UInt())
     val bx = Input(UInt())
     val by = Input(UInt())
+    val bz = Input(UInt())
     val cx = Input(UInt())
     val cy = Input(UInt())
+    val cz = Input(UInt())
     val px = Input(UInt())
     val py = Input(UInt())
     val visible = Output(Bool())
@@ -24,7 +26,7 @@ class Rasterizer extends Module {
   val abx = io.bx.zext - io.ax.zext
   val aby = io.by.zext - io.ay.zext
   val acx = io.cx.zext - io.ax.zext
-  val acy = io.cy.zext - io.ay.zext 
+  val acy = io.cy.zext - io.ay.zext
   val sa = abx * acy - aby * acx
 
   val apx = io.px.zext - io.ax.zext
@@ -37,8 +39,14 @@ class Rasterizer extends Module {
   val w = Mux(sa >= 0.S, sw, -sw)
   val u = a - v - w
   io.visible := (u >= 0.S) && (v >= 0.S) && (w >= 0.S) && (a =/= 0.S)
+
   io.u := u.asUInt
   io.v := v.asUInt
   io.w := w.asUInt
   io.a := a.asUInt
+
+  io.u := u.asUInt >> 1.U
+  io.v := v.asUInt * io.bz >> 10.U
+  io.w := w.asUInt * io.cz >> 10.U
+  io.a := io.u + io.v + io.w
 }

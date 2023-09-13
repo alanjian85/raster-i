@@ -11,8 +11,10 @@ class Render extends Module {
 
     val xReg = RegInit(0.U(log2Up(Screen.width).W))
     val yReg = RegInit(0.U(log2Up(Screen.height).W))
+    val frameAngleReg = RegInit(0.U(log2Up(360).W))
     
     val vertShader = Module(new VertShader)
+    vertShader.io.angle := frameAngleReg
 
     val pixVec = Wire(Vec(4, UInt(32.W)))
     for (i <- 0 until 4) {
@@ -21,8 +23,10 @@ class Render extends Module {
       rasterizer.io.ay := RegNext(vertShader.io.ay)
       rasterizer.io.bx := RegNext(vertShader.io.bx)
       rasterizer.io.by := RegNext(vertShader.io.by)
+      rasterizer.io.bz := RegNext(vertShader.io.bz)
       rasterizer.io.cx := RegNext(vertShader.io.cx)
       rasterizer.io.cy := RegNext(vertShader.io.cy)
+      rasterizer.io.cz := RegNext(vertShader.io.cz)
       rasterizer.io.px := xReg | i.U
       rasterizer.io.py := yReg
 
@@ -46,6 +50,17 @@ class Render extends Module {
     fbWriter.io.req.bits.y := yReg
     fbWriter.io.req.bits.pixVec := RegNext(ditherer.io.outPixVec)
     io.axi <> fbWriter.io.axi
+
+    val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
+    val angleReg = RegInit(0.U(log2Up(360).W))
+    cntReg := cntReg + 1.U
+    when (cntReg === 1388888.U) {
+      cntReg := 0.U
+      angleReg := angleReg + 1.U
+      when (angleReg === 359.U) {
+        angleReg := 0.U
+      }
+    }
 
     object State extends ChiselEnum {
       val vertShading, rasterizing, fragShading, dithering, writing = Value
@@ -76,6 +91,7 @@ class Render extends Module {
             yReg := yReg + 1.U
             when (yReg === (Screen.height - 1).U) {
               yReg := 0.U
+              frameAngleReg := angleReg
             }
           }
         }
