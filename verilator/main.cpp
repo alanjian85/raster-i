@@ -2,8 +2,16 @@
 // SPDX-License-Identifier: MIT
 
 #include <memory>
+#include <iostream>
 #include <SDL2/SDL.h>
 #include "VTrinitySdl.h"
+
+uint32_t filter(uint32_t x) {
+	return (x & 0x000000f0) << 24 |
+	       (x & 0x0000f000) << 8  |
+	       (x & 0x00f00000) >> 8  |
+	       (x & 0xf0000000) >> 24;
+}
 
 int main() {
     auto trinity = std::make_unique<VTrinitySdl>();
@@ -13,8 +21,8 @@ int main() {
         "Project Trinity",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        800,
-        600,
+        1024,
+        768,
         0
     );
     SDL_Renderer *renderer = SDL_CreateRenderer(
@@ -26,13 +34,16 @@ int main() {
         renderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
-        800,
-        600
+        1024,
+        768
     );
-    uint32_t framebuffer[800 * 600];
+    uint32_t framebuffer[1024 * 768];
 
     trinity->reset = 1;
     trinity->clock = 0;
+    trinity->io_angle = 0;
+    trinity->io_x = 0;
+    trinity->io_y = 0;
     trinity->eval();
     trinity->clock = 1;
     trinity->eval();
@@ -40,34 +51,52 @@ int main() {
     trinity->clock = 0;
     trinity->eval();
 
+    for (int i = 0; i < 6; ++i) {
+    	trinity->clock = 1;
+	trinity->eval();
+	trinity->clock = 0;
+	trinity->eval();
+	trinity->io_x++;
+    }
+
     bool quit = false;
+    int x = 0, y = 0;
     while (!quit) {
-        trinity->clock = 1;
-        trinity->eval();
-        trinity->clock = 0;
-        trinity->eval();
+	trinity->clock = 1;
+	trinity->eval();
+	trinity->clock = 0;
+	trinity->eval();
+	if (trinity->io_x++ == 1023) {
+	    trinity->io_x = 0;
+	    if (trinity->io_y++ == 767)
+	        trinity->io_y = 0;
+	}
+	framebuffer[y * 1024 + x] = filter(trinity->io_pix);
+	if (x++ == 1023) {
+	    x = 0;
+	    if (y++ == 767) {
+                y = 0;
+		float mul = SDL_GetTicks() / (13.0f * 360);
+ 		trinity->io_angle = (mul - (int) mul) * 360;
+	    } else {
+		continue;
+	    }
+	} else {
+	    continue;
+	}
 
-        if (trinity->io_active) {
-            uint8_t r = trinity->io_pix_r | trinity->io_pix_r << 4;
-            uint8_t g = trinity->io_pix_g | trinity->io_pix_g << 4;
-            uint8_t b = trinity->io_pix_b | trinity->io_pix_b << 4;
-            framebuffer[trinity->io_pos_y * 800 + trinity->io_pos_x] = r << 24 | g << 16 | b << 8 | 0xff;
+        SDL_Event event;
+        SDL_PollEvent(&event);
+        if (event.type == SDL_QUIT) {
+            quit = true;
+            continue;
         }
 
-        if (trinity->io_pos_x == 0 && trinity->io_pos_y == 600) {
-            SDL_Event event;
-            SDL_PollEvent(&event);
-            if (event.type == SDL_QUIT) {
-                quit = true;
-                continue;
-            }
-
-            SDL_UpdateTexture(texture, nullptr, framebuffer, 800 * 4);
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-            SDL_RenderPresent(renderer);
-        }
+        SDL_UpdateTexture(texture, nullptr, framebuffer, 1024 * 4);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+        SDL_RenderPresent(renderer);
     }
 
     SDL_DestroyTexture(texture);

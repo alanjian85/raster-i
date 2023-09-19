@@ -1,12 +1,12 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xE210710A25D92AB7",
+      "boundary_crc": "0xF88C0B4C36E008F1",
       "device": "xc7a100tcsg324-1",
       "name": "ddr_ctrl",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
-      "tool_version": "2023.1.1",
+      "tool_version": "2023.1",
       "validated": "true"
     },
     "design_tree": {
@@ -25,7 +25,8 @@
       "mig_7series_0": "",
       "proc_sys_reset_0": "",
       "clk_wiz_0": "",
-      "proc_sys_reset_1": ""
+      "proc_sys_reset_1": "",
+      "ila_0": ""
     },
     "interface_ports": {
       "ddr3": {
@@ -376,6 +377,30 @@
             "direction": "I",
             "left": "3",
             "right": "0"
+          },
+          "ARREADY": {
+            "physical_name": "render_axi_arready",
+            "direction": "O"
+          },
+          "RDATA": {
+            "physical_name": "render_axi_rdata",
+            "direction": "O",
+            "left": "127",
+            "right": "0"
+          },
+          "RLAST": {
+            "physical_name": "render_axi_rlast",
+            "direction": "O"
+          },
+          "RRESP": {
+            "physical_name": "render_axi_rresp",
+            "direction": "O",
+            "left": "1",
+            "right": "0"
+          },
+          "RVALID": {
+            "physical_name": "render_axi_rvalid",
+            "direction": "O"
           }
         }
       },
@@ -712,7 +737,7 @@
     "components": {
       "axi_interconnect_0": {
         "vlnv": "xilinx.com:ip:axi_interconnect:2.1",
-        "xci_path": "ip\\ddr_ctrl_axi_interconnect_0_0\\ddr_ctrl_axi_interconnect_0_0.xci",
+        "xci_path": "ip/ddr_ctrl_axi_interconnect_0_0/ddr_ctrl_axi_interconnect_0_0.xci",
         "inst_hier_path": "axi_interconnect_0",
         "xci_name": "ddr_ctrl_axi_interconnect_0_0",
         "parameters": {
@@ -807,7 +832,7 @@
           "xbar": {
             "vlnv": "xilinx.com:ip:axi_crossbar:2.1",
             "xci_name": "ddr_ctrl_xbar_0",
-            "xci_path": "ip\\ddr_ctrl_xbar_0\\ddr_ctrl_xbar_0.xci",
+            "xci_path": "ip/ddr_ctrl_xbar_0/ddr_ctrl_xbar_0.xci",
             "inst_hier_path": "axi_interconnect_0/xbar",
             "parameters": {
               "NUM_MI": {
@@ -888,7 +913,7 @@
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
                 "xci_name": "ddr_ctrl_auto_cc_1",
-                "xci_path": "ip\\ddr_ctrl_auto_cc_1\\ddr_ctrl_auto_cc_1.xci",
+                "xci_path": "ip/ddr_ctrl_auto_cc_1/ddr_ctrl_auto_cc_1.xci",
                 "inst_hier_path": "axi_interconnect_0/s00_couplers/auto_cc",
                 "interface_ports": {
                   "S_AXI": {
@@ -993,7 +1018,7 @@
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
                 "xci_name": "ddr_ctrl_auto_cc_2",
-                "xci_path": "ip\\ddr_ctrl_auto_cc_2\\ddr_ctrl_auto_cc_2.xci",
+                "xci_path": "ip/ddr_ctrl_auto_cc_2/ddr_ctrl_auto_cc_2.xci",
                 "inst_hier_path": "axi_interconnect_0/s01_couplers/auto_cc",
                 "interface_ports": {
                   "S_AXI": {
@@ -1098,7 +1123,7 @@
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
                 "xci_name": "ddr_ctrl_auto_cc_0",
-                "xci_path": "ip\\ddr_ctrl_auto_cc_0\\ddr_ctrl_auto_cc_0.xci",
+                "xci_path": "ip/ddr_ctrl_auto_cc_0/ddr_ctrl_auto_cc_0.xci",
                 "inst_hier_path": "axi_interconnect_0/m00_couplers/auto_cc",
                 "interface_ports": {
                   "S_AXI": {
@@ -1251,7 +1276,7 @@
       "mig_7series_0": {
         "vlnv": "xilinx.com:ip:mig_7series:4.2",
         "xci_name": "ddr_ctrl_mig_7series_0_0",
-        "xci_path": "ip\\ddr_ctrl_mig_7series_0_0\\ddr_ctrl_mig_7series_0_0.xci",
+        "xci_path": "ip/ddr_ctrl_mig_7series_0_0/ddr_ctrl_mig_7series_0_0.xci",
         "inst_hier_path": "mig_7series_0",
         "parameters": {
           "BOARD_MIG_PARAM": {
@@ -1268,13 +1293,13 @@
       "proc_sys_reset_0": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
         "xci_name": "ddr_ctrl_proc_sys_reset_0_0",
-        "xci_path": "ip\\ddr_ctrl_proc_sys_reset_0_0\\ddr_ctrl_proc_sys_reset_0_0.xci",
+        "xci_path": "ip/ddr_ctrl_proc_sys_reset_0_0/ddr_ctrl_proc_sys_reset_0_0.xci",
         "inst_hier_path": "proc_sys_reset_0"
       },
       "clk_wiz_0": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
         "xci_name": "ddr_ctrl_clk_wiz_0_0",
-        "xci_path": "ip\\ddr_ctrl_clk_wiz_0_0\\ddr_ctrl_clk_wiz_0_0.xci",
+        "xci_path": "ip/ddr_ctrl_clk_wiz_0_0/ddr_ctrl_clk_wiz_0_0.xci",
         "inst_hier_path": "clk_wiz_0",
         "parameters": {
           "CLKOUT1_DRIVES": {
@@ -1348,8 +1373,19 @@
       "proc_sys_reset_1": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
         "xci_name": "ddr_ctrl_proc_sys_reset_1_0",
-        "xci_path": "ip\\ddr_ctrl_proc_sys_reset_1_0\\ddr_ctrl_proc_sys_reset_1_0.xci",
+        "xci_path": "ip/ddr_ctrl_proc_sys_reset_1_0/ddr_ctrl_proc_sys_reset_1_0.xci",
         "inst_hier_path": "proc_sys_reset_1"
+      },
+      "ila_0": {
+        "vlnv": "xilinx.com:ip:ila:6.2",
+        "xci_name": "ddr_ctrl_ila_0_0",
+        "xci_path": "ip/ddr_ctrl_ila_0_0/ddr_ctrl_ila_0_0.xci",
+        "inst_hier_path": "ila_0",
+        "parameters": {
+          "C_DATA_DEPTH": {
+            "value": "4096"
+          }
+        }
       }
     },
     "interface_nets": {
@@ -1374,7 +1410,8 @@
       "render_axi_1": {
         "interface_ports": [
           "render_axi",
-          "axi_interconnect_0/S00_AXI"
+          "axi_interconnect_0/S00_AXI",
+          "ila_0/SLOT_0_AXI"
         ]
       }
     },
@@ -1446,7 +1483,8 @@
       "render_aclk_1": {
         "ports": [
           "render_aclk",
-          "axi_interconnect_0/S00_ACLK"
+          "axi_interconnect_0/S00_ACLK",
+          "ila_0/clk"
         ]
       },
       "render_aresetn_1": {

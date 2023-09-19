@@ -6,7 +6,9 @@ import chisel3.util._
 
 class VertShader extends Module {
   val io = IO(new Bundle {
-    val angle = Input(UInt(9.W))
+    val cos  = Input(SInt(12.W))
+    val inBz = Input(UInt(11.W))
+    val inCz = Input(UInt(11.W))
     val ax = Output(UInt())
     val ay = Output(UInt())
     val bx = Output(UInt())
@@ -17,21 +19,16 @@ class VertShader extends Module {
     val cz = Output(UInt())
   })
 
-  val cosRom = Module(new CosRom)
-  val bzRom = Module(new BzRom)
-  val czRom = Module(new CzRom)
-  cosRom.io.addr := io.angle
-  bzRom.io.addr := io.angle
-  czRom.io.addr := io.angle
-
   io.ax := 512.U
   io.ay := 192.U
 
-  io.bx := (512.S - ((bzRom.io.data.zext * cosRom.io.data >> 10) * 222.S >> 10)).asUInt
-  io.by := 384.U +& (bzRom.io.data * 192.U >> 10)
-  io.bz := bzRom.io.data
+  val bzCosReg = RegNext(io.inBz.zext * io.cos >> 10)
+  io.bx := (512.S - (bzCosReg * 222.S >> 10)).asUInt
+  io.by := RegNext(384.U +& (io.inBz * 192.U >> 10))
+  io.bz := RegNext(io.inBz)
 
-  io.cx := (512.S + ((czRom.io.data.zext * cosRom.io.data >> 10) * 222.S >> 10)).asUInt
-  io.cy := 384.U +& (czRom.io.data * 192.U >> 10)
-  io.cz := czRom.io.data
+  val czCosReg = RegNext(io.inCz.zext * io.cos >> 10)
+  io.cx := (512.S + (czCosReg * 222.S >> 10)).asUInt
+  io.cy := RegNext(384.U +& (io.inCz * 192.U >> 10))
+  io.cz := RegNext(io.inCz)
 }
