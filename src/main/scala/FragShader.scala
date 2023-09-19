@@ -14,11 +14,13 @@ class FragShader extends Module {
     val pix = Output(UInt(32.W))
   })
 
-  val r = Mux(io.visible, (io.u * 256.U / io.a)(7, 0), "h00".U)
-  val g = Mux(io.visible, (io.v * 256.U / io.a)(7, 0), "h00".U)
-  val b = Mux(io.visible, (io.w * 256.U / io.a)(7, 0), "h00".U)
-//  val r = Mux(io.visible, "hff".U, "h00".U)
-//  val g = Mux(io.visible, "h00".U, "h00".U)
-//  val b = Mux(io.visible, "h00".U, "h00".U)
+  //def div
+
+  //val r = Mux(io.visible, div(io.u * 255.U, io.a), "h00".U)
+  //val g = Mux(io.visible, div(io.v * 255.U, io.a), "h00".U)
+  //val b = Mux(io.visible, div(io.w * 255.U, io.a), "h00".U)
+  val r = Mux(io.visible, "hff".U(8.W), "h00".U)
+  val g = Mux(io.visible, "h00".U(8.W), "h00".U)
+  val b = Mux(io.visible, "h00".U(8.W), "h00".U)
   io.pix := "hff".U ## b ## g ## r
 }

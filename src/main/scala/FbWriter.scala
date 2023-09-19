@@ -59,10 +59,10 @@ class FbWriter extends Module {
                     }
                 }
                 xReg := xReg + 1.U
-            }
-            when (xReg === (Screen.width - 1).U) {
-                xReg := 0.U
-                stateReg := addrWriting
+                when (xReg === (Screen.width - 1).U) {
+                    xReg := 0.U
+                    stateReg := addrWriting
+                }
             }
         }
         is(addrWriting) {
@@ -75,15 +75,16 @@ class FbWriter extends Module {
             io.axi.data.valid := true.B
             when (io.axi.data.ready) {
                 wrIdxReg := wrIdxReg + 1.U
+                when (wrIdxReg === 255.U) {
+                    wrIdxReg := 0.U
+                    stateReg := avail
+                    yReg := yReg + 1.U
+                    when (yReg === (Screen.height - 1).U) {
+                        yReg := 0.U
+                    }
+                }
             }
-            when (wrIdxReg === 255.U) {
-                wrIdxReg := 0.U
-                stateReg := avail
-                yReg := yReg + 1.U
-            }
-            when (yReg === (Screen.height - 1).U) {
-                yReg := 0.U
-            }
+
         }
     }
 }

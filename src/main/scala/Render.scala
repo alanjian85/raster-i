@@ -77,6 +77,7 @@ class Render extends Module {
         yReg := yReg + 1.U
         when (yReg === (Screen.height - 1).U) {
           yReg := 0.U
+          frameAngleReg := angleReg
         }
       }
       when (flushCntReg === 6.U) {
@@ -91,6 +92,7 @@ class Render extends Module {
           yReg := yReg + 1.U
           when (yReg === (Screen.height - 1).U) {
             yReg := 0.U
+            frameAngleReg := angleReg
           }
         }
       } .otherwise {

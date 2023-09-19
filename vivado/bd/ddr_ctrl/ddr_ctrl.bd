@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xF88C0B4C36E008F1",
+      "boundary_crc": "0xE210710A25D92AB7",
       "device": "xc7a100tcsg324-1",
       "name": "ddr_ctrl",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -25,8 +25,7 @@
       "mig_7series_0": "",
       "proc_sys_reset_0": "",
       "clk_wiz_0": "",
-      "proc_sys_reset_1": "",
-      "ila_0": ""
+      "proc_sys_reset_1": ""
     },
     "interface_ports": {
       "ddr3": {
@@ -377,30 +376,6 @@
             "direction": "I",
             "left": "3",
             "right": "0"
-          },
-          "ARREADY": {
-            "physical_name": "render_axi_arready",
-            "direction": "O"
-          },
-          "RDATA": {
-            "physical_name": "render_axi_rdata",
-            "direction": "O",
-            "left": "127",
-            "right": "0"
-          },
-          "RLAST": {
-            "physical_name": "render_axi_rlast",
-            "direction": "O"
-          },
-          "RRESP": {
-            "physical_name": "render_axi_rresp",
-            "direction": "O",
-            "left": "1",
-            "right": "0"
-          },
-          "RVALID": {
-            "physical_name": "render_axi_rvalid",
-            "direction": "O"
           }
         }
       },
@@ -1375,17 +1350,6 @@
         "xci_name": "ddr_ctrl_proc_sys_reset_1_0",
         "xci_path": "ip/ddr_ctrl_proc_sys_reset_1_0/ddr_ctrl_proc_sys_reset_1_0.xci",
         "inst_hier_path": "proc_sys_reset_1"
-      },
-      "ila_0": {
-        "vlnv": "xilinx.com:ip:ila:6.2",
-        "xci_name": "ddr_ctrl_ila_0_0",
-        "xci_path": "ip/ddr_ctrl_ila_0_0/ddr_ctrl_ila_0_0.xci",
-        "inst_hier_path": "ila_0",
-        "parameters": {
-          "C_DATA_DEPTH": {
-            "value": "4096"
-          }
-        }
       }
     },
     "interface_nets": {
@@ -1410,8 +1374,7 @@
       "render_axi_1": {
         "interface_ports": [
           "render_axi",
-          "axi_interconnect_0/S00_AXI",
-          "ila_0/SLOT_0_AXI"
+          "axi_interconnect_0/S00_AXI"
         ]
       }
     },
@@ -1483,8 +1446,7 @@
       "render_aclk_1": {
         "ports": [
           "render_aclk",
-          "axi_interconnect_0/S00_ACLK",
-          "ila_0/clk"
+          "axi_interconnect_0/S00_ACLK"
         ]
       },
       "render_aresetn_1": {
