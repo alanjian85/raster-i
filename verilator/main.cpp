@@ -51,7 +51,7 @@ int main() {
     trinity->clock = 0;
     trinity->eval();
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 14; ++i) {
     	trinity->clock = 1;
 	trinity->eval();
 	trinity->clock = 0;
