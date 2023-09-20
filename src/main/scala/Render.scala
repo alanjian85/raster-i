@@ -51,8 +51,8 @@ class Render extends Module {
       pyReg(i) := (if (i == 0) rasterizer.io.py else pyReg(i - 1))
     }
     val ditherer = Module(new Ditherer)
-    ditherer.io.px := RegNext(RegNext(RegNext(pxReg(7))))
-    ditherer.io.py := RegNext(RegNext(RegNext(pyReg(7))))
+    ditherer.io.px := RegNext(RegNext(RegNext(RegNext(pxReg(7)))))
+    ditherer.io.py := RegNext(RegNext(RegNext(RegNext(pyReg(7)))))
     ditherer.io.inPix := RegNext(fragShader.io.pix)
 
     val fbWriter = Module(new FbWriter)
@@ -73,7 +73,7 @@ class Render extends Module {
     }
 
     val flushReg    = RegInit(true.B)
-    val flushCntReg = RegInit(0.U(unsignedBitLength(14).W))
+    val flushCntReg = RegInit(0.U(unsignedBitLength(15).W))
     when (flushReg) {
       fbWriter.io.req.valid := false.B
       flushCntReg := flushCntReg + 1.U
@@ -86,7 +86,7 @@ class Render extends Module {
           frameAngleReg := angleReg
         }
       }
-      when (flushCntReg === 14.U) {
+      when (flushCntReg === 15.U) {
         flushReg := false.B
       }
     } .otherwise {

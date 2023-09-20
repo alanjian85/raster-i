@@ -27,19 +27,18 @@ class Rasterizer extends Module {
   val aby = io.by.zext - io.ay.zext
   val acx = io.cx.zext - io.ax.zext
   val acy = io.cy.zext - io.ay.zext
-  val sa = RegNext(abx * acy - aby * acx)
-
   val apx = io.px.zext - io.ax.zext
   val apy = io.py.zext - io.ay.zext
   val sv = RegNext(apx * acy - apy * acx)
   val sw = RegNext(abx * apy - aby * apx)
+  val sa = RegNext(abx * acy - aby * acx)
 
-  val a = sa.abs
-  val v = Mux(sa >= 0.S, sv, -sv)
-  val w = Mux(sa >= 0.S, sw, -sw)
-  val u = a - v - w
+  val a = RegNext(sa.abs)
+  val v = RegNext(Mux(sa >= 0.S, sv, -sv))
+  val w = RegNext(Mux(sa >= 0.S, sw, -sw))
+  val u = RegNext(a - v - w)
+
   io.visible := (u >= 0.S) && (v >= 0.S) && (w >= 0.S) && (a =/= 0.S)
-
   io.u := u.asUInt >> 1.U
   io.v := v.asUInt * io.bz >> 10.U
   io.w := w.asUInt * io.cz >> 10.U

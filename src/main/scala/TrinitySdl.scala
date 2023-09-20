@@ -51,8 +51,8 @@ class TrinitySdl extends Module {
     pyReg(i) := (if (i == 0) rasterizer.io.py else pyReg(i - 1))
   }
   val ditherer = Module(new Ditherer)
-  ditherer.io.px := RegNext(RegNext(RegNext(pxReg(7))))
-  ditherer.io.py := RegNext(RegNext(RegNext(pyReg(7))))
+  ditherer.io.px := RegNext(RegNext(RegNext(RegNext(pxReg(7)))))
+  ditherer.io.py := RegNext(RegNext(RegNext(RegNext(pyReg(7)))))
   ditherer.io.inPix := RegNext(fragShader.io.pix)
 
   io.pix := ditherer.io.outPix
