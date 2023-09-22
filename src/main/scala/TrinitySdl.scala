@@ -38,7 +38,7 @@ class TrinitySdl extends Module {
   rasterizer.io.py := RegNext(RegNext(RegNext(io.y)))
 
   val fragShader = Module(new FragShader)
-  fragShader.io.visible := RegNext(rasterizer.io.visible)
+  fragShader.io.inVis := RegNext(rasterizer.io.visible)
   fragShader.io.u := RegNext(rasterizer.io.u) 
   fragShader.io.v := RegNext(rasterizer.io.v)
   fragShader.io.w := RegNext(rasterizer.io.w)

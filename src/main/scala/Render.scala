@@ -38,7 +38,7 @@ class Render extends Module {
     rasterizer.io.py := RegNext(RegNext(RegNext(yReg)))
 
     val fragShader = Module(new FragShader)
-    fragShader.io.visible := RegNext(rasterizer.io.visible)
+    fragShader.io.inVis := RegNext(rasterizer.io.visible)
     fragShader.io.u       := RegNext(rasterizer.io.u)
     fragShader.io.v       := RegNext(rasterizer.io.v)
     fragShader.io.w       := RegNext(rasterizer.io.w)
@@ -56,7 +56,8 @@ class Render extends Module {
     ditherer.io.inPix := RegNext(fragShader.io.pix)
 
     val fbWriter = Module(new FbWriter)
-    fbWriter.io.req.bits := RegNext(ditherer.io.outPix)
+    fbWriter.io.req.bits.pix := RegNext(ditherer.io.outPix)
+    fbWriter.io.req.bits.vis := RegNext(RegNext(fragShader.io.outVis))
     val reqXReg = RegNext(ditherer.io.px)
     val reqYReg = RegNext(ditherer.io.py)
     io.axi <> fbWriter.io.axi
