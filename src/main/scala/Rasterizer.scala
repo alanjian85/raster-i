@@ -36,7 +36,7 @@ class Rasterizer extends Module {
   val a = RegNext(sa.abs)
   val v = RegNext(Mux(sa >= 0.S, sv, -sv))
   val w = RegNext(Mux(sa >= 0.S, sw, -sw))
-  val u = RegNext(a - v - w)
+  val u = a - v - w
 
   io.visible := (u >= 0.S) && (v >= 0.S) && (w >= 0.S) && (a =/= 0.S)
   io.u := u.asUInt >> 1.U
