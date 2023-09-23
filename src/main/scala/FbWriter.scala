@@ -5,8 +5,8 @@ import chisel3._
 import chisel3.util._
 
 class FbWrReq extends Bundle {
-  val pix = UInt(32.W)
-  val vis = Bool()
+  val pix = Vec(4, UInt(32.W))
+  val vis = Vec(4, Bool())
 }
 
 class FbWriter extends Module {
@@ -15,9 +15,9 @@ class FbWriter extends Module {
         val axi = new WrAxi(28, 128)
     })
 
-    val pixCache = Seq.fill(4)(Mem(256, UInt(32.W)))
-    val visCache = Seq.fill(4)(Mem(256, Bool()))
-    val xReg  = RegInit(0.U(log2Up(Screen.width).W))
+    val pixCache = Mem(256, Vec(4, UInt(32.W)))
+    val visCache = Mem(256, Vec(4, Bool()))
+    val xReg  = RegInit(0.U(log2Up(Screen.width / 4).W))
     val yReg  = RegInit(0.U(log2Up(Screen.height).W))
 
     io.req.ready := false.B
@@ -30,16 +30,13 @@ class FbWriter extends Module {
     io.axi.addr.valid      := false.B 
 
     val wrIdxReg  = RegInit(0.U(8.W))
-    io.axi.data.bits.data := pixCache(3).read(wrIdxReg) ##
-                             pixCache(2).read(wrIdxReg) ##
-                             pixCache(1).read(wrIdxReg) ##
-                             pixCache(0).read(wrIdxReg)
-    io.axi.data.bits.strb := Fill(4, visCache(3).read(wrIdxReg)) ##
-                             Fill(4, visCache(2).read(wrIdxReg)) ##
-                             Fill(4, visCache(1).read(wrIdxReg)) ##
-                             Fill(4, visCache(0).read(wrIdxReg))
+    io.axi.data.bits.data := pixCache.read(wrIdxReg).reverse.reduce(_ ## _)
+    io.axi.data.bits.strb := visCache.read(wrIdxReg)
+                                     .map(_.asUInt)
+                                     .reverse
+                                     .reduce(Fill(4, _) ## Fill(4, _)) 
     io.axi.data.bits.last := wrIdxReg === 255.U
-    io.axi.data.valid     := false.B 
+    io.axi.data.valid     := false.B
 
     io.axi.resp.ready := true.B
 
@@ -53,26 +50,10 @@ class FbWriter extends Module {
         is(avail) {
             io.req.ready := true.B
             when (io.req.valid) {
-                switch (xReg(1, 0)) {
-                    is(0.U) {
-                        pixCache(0).write(xReg >> 2.U, io.req.bits.pix)
-                        visCache(0).write(xReg >> 2.U, io.req.bits.vis)
-                    }
-                    is(1.U) {
-                        pixCache(1).write(xReg >> 2.U, io.req.bits.pix)
-                        visCache(1).write(xReg >> 2.U, io.req.bits.vis)
-                    }
-                    is(2.U) {
-                        pixCache(2).write(xReg >> 2.U, io.req.bits.pix)
-                        visCache(2).write(xReg >> 2.U, io.req.bits.vis)
-                    }
-                    is(3.U) {
-                        pixCache(3).write(xReg >> 2.U, io.req.bits.pix)
-                        visCache(3).write(xReg >> 2.U, io.req.bits.vis)
-                    }
-                }
+                pixCache.write(xReg, io.req.bits.pix)
+                visCache.write(xReg, io.req.bits.vis)
                 xReg := xReg + 1.U
-                when (xReg === (Screen.width - 1).U) {
+                when (xReg === ((Screen.width / 4) - 1).U) {
                     xReg := 0.U
                     stateReg := addrWriting
                 }

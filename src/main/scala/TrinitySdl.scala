@@ -10,7 +10,7 @@ class TrinitySdl extends Module {
     val angle = Input(UInt(9.W))
     val x = Input(UInt(log2Up(Screen.width).W))
     val y = Input(UInt(log2Up(Screen.height).W))
-    val pix = Output(UInt(32.W))
+    val pix = Output(Vec(4, UInt(32.W)))
   })
 
   val cosRom = SyncReadMem(360, SInt(12.W))
@@ -25,35 +25,50 @@ class TrinitySdl extends Module {
   vertShader.io.inBz := bzRom.read(io.angle)
   vertShader.io.inCz := czRom.read(io.angle)
 
-  val rasterizer = Module(new Rasterizer) 
-  rasterizer.io.ax := RegNext(vertShader.io.ax)
-  rasterizer.io.ay := RegNext(vertShader.io.ay)
-  rasterizer.io.bx := RegNext(vertShader.io.bx)
-  rasterizer.io.by := RegNext(vertShader.io.by)
-  rasterizer.io.bz := RegNext(vertShader.io.bz)
-  rasterizer.io.cx := RegNext(vertShader.io.cx)
-  rasterizer.io.cy := RegNext(vertShader.io.cy)
-  rasterizer.io.cz := RegNext(vertShader.io.cz)
-  rasterizer.io.px := RegNext(RegNext(RegNext(io.x)))
-  rasterizer.io.py := RegNext(RegNext(RegNext(io.y)))
+  val rastAxReg = RegNext(vertShader.io.ax)
+  val rastAyReg = RegNext(vertShader.io.ay)
+  val rastBxReg = RegNext(vertShader.io.bx)
+  val rastByReg = RegNext(vertShader.io.by)
+  val rastBzReg = RegNext(vertShader.io.bz)
+  val rastCxReg = RegNext(vertShader.io.cx)
+  val rastCyReg = RegNext(vertShader.io.cy)
+  val rastCzReg = RegNext(vertShader.io.cz)
+  val rastPxReg = RegNext(RegNext(RegNext(io.x)))
+  val rastPyReg = RegNext(RegNext(RegNext(io.y)))
 
-  val fragShader = Module(new FragShader)
-  fragShader.io.inVis := RegNext(rasterizer.io.visible)
-  fragShader.io.u := RegNext(rasterizer.io.u) 
-  fragShader.io.v := RegNext(rasterizer.io.v)
-  fragShader.io.w := RegNext(rasterizer.io.w)
-  fragShader.io.a := RegNext(rasterizer.io.a)
+  val pix = Wire(Vec(4, UInt(32.W)))
+  val vis = Wire(Vec(4, Bool()))
+  for (i <- 0 until 4) {
+    val rasterizer = Module(new Rasterizer)
+    rasterizer.io.ax := rastAxReg
+    rasterizer.io.ay := rastAyReg
+    rasterizer.io.bx := rastBxReg
+    rasterizer.io.by := rastByReg
+    rasterizer.io.bz := rastBzReg
+    rasterizer.io.cx := rastCxReg
+    rasterizer.io.cy := rastCyReg
+    rasterizer.io.cz := rastCzReg
+    rasterizer.io.px := rastPxReg
+    rasterizer.io.py := rastPyReg
 
-  val pxReg = Reg(Vec(8, UInt(log2Up(Screen.width).W)))
-  val pyReg = Reg(Vec(8, UInt(log2Up(Screen.height).W)))
-  for (i <- 0 until 8) {
-    pxReg(i) := (if (i == 0) rasterizer.io.px else pxReg(i - 1))
-    pyReg(i) := (if (i == 0) rasterizer.io.py else pyReg(i - 1))
+    val fragShader = Module(new FragShader)
+    fragShader.io.inVis := RegNext(rasterizer.io.visible)
+    fragShader.io.u     := RegNext(rasterizer.io.u)
+    fragShader.io.v     := RegNext(rasterizer.io.v)
+    fragShader.io.w     := RegNext(rasterizer.io.w)
+    fragShader.io.a     := RegNext(rasterizer.io.a)
+    pix(i) := fragShader.io.pix
+    vis(i) := fragShader.io.outVis
+  }
+
+  val pyReg = Reg(Vec(12, UInt(log2Up(Screen.height).W)))
+  pyReg(0) := rastPyReg
+  for (i <- 1 until 12) {
+    pyReg(i) := pyReg(i - 1)
   }
   val ditherer = Module(new Ditherer)
-  ditherer.io.px := RegNext(RegNext(RegNext(RegNext(pxReg(7)))))
-  ditherer.io.py := RegNext(RegNext(RegNext(RegNext(pyReg(7)))))
-  ditherer.io.inPix := RegNext(fragShader.io.pix)
+  ditherer.io.py := pyReg(11)
+  ditherer.io.inPix := RegNext(pix)
 
   io.pix := ditherer.io.outPix
 }
