@@ -16,7 +16,7 @@ class FragShader extends Module {
     val outVis = Output(Bool())
   })
 
-  def div(dividend: UInt, divisor: UInt) = {
+  def div(visible: Bool, dividend: UInt, divisor: UInt) = {
     val dividendReg = Reg(Vec(7, UInt(8.W)))
     val divisorReg  = Reg(Vec(7, UInt(barLen.W)))
     val remReg = Reg(Vec(8, UInt((barLen + 8).W)))
@@ -41,13 +41,8 @@ class FragShader extends Module {
         remReg(i) := rem
       }
     }
-    quoReg(0)
+    Mux(visible, quoReg(0), "h00".U)
   }
-
-  val r = div(io.u * 255.U, io.a)
-  val g = div(io.v * 255.U, io.a)
-  val b = div(io.w * 255.U, io.a)
-  io.pix := "hff".U ## b ## g ## r
 
   val visReg = Reg(Vec(8, Bool()))
   visReg(0) := io.inVis
@@ -55,4 +50,9 @@ class FragShader extends Module {
     visReg(i) := visReg(i - 1)
   }
   io.outVis := visReg(7)
+
+  val r = div(visReg(7), io.u * 255.U, io.a)
+  val g = div(visReg(7), io.v * 255.U, io.a)
+  val b = div(visReg(7), io.w * 255.U, io.a)
+  io.pix := "hff".U ## b ## g ## r
 }
