@@ -9,6 +9,7 @@ class VgaSignal extends Module {
     val pos = Output(UVec2())
     val hsync = Output(Bool())
     val vsync = Output(Bool())
+    val vblank = Output(Bool())
     val active = Output(Bool())
   })
 
@@ -24,6 +25,7 @@ class VgaSignal extends Module {
   io.pos := posReg
 
   io.hsync := (Screen.hfrontEnd.U <= posReg.x && posReg.x < Screen.hsyncEnd.U) === Screen.polarity.B
-  io.vsync := (Screen.vfrontEnd.U <= posReg.y && posReg.y < Screen.vsyncEnd.U) === Screen.polarity.B
+  io.vsync := io.vblank === Screen.polarity.B
+  io.vblank := Screen.vfrontEnd.U <= posReg.y && posReg.y < Screen.vsyncEnd.U
   io.active := posReg.x < Screen.width.U && posReg.y < Screen.height.U
 }

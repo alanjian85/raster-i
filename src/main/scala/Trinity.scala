@@ -18,13 +18,18 @@ class Trinity extends Module {
   val ddrCtrl = Module(new DdrCtrl)
   io.ddr3 <> ddrCtrl.io.ddr3
 
+  val dispFbIdx = Wire(UInt(1.W))
+  val vblank = Wire(Bool())
+
   val renderSysRst = Module(new ProcSysRst)
   renderSysRst.clock := clkWiz.io.clkRender
   ddrCtrl.io.aclkRender := clkWiz.io.clkRender
   ddrCtrl.io.arstnRender := renderSysRst.io.arstn
   withClockAndReset(clkWiz.io.clkRender, renderSysRst.io.rst) {
     val render = Module(new Render)
+    render.io.vblank := RegNext(RegNext(vblank))
     ddrCtrl.io.axiRender <> render.io.axi
+    dispFbIdx := 1.U - render.io.fbIdx
   }
 
   val displaySysRst = Module(new ProcSysRst)
@@ -33,9 +38,11 @@ class Trinity extends Module {
   ddrCtrl.io.arstnDisplay := displaySysRst.io.arstn
   withClockAndReset(clkWiz.io.clkDisplay, displaySysRst.io.rst) {
     val display = Module(new Display)
+    display.io.fbIdx := RegNext(RegNext(dispFbIdx))
     ddrCtrl.io.axiDisplay <> display.io.axi
     io.pix := display.io.pix
     io.hsync := display.io.hsync
     io.vsync := display.io.vsync
+    vblank := display.io.vblank
   }
 }

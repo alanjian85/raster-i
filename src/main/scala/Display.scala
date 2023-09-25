@@ -6,10 +6,12 @@ import chisel3.util._
 
 class Display extends Module {
     val io = IO(new Bundle {
+        val fbIdx = Input(UInt(1.W))
         val axi = new RdAxi(28, 128)
         val pix = Output(RGB4())
         val hsync = Output(Bool())
         val vsync = Output(Bool())
+        val vblank = Output(Bool()) 
     })
 
     val scanSize = Screen.width >> 2
@@ -44,6 +46,7 @@ class Display extends Module {
     }
     io.hsync := RegNext(vgaSignal.io.hsync)
     io.vsync := RegNext(vgaSignal.io.vsync)
+    io.vblank := RegNext(vgaSignal.io.vblank)
 
     io.axi.addr.bits.id := DontCare
     val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
@@ -60,7 +63,7 @@ class Display extends Module {
     when (rdValidReg && io.axi.addr.ready) {
         rdValidReg := false.B
     }
-    io.axi.addr.bits.addr := lineIdxReg * scanSize.U << 4.U
+    io.axi.addr.bits.addr := (io.fbIdx << 22.U) | (lineIdxReg * scanSize.U << 4.U)
     io.axi.addr.bits.burst := "b01".U
     io.axi.addr.bits.len := (scanSize - 1).U
     io.axi.addr.bits.size := "b100".U

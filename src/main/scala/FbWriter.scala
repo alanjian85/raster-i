@@ -11,6 +11,7 @@ class FbWrReq extends Bundle {
 
 class FbWriter extends Module {
     val io = IO(new Bundle {
+        val fbIdx = Input(UInt(1.W))
         val req = Flipped(Decoupled(new FbWrReq))
         val axi = new WrAxi(28, 128)
     })
@@ -49,7 +50,8 @@ class FbWriter extends Module {
 
     val wrCacheIdx = RegInit(0.U(1.W))
     io.axi.addr.bits.id    := DontCare
-    io.axi.addr.bits.addr  := Screen.width.U * cacheY(wrCacheIdx) << 2.U
+    io.axi.addr.bits.addr  := (io.fbIdx << 22.U) | 
+                              (Screen.width.U * cacheY(wrCacheIdx) << 2.U)
     io.axi.addr.bits.len   := 255.U
     io.axi.addr.bits.size  := "b100".U
     io.axi.addr.bits.burst := "b01".U
