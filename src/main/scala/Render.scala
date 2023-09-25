@@ -78,16 +78,22 @@ class Render extends Module {
     fbWriter.io.req.bits.vis := RegNext(RegNext(vis))
     val reqXReg = RegNext(pxReg(11))
     val reqYReg = RegNext(ditherer.io.py)
+    val angleReg = Reg(Vec(16, UInt(9.W)))
+    angleReg(0) := frameAngleReg
+    for (i <- 1 until 16) {
+      angleReg(i) := angleReg(i - 1)
+    }
+    val reqAngleReg = angleReg(15)
     io.axi <> fbWriter.io.axi
 
-    val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
-    val angleReg = RegInit(0.U(log2Up(360).W))
+    val cntReg = RegInit(0.U(unsignedBitLength(138888).W))
+    val currAngleReg = RegInit(0.U(log2Up(360).W))
     cntReg := cntReg + 1.U
-    when (cntReg === 1388888.U) {
+    when (cntReg === 138888.U) {
       cntReg := 0.U
-      angleReg := angleReg + 1.U
-      when (angleReg === 359.U) {
-        angleReg := 0.U
+      currAngleReg := currAngleReg + 1.U
+      when (currAngleReg === 359.U) {
+        currAngleReg := 0.U
       }
     }
 
@@ -102,7 +108,7 @@ class Render extends Module {
         yReg := yReg + 1.U
         when (yReg === (Screen.height - 1).U) {
           yReg := 0.U
-          frameAngleReg := angleReg
+          frameAngleReg := currAngleReg
         }
       }
       when (flushCntReg === 15.U) {
@@ -117,7 +123,7 @@ class Render extends Module {
           yReg := yReg + 1.U
           when (yReg === (Screen.height - 1).U) {
             yReg := 0.U
-            frameAngleReg := angleReg
+            frameAngleReg := currAngleReg
           }
         }
       } .otherwise {
@@ -125,6 +131,7 @@ class Render extends Module {
         flushCntReg := 0.U
         xReg := reqXReg
         yReg := reqYReg
+        frameAngleReg := reqAngleReg
       }
     }
 }
