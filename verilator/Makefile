@@ -22,7 +22,7 @@ obj_dir: $(HDL_SRCS) | $(CPP_SRCS)
 	@verilator --exe $(HDL_SRCS) --cc $(CPP_SRCS) -o $(PRODUCT) \
 			   $(VFLAGS) -LDFLAGS $(LDFLAGS)
 
-obj_dir/$(PRODUCT): obj_dir
+obj_dir/$(PRODUCT): $(CPP_SRCS) | obj_dir 
 	@printf " MAKE\tobj_dir\n"
 	@make -C obj_dir -f V$(TOP).mk
 

@@ -28,7 +28,7 @@ int main() {
     SDL_Renderer *renderer = SDL_CreateRenderer(
             window,
             -1,
-            0
+            SDL_RENDERER_PRESENTVSYNC 
             );
     SDL_Texture *texture = SDL_CreateTexture(
             renderer,
@@ -66,7 +66,7 @@ int main() {
         trinity->eval();
         trinity->clock = 0;
         trinity->eval();
-        std::cout << "X: " << int(trinity->io_outX) << " Y: " << int(trinity->io_outY) << '\n'; 
+        //std::cout << "X: " << int(trinity->io_outX) << " Y: " << int(trinity->io_outY) << '\n'; 
         framebuffer[y * 1024 + x * 4 + 0] = filter(trinity->io_pix_0);
         framebuffer[y * 1024 + x * 4 + 1] = filter(trinity->io_pix_1);
         framebuffer[y * 1024 + x * 4 + 2] = filter(trinity->io_pix_2);
