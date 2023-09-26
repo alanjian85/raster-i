@@ -93,10 +93,10 @@ class Render extends Module {
   val reqAngleReg = angleReg(15)
   io.axi <> fbWriter.io.axi
 
-  val cntReg = RegInit(0.U(unsignedBitLength(138888).W))
+  val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
   val currAngleReg = RegInit(0.U(log2Up(360).W))
   cntReg := cntReg + 1.U
-  when (cntReg === 138888.U) {
+  when (cntReg === 1388888.U) {
     cntReg := 0.U
     currAngleReg := currAngleReg + 1.U
     when (currAngleReg === 359.U) {

@@ -8,9 +8,11 @@ import chisel3.util.experimental._
 class TrinitySdl extends Module {
   val io = IO(new Bundle {
     val angle = Input(UInt(9.W))
-    val x = Input(UInt(log2Up(Screen.width).W))
+    val x = Input(UInt(log2Up(Screen.width / 4).W))
     val y = Input(UInt(log2Up(Screen.height).W))
     val pix = Output(Vec(4, UInt(32.W)))
+    val outX = Output(UInt(log2Up(Screen.width / 4).W))
+    val outY = Output(UInt(log2Up(Screen.height).W))
   })
 
   val cosRom = SyncReadMem(360, SInt(12.W))
@@ -48,7 +50,7 @@ class TrinitySdl extends Module {
     rasterizer.io.cx := rastCxReg
     rasterizer.io.cy := rastCyReg
     rasterizer.io.cz := rastCzReg
-    rasterizer.io.px := rastPxReg
+    rasterizer.io.px := (rastPxReg << 2.U) | i.U
     rasterizer.io.py := rastPyReg
 
     val fragShader = Module(new FragShader)
@@ -61,9 +63,12 @@ class TrinitySdl extends Module {
     vis(i) := fragShader.io.outVis
   }
 
+  val pxReg = Reg(Vec(12, UInt(log2Up(Screen.width / 4).W)))
   val pyReg = Reg(Vec(12, UInt(log2Up(Screen.height).W)))
+  pxReg(0) := rastPxReg
   pyReg(0) := rastPyReg
   for (i <- 1 until 12) {
+    pxReg(i) := pxReg(i - 1)
     pyReg(i) := pyReg(i - 1)
   }
   val ditherer = Module(new Ditherer)
@@ -71,4 +76,6 @@ class TrinitySdl extends Module {
   ditherer.io.inPix := RegNext(pix)
 
   io.pix := ditherer.io.outPix
+  io.outX := RegNext(pxReg(11))
+  io.outY := RegNext(pyReg(11))
 }
