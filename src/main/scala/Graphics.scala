@@ -4,7 +4,7 @@
 import chisel3._
 import chisel3.util._
 
-class Render extends Module {
+class Graphics extends Module {
   val io = IO(new Bundle {
     val vblank = Input(Bool())
     val axi = new WrAxi(28, 128)

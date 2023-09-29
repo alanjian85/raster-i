@@ -66,7 +66,7 @@
         "CLK_OUT6_USE_FINE_PS_GUI": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "CLK_OUT7_USE_FINE_PS_GUI": [ { "value": "false", "resolve_type": "user", "format": "bool", "usage": "all" } ],
         "PRIMARY_PORT": [ { "value": "clk", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
-        "CLK_OUT1_PORT": [ { "value": "clk_render", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
+        "CLK_OUT1_PORT": [ { "value": "clk_graphics", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
         "CLK_OUT2_PORT": [ { "value": "clk_display", "value_src": "user", "resolve_type": "user", "usage": "all" } ],
         "CLK_OUT3_PORT": [ { "value": "clk_out3", "resolve_type": "user", "usage": "all" } ],
         "CLK_OUT4_PORT": [ { "value": "clk_out4", "resolve_type": "user", "usage": "all" } ],
@@ -338,7 +338,7 @@
         "C_INCLK_SUM_ROW2": [ { "value": "no_secondary_input_clock ", "resolve_type": "generated", "usage": "all" } ],
         "C_OUTCLK_SUM_ROW0A": [ { "value": " Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase", "resolve_type": "generated", "usage": "all" } ],
         "C_OUTCLK_SUM_ROW0B": [ { "value": "  Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)", "resolve_type": "generated", "usage": "all" } ],
-        "C_OUTCLK_SUM_ROW1": [ { "value": "clk_render__100.00000______0.000______50.0______130.067_____99.281", "resolve_type": "generated", "usage": "all" } ],
+        "C_OUTCLK_SUM_ROW1": [ { "value": "clk_graphics__100.00000______0.000______50.0______130.067_____99.281", "resolve_type": "generated", "usage": "all" } ],
         "C_OUTCLK_SUM_ROW2": [ { "value": "clk_display__65.00000______0.000______50.0______142.278_____99.281", "resolve_type": "generated", "usage": "all" } ],
         "C_OUTCLK_SUM_ROW3": [ { "value": "no_CLK_OUT3_output", "resolve_type": "generated", "usage": "all" } ],
         "C_OUTCLK_SUM_ROW4": [ { "value": "no_CLK_OUT4_output", "resolve_type": "generated", "usage": "all" } ],
@@ -470,7 +470,7 @@
         "C_OVERRIDE_PLL": [ { "value": "0", "resolve_type": "generated", "format": "long", "usage": "all" } ],
         "C_PRIMARY_PORT": [ { "value": "clk", "resolve_type": "generated", "usage": "all" } ],
         "C_SECONDARY_PORT": [ { "value": "clk_in2", "resolve_type": "generated", "usage": "all" } ],
-        "C_CLK_OUT1_PORT": [ { "value": "clk_render", "resolve_type": "generated", "usage": "all" } ],
+        "C_CLK_OUT1_PORT": [ { "value": "clk_graphics", "resolve_type": "generated", "usage": "all" } ],
         "C_CLK_OUT2_PORT": [ { "value": "clk_display", "resolve_type": "generated", "usage": "all" } ],
         "C_CLK_OUT3_PORT": [ { "value": "clk_out3", "resolve_type": "generated", "usage": "all" } ],
         "C_CLK_OUT4_PORT": [ { "value": "clk_out4", "resolve_type": "generated", "usage": "all" } ],
@@ -609,7 +609,7 @@
     "boundary": {
       "ports": {
         "clk": [ { "direction": "in" } ],
-        "clk_render": [ { "direction": "out" } ],
+        "clk_graphics": [ { "direction": "out" } ],
         "clk_display": [ { "direction": "out" } ]
       },
       "interfaces": {
@@ -647,7 +647,7 @@
             "INSERT_VIP": [ { "value": "0", "resolve_type": "user", "format": "long", "usage": "simulation.rtl", "is_ips_inferred": true, "is_static_object": false } ]
           },
           "port_maps": {
-            "CLK_OUT1": [ { "physical_name": "clk_render" } ]
+            "CLK_OUT1": [ { "physical_name": "clk_graphics" } ]
           }
         },
         "clock_CLK_OUT2": {
