@@ -6,6 +6,8 @@ import chisel3.util._
 import chisel3.util.experimental._
 
 class TrinitySdl extends Module {
+  val io = IO(new Bundle {})
+/*
   val io = IO(new Bundle {
     val angle = Input(UInt(9.W))
     val x = Input(UInt(log2Up(Screen.width / 4).W))
@@ -78,4 +80,5 @@ class TrinitySdl extends Module {
   io.pix := ditherer.io.outPix
   io.outX := RegNext(pxReg(11))
   io.outY := RegNext(pyReg(11))
+*/
 }

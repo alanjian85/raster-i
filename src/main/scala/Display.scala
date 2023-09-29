@@ -69,6 +69,16 @@ class Display extends Module {
     io.axi.addr.bits.size := "b100".U
     io.axi.addr.valid := rdValidReg
 
+    val ditherer = Module(new Ditherer)
+    ditherer.io.row := vgaSignal.io.pos.y(1, 0) 
+    val rdData = io.axi.data.bits.data
+    ditherer.io.inPix := VecInit(
+      rdData(119, 112) ## rdData(111, 104) ## rdData(103, 96),
+      rdData( 87,  80) ## rdData( 79,  72) ## rdData( 71, 64),
+      rdData( 55,  48) ## rdData( 47,  40) ## rdData( 39, 32),
+      rdData( 23,  16) ## rdData( 15,   8) ## rdData(  7,  0)
+    )
+
     io.axi.data.bits.id := DontCare
     val recvIdxReg = RegInit(0.U(log2Up(scanSize).W))
     io.axi.data.ready := true.B
@@ -77,11 +87,6 @@ class Display extends Module {
         when (recvIdxReg === (scanSize - 1).U) {
             recvIdxReg := 0.U
         }
-        val rdData = io.axi.data.bits.data
-        val wrData = rdData(119, 116) ## rdData(111, 108) ## rdData(103, 100) ##
-                     rdData( 87,  84) ## rdData( 79,  76) ## rdData( 71,  68) ##
-                     rdData( 55,  52) ## rdData( 47,  44) ## rdData( 39,  36) ##
-                     rdData( 23,  20) ## rdData( 15,  12) ## rdData(  7,   4)
-        scanBuffer.write(recvIdxReg, wrData)
+        scanBuffer.write(recvIdxReg, ditherer.io.outPix.reduceTree(_ ## _))
     }
 }

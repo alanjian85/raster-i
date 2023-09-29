@@ -5,6 +5,6 @@ import chisel3._
 
 object Main extends App {
   val emitArgs = Array("--target-dir", "generated")
-  emitVerilog(new TrinitySdl, emitArgs)
+  //emitVerilog(new TrinitySdl, emitArgs)
   emitVerilog(new Top, emitArgs)
 }

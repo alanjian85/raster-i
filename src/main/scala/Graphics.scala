@@ -63,17 +63,14 @@ class Graphics extends Module {
     vis(i) := fragShader.io.outVis
   }
 
-  val pxReg = Reg(Vec(12, UInt(log2Up(Screen.width / 4).W)))
-  val pyReg = Reg(Vec(12, UInt(log2Up(Screen.height).W)))
+  val pxReg = Reg(Vec(11, UInt(log2Up(Screen.width / 4).W)))
+  val pyReg = Reg(Vec(11, UInt(log2Up(Screen.height).W)))
   pxReg(0) := rastPxReg
   pyReg(0) := rastPyReg
-  for (i <- 1 until 12) {
+  for (i <- 1 until 11) {
     pxReg(i) := pxReg(i - 1)
     pyReg(i) := pyReg(i - 1)
   }
-  val ditherer = Module(new Ditherer)
-  ditherer.io.py := pyReg(11)
-  ditherer.io.inPix := RegNext(pix)
 
   val fbIdx = RegInit(1.U(1.W)) 
   io.fbIdx := fbIdx
@@ -81,16 +78,16 @@ class Graphics extends Module {
   val fbWriter = Module(new FbWriter)
   fbWriter.io.fbIdx := fbIdx
   fbWriter.io.req.valid := false.B
-  fbWriter.io.req.bits.pix := RegNext(ditherer.io.outPix)
-  fbWriter.io.req.bits.vis := RegNext(RegNext(vis))
-  val reqXReg = RegNext(pxReg(11))
-  val reqYReg = RegNext(ditherer.io.py)
+  fbWriter.io.req.bits.pix := RegNext(pix)
+  fbWriter.io.req.bits.vis := RegNext(vis)
+  val reqXReg = RegNext(pxReg(10))
+  val reqYReg = RegNext(pyReg(10))
   val angleReg = Reg(Vec(16, UInt(9.W)))
   angleReg(0) := frameAngleReg
-  for (i <- 1 until 16) {
+  for (i <- 1 until 15) {
     angleReg(i) := angleReg(i - 1)
   }
-  val reqAngleReg = angleReg(15)
+  val reqAngleReg = angleReg(14)
   io.axi <> fbWriter.io.axi
 
   val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
@@ -110,7 +107,7 @@ class Graphics extends Module {
   import State._
 
   val state = RegInit(flush)
-  val pipeCnt = RegInit(0.U(unsignedBitLength(16).W))
+  val pipeCnt = RegInit(0.U(unsignedBitLength(15).W))
   switch (state) {
     is(flush) {
       fbWriter.io.req.valid := false.B
@@ -123,7 +120,7 @@ class Graphics extends Module {
           yReg := 0.U
         }
       }
-      when (pipeCnt === 15.U) {
+      when (pipeCnt === 14.U) {
         pipeCnt := 0.U
         state := run
       }
@@ -148,7 +145,7 @@ class Graphics extends Module {
       }
     }
     is (done) {
-      when (pipeCnt =/= 16.U) {
+      when (pipeCnt <= 14.U) {
         pipeCnt := pipeCnt + 1.U
         fbWriter.io.req.valid := true.B
       } .otherwise {
