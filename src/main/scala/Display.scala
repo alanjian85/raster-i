@@ -46,10 +46,10 @@ class Display extends Module {
     ditherer.io.row := vgaSignal.io.nextPos.y(1, 0)
     val rdData = io.axi.data.bits.data
     ditherer.io.in := VecInit(
-      RGB888(rdData(  7,  0), rdData( 15,   8), rdData( 23,  16)),
-      RGB888(rdData( 39, 32), rdData( 47,  40), rdData( 55,  48)),
-      RGB888(rdData( 71, 64), rdData( 79,  72), rdData( 87,  80)),
-      RGB888(rdData(103, 96), rdData(111, 104), rdData(119, 112))
+      RGB888.decode(rdData( 23,  0)),
+      RGB888.decode(rdData( 55, 32)),
+      RGB888.decode(rdData( 87, 64)),
+      RGB888.decode(rdData(119, 96))
     )
 
     io.axi.data.bits.id := DontCare

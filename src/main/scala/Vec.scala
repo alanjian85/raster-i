@@ -17,11 +17,4 @@ class UVec2Factory(val xWidth: Int, val yWidth: Int) {
     result.y := y.U
     result
   }
-
-  def apply(x: UInt, y: UInt) = {
-    val result = Wire(new UVec2(xWidth, yWidth))
-    result.x := x
-    result.y := y
-    result
-  }
 }

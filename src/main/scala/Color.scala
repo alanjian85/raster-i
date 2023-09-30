@@ -12,19 +12,15 @@ class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
 class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
   def apply() = new RGB(rWidth, gWidth, bWidth)
 
-  def apply(r: Int, g: Int, b: Int) = {
-    val result = Wire(new RGB(rWidth, gWidth, bWidth))
-    result.r := r.U
-    result.g := g.U
-    result.b := b.U
-    result
+  def encode(pix: RGB) = {
+    pix.b ## pix.g ## pix.r
   }
 
-  def apply(r: UInt, g: UInt, b: UInt) = {
+  def decode(pix: UInt) = {
     val result = Wire(new RGB(rWidth, gWidth, bWidth))
-    result.r := r
-    result.g := g
-    result.b := b
+    result.r := pix(rWidth - 1, 0)
+    result.g := pix(rWidth + gWidth - 1, rWidth)
+    result.b := pix(rWidth + gWidth + bWidth - 1, rWidth + gWidth)
     result
   }
 }
