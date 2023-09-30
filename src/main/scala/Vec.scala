@@ -2,99 +2,44 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
+import chisel3.util._
 
-class UVec2 extends Bundle {
-  val x = UInt()
-  val y = UInt()
+class UVec2(val xWidth: Int, val yWidth: Int) extends Bundle {
+  val x = UInt(xWidth.W)
+  val y = UInt(yWidth.W)
+}
 
-  def asSVec2() = {
-    val result = Wire(SVec2())
-    result.x := x.asSInt
-    result.y := y.asSInt
-    result
-  }
-  
-  def +(that: UVec2) = {
-    val result = Wire(UVec2())
-    result.x := this.x + that.x
-    result.x := this.y + that.y
-    result
-  }
+class UVec2Factory(val xWidth: Int, val yWidth: Int) {
+  def apply() = new UVec2(xWidth, yWidth)
 
-  def -(that: UVec2) = {
-    val result = Wire(UVec2())
-    result.x := this.x - that.x
-    result.y := this.y - that.y
+  def apply(x: Int, y: Int) = {
+    require(x >= 0)
+    require(unsignedBitLength(x) <= xWidth)
+    require(y >= 0)
+    require(unsignedBitLength(y) <= yWidth)
+
+    val result = Wire(new UVec2(xWidth, yWidth))
+    result.x := x.U(xWidth.W)
+    result.y := y.U(yWidth.W)
     result
   }
 }
 
-object UVec2 {
-  def apply() = {
-    new UVec2
-  }
+class SVec2(xWidth: Int, yWidth: Int) extends Bundle {
+  val x = SInt(xWidth.W)
+  val y = SInt(yWidth.W)
 }
 
-object UVec2Init {
-  def apply(x: UInt = 0.U) = {
-    val result = Wire(UVec2())
-    result.x := x
-    result.y := x
-    result
-  }
+class SVec2Factory(val xWidth: Int, val yWidth: Int) {
+  def apply() = new SVec2(xWidth, yWidth)
 
-  def apply(x: UInt, y: UInt) = {
-    val result = Wire(UVec2())
-    result.x := x
-    result.y := y
-    result
-  }
-}
+  def apply(x: Int, y: Int) = {
+    require(signedBitLength(x) <= xWidth)
+    require(signedBitLength(y) <= yWidth)
 
-class SVec2 extends Bundle {
-  val x = SInt()
-  val y = SInt()
-
-  def asUVec2() = {
-    val result = Wire(UVec2())
-    result.x := x.asUInt
-    result.y := y.asUInt
-    result
-  }
-
-  def +(that: SVec2) = {
-    val result = Wire(SVec2())
-    result.x := this.x + that.x
-    result.y := this.y + that.y
-    result
-  }
-
-  def -(that: SVec2) = {
-    val result = Wire(SVec2())
-    result.x := this.x - that.x
-    result.y := this.y - that.y
-    result
-  }
-}
-
-object SVec2 {
-  def apply() = {
-    new SVec2
-  }
-}
-
-object SVec2Init {
-  def apply(x: SInt = 0.S) = {
-    val result = Wire(SVec2())
-    result.x := x
-    result.y := x
-    result
-  }
-
-  def apply(x: SInt, y: SInt) = {
-    val result = Wire(SVec2())
-    result.x := x
-    result.y := y
+    val result = Wire(new SVec2(xWidth, yWidth))
+    result.x := x.S(xWidth.W)
+    result.y := y.S(yWidth.W)
     result
   }
 }

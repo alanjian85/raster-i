@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util._
 
 class FragShader extends Module {
-  val barLen = unsignedBitLength(Screen.width * Screen.height) - 1
+  val barLen = unsignedBitLength(VgaTiming.width * VgaTiming.height) - 1
   val io = IO(new Bundle {
     val inVis = Input(Bool())
     val u = Input(UInt(barLen.W))

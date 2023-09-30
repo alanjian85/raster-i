@@ -5,9 +5,7 @@ import chisel3._
 import chisel3.util._
 
 class TrinityIO extends Bundle {
-  val pix = Output(RGB4())
-  val hsync = Output(Bool())
-  val vsync = Output(Bool())
+  val vga  = new VgaExt
   val ddr3 = new Ddr3Ext
 }
 
@@ -40,9 +38,7 @@ class Trinity extends Module {
     val display = Module(new Display)
     display.io.fbIdx := RegNext(RegNext(dispFbIdx))
     vram.io.axiDisplay <> display.io.axi
-    io.pix := display.io.pix
-    io.hsync := display.io.hsync
-    io.vsync := display.io.vsync
-    vblank := display.io.vblank
+    io.vga := display.io.vga
+    vblank := RegNext(display.io.vga.vsync === VgaTiming.polarity.B)
   }
 }

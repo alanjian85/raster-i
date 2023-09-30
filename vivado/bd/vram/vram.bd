@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x3A58F1BFD6DBB98",
+      "boundary_crc": "0x3A58F1B548F3317",
       "device": "xc7a100tcsg324-1",
       "name": "vram",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",

@@ -8,54 +8,29 @@ class Display extends Module {
     val io = IO(new Bundle {
         val fbIdx = Input(UInt(1.W))
         val axi = new RdAxi(28, 128)
-        val pix = Output(RGB4())
-        val hsync = Output(Bool())
-        val vsync = Output(Bool())
-        val vblank = Output(Bool()) 
+        val vga = new VgaExt
     })
 
-    val scanSize = Screen.width >> 2
-    val scanBuffer = SyncReadMem(scanSize, UInt(48.W))
+    val scanSize = VgaTiming.width >> 2
+    val scanBuffer = SyncReadMem(scanSize, Vec(4, UInt(12.W)))
 
     val vgaSignal = Module(new VgaSignal)
-    val vgaData = scanBuffer.read(vgaSignal.io.pos.x >> 2.U)
-    io.pix := RGB4Init(0.U)
-    when (RegNext(vgaSignal.io.active)) {
-        switch (RegNext(vgaSignal.io.pos.x & "b11".U)) {
-            is(0.U) {
-                io.pix.r := vgaData(3, 0)
-                io.pix.g := vgaData(7, 4)
-                io.pix.b := vgaData(11, 8)
-            }
-            is(1.U) {
-                io.pix.r := vgaData(15, 12)
-                io.pix.g := vgaData(19, 16)
-                io.pix.b := vgaData(23, 20)
-            }
-            is(2.U) {
-                io.pix.r := vgaData(27, 24)
-                io.pix.g := vgaData(31, 28)
-                io.pix.b := vgaData(35, 32)
-            }
-            is (3.U) {
-                io.pix.r := vgaData(39, 36)
-                io.pix.g := vgaData(43, 40)
-                io.pix.b := vgaData(47, 44)
-            }
-        }
-    }
-    io.hsync := RegNext(vgaSignal.io.hsync)
-    io.vsync := RegNext(vgaSignal.io.vsync)
-    io.vblank := RegNext(vgaSignal.io.vblank)
+    val vgaData = scanBuffer.read(vgaSignal.io.nextPos.x >> 2.U)
+    val vgaPos = RegNext(vgaSignal.io.nextPos)
+    vgaSignal.io.currPos := vgaPos
+    val idx = vgaPos.x & "b11".U
+    vgaSignal.io.pix.r := vgaData(idx)(3, 0)
+    vgaSignal.io.pix.g := vgaData(idx)(7, 4)
+    vgaSignal.io.pix.b := vgaData(idx)(11, 8)
+    io.vga := vgaSignal.io.vga
 
     io.axi.addr.bits.id := DontCare
-    val lineIdxReg = RegInit(0.U(log2Up(Screen.height).W))
+    val lineIdxReg = RegInit(0.U(log2Up(VgaTiming.height).W))
     val rdValidReg = RegInit(true.B)
-    when (vgaSignal.io.active &&
-          vgaSignal.io.pos.x === (Screen.width - 1).U)
-    {
+    when (vgaSignal.io.nextPos.x === (VgaTiming.width - 1).U &&
+          vgaSignal.io.nextPos.y < VgaTiming.height.U) {
         lineIdxReg := lineIdxReg + 1.U
-        when (lineIdxReg === (Screen.height - 1).U) {
+        when (lineIdxReg === (VgaTiming.height - 1).U) {
             lineIdxReg := 0.U
         }
         rdValidReg := true.B
@@ -70,13 +45,13 @@ class Display extends Module {
     io.axi.addr.valid := rdValidReg
 
     val ditherer = Module(new Ditherer)
-    ditherer.io.row := vgaSignal.io.pos.y(1, 0) 
+    ditherer.io.row := vgaSignal.io.nextPos.y(1, 0)
     val rdData = io.axi.data.bits.data
     ditherer.io.inPix := VecInit(
-      rdData(119, 112) ## rdData(111, 104) ## rdData(103, 96),
-      rdData( 87,  80) ## rdData( 79,  72) ## rdData( 71, 64),
+      rdData( 23,  16) ## rdData( 15,   8) ## rdData(  7,  0),
       rdData( 55,  48) ## rdData( 47,  40) ## rdData( 39, 32),
-      rdData( 23,  16) ## rdData( 15,   8) ## rdData(  7,  0)
+      rdData( 87,  80) ## rdData( 79,  72) ## rdData( 71, 64),
+      rdData(119, 112) ## rdData(111, 104) ## rdData(103, 96)
     )
 
     io.axi.data.bits.id := DontCare
@@ -87,6 +62,6 @@ class Display extends Module {
         when (recvIdxReg === (scanSize - 1).U) {
             recvIdxReg := 0.U
         }
-        scanBuffer.write(recvIdxReg, ditherer.io.outPix.reduceTree(_ ## _))
+        scanBuffer.write(recvIdxReg, ditherer.io.outPix)
     }
 }

@@ -2,35 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
+import chisel3.util._
 
-class RGB(width: Int) extends Bundle {
-  val r = UInt(width.W)
-  val g = UInt(width.W)
-  val b = UInt(width.W)
+class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
+  val r = UInt(rWidth.W)
+  val g = UInt(gWidth.W)
+  val b = UInt(bWidth.W)
 }
 
-class RGB4 extends RGB(4)
+class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
+  def apply() = new RGB(rWidth, gWidth, bWidth)
 
-object RGB4 {
-  def apply() = {
-    new RGB4
-  }
-}
-
-object RGB4Init {
-  def apply(x: UInt = 0.U) = {
-    val result = Wire(RGB4())
-    result.r := x
-    result.g := x
-    result.b := x
-    result
-  }
-
-  def apply(r: UInt, g: UInt, b: UInt) = {
-    val result = Wire(RGB4())
-    result.r := r
-    result.g := g
-    result.b := b
+  def apply(r: Int, g: Int, b: Int) = {
+    require(r >= 0)
+    require(unsignedBitLength(r) <= rWidth)
+    require(g >= 0)
+    require(unsignedBitLength(g) <= gWidth)
+    require(b >= 0)
+    require(unsignedBitLength(b) <= bWidth)
+    val result = Wire(new RGB(rWidth, gWidth, bWidth))
+    result.r := r.U(rWidth.W)
+    result.g := g.U(gWidth.W)
+    result.b := b.U(bWidth.W)
     result
   }
 }
+
+object RGB444 extends RGBFactory(4, 4, 4)
+object RGB888 extends RGBFactory(8, 8, 8)

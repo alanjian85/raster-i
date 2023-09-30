@@ -11,8 +11,8 @@ class Graphics extends Module {
     val fbIdx = Output(UInt(1.W))
   })
 
-  val xReg = RegInit(0.U(log2Up(Screen.width / 4).W))
-  val yReg = RegInit(0.U(log2Up(Screen.height).W))
+  val xReg = RegInit(0.U(log2Up(VgaTiming.width / 4).W))
+  val yReg = RegInit(0.U(log2Up(VgaTiming.height).W))
   val frameAngleReg = RegInit(0.U(log2Up(360).W))
 
   val cosRom = Module(new CosRom)
@@ -63,8 +63,8 @@ class Graphics extends Module {
     vis(i) := fragShader.io.outVis
   }
 
-  val pxReg = Reg(Vec(11, UInt(log2Up(Screen.width / 4).W)))
-  val pyReg = Reg(Vec(11, UInt(log2Up(Screen.height).W)))
+  val pxReg = Reg(Vec(11, UInt(log2Up(VgaTiming.width / 4).W)))
+  val pyReg = Reg(Vec(11, UInt(log2Up(VgaTiming.height).W)))
   pxReg(0) := rastPxReg
   pyReg(0) := rastPyReg
   for (i <- 1 until 11) {
@@ -113,10 +113,10 @@ class Graphics extends Module {
       fbWriter.io.req.valid := false.B
       pipeCnt := pipeCnt + 1.U
       xReg := xReg + 1.U
-      when (xReg === ((Screen.width / 4) - 1).U) {
+      when (xReg === ((VgaTiming.width / 4) - 1).U) {
         xReg := 0.U
         yReg := yReg + 1.U
-        when (yReg === (Screen.height - 1).U) {
+        when (yReg === (VgaTiming.height - 1).U) {
           yReg := 0.U
         }
       }
@@ -129,10 +129,10 @@ class Graphics extends Module {
       fbWriter.io.req.valid := true.B
       when (fbWriter.io.req.ready) {
         xReg := xReg + 1.U
-        when (xReg === ((Screen.width / 4) - 1).U) {
+        when (xReg === ((VgaTiming.width / 4) - 1).U) {
           xReg := 0.U
           yReg := yReg + 1.U
-          when (yReg === (Screen.height - 1).U) {
+          when (yReg === (VgaTiming.height - 1).U) {
             yReg := 0.U
             state := done
           }

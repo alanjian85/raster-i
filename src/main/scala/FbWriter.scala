@@ -17,13 +17,13 @@ class FbWriter extends Module {
     })
 
     val cacheAvail = RegInit(VecInit(Seq.fill(2)(true.B)))
-    val cacheY = RegInit(VecInit(Seq.fill(2)(0.U(log2Up(Screen.height).W))))
+    val cacheY = RegInit(VecInit(Seq.fill(2)(0.U(log2Up(VgaTiming.height).W))))
     val pixCache = Mem(256 * 2, Vec(4, UInt(32.W)))
     // val visCache = Mem(256 * 2, Vec(4, Bool()))
 
     val ldCacheIdx = RegInit(0.U(1.W))
-    val currX = RegInit(0.U(log2Up(Screen.width / 4).W))
-    val currY = RegInit(0.U(log2Up(Screen.height).W))
+    val currX = RegInit(0.U(log2Up(VgaTiming.width / 4).W))
+    val currY = RegInit(0.U(log2Up(VgaTiming.height).W))
 
     io.req.ready := cacheAvail(ldCacheIdx)
 
@@ -35,14 +35,14 @@ class FbWriter extends Module {
         pixCache.write(ldCacheIdx * 256.U | currX, io.req.bits.pix)
         // visCache(ldCacheIdx).write(currX, io.req.bits.vis)
         currX := currX + 1.U
-        when (currX === ((Screen.width / 4) - 1).U) {
+        when (currX === ((VgaTiming.width / 4) - 1).U) {
             cacheY(ldCacheIdx) := currY
             cacheAvail(ldCacheIdx) := false.B
             ldCacheIdx := ldCacheIdx + 1.U
 
             currX := 0.U
             currY := currY + 1.U
-            when (currY === (Screen.height - 1).U) {
+            when (currY === (VgaTiming.height - 1).U) {
               currY := 0.U
             }
         }
@@ -51,7 +51,7 @@ class FbWriter extends Module {
     val wrCacheIdx = RegInit(0.U(1.W))
     io.axi.addr.bits.id    := DontCare
     io.axi.addr.bits.addr  := (io.fbIdx << 22.U) | 
-                              (Screen.width.U * cacheY(wrCacheIdx) << 2.U)
+                              (VgaTiming.width.U * cacheY(wrCacheIdx) << 2.U)
     io.axi.addr.bits.len   := 255.U
     io.axi.addr.bits.size  := "b100".U
     io.axi.addr.bits.burst := "b01".U
