@@ -23,12 +23,12 @@ class VertShader extends Module {
   io.ay := 192.U
 
   val bzCosReg = RegNext(io.inBz.zext * io.cos >> 10)
-  io.bx := (512.S - (bzCosReg * 222.S >> 10)).asUInt
-  io.by := RegNext(384.U +& (io.inBz * 192.U >> 10))
+  io.bx := (512.S - (bzCosReg * 256.S >> 10)).asUInt
+  io.by := RegNext(384.U +& (io.inBz * 166.U >> 10))
   io.bz := RegNext(io.inBz)
 
   val czCosReg = RegNext(io.inCz.zext * io.cos >> 10)
-  io.cx := (512.S + (czCosReg * 222.S >> 10)).asUInt
-  io.cy := RegNext(384.U +& (io.inCz * 192.U >> 10))
+  io.cx := (512.S + (czCosReg * 256.S >> 10)).asUInt
+  io.cy := RegNext(384.U +& (io.inCz * 166.U >> 10))
   io.cz := RegNext(io.inCz)
 }
