@@ -20,14 +20,14 @@ class FragShader extends Module {
     val dividendReg = Reg(Vec(7, UInt(8.W)))
     val divisorReg  = Reg(Vec(7, UInt(barLen.W)))
     val remReg = Reg(Vec(8, UInt((barLen + 8).W)))
-    val quoReg = Reg(Vec(8, UInt(8.W))) 
+    val quoReg = Reg(Vec(8, UInt(8.W)))
     for (i <- 7 to 0 by -1) {
       if (i != 0) {
         if (i == 7) {
           dividendReg(6) := dividend
           divisorReg(6)  := divisor
         } else {
-          dividendReg(i - 1) := dividendReg(i) 
+          dividendReg(i - 1) := dividendReg(i)
           divisorReg(i - 1)  := divisorReg(i)
         }
       }

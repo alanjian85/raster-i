@@ -50,12 +50,12 @@ class FbWriter extends Module {
 
     val wrCacheIdx = RegInit(0.U(1.W))
     io.axi.addr.bits.id    := DontCare
-    io.axi.addr.bits.addr  := (io.fbIdx << 22.U) | 
+    io.axi.addr.bits.addr  := (io.fbIdx << 22.U) |
                               (VgaTiming.width.U * cacheY(wrCacheIdx) << 2.U)
     io.axi.addr.bits.len   := 255.U
     io.axi.addr.bits.size  := "b100".U
     io.axi.addr.bits.burst := "b01".U
-    io.axi.addr.valid      := false.B 
+    io.axi.addr.valid      := false.B
 
     val wrCurrIdx  = RegInit(0.U(8.W))
     io.axi.data.bits.data := pixCache
@@ -63,11 +63,11 @@ class FbWriter extends Module {
                                .reverse
                                .reduce(_ ## _)
     io.axi.data.bits.strb := "hffff".U
-    /* 
+    /*
     visCache.read(wrCurrIdx)
       .map(_.asUInt)
       .reverse
-      .reduce(Fill(4, _) ## Fill(4, _)) 
+      .reduce(Fill(4, _) ## Fill(4, _))
     */
     io.axi.data.bits.last := wrCurrIdx === 255.U
     io.axi.data.valid     := false.B
@@ -75,7 +75,7 @@ class FbWriter extends Module {
     io.axi.resp.ready := true.B
 
     object WrState extends ChiselEnum {
-        val idle, wrAddr, wrData = Value 
+        val idle, wrAddr, wrData = Value
     }
     import WrState._
     val wrStateReg = RegInit(idle)
@@ -83,9 +83,9 @@ class FbWriter extends Module {
     switch (wrStateReg) {
         is(idle) {
             when (!cacheAvail(wrCacheIdx)) {
-                wrStateReg := wrAddr 
+                wrStateReg := wrAddr
             } .otherwise {
-                wrCacheIdx := wrCacheIdx + 1.U            
+                wrCacheIdx := wrCacheIdx + 1.U
             }
         }
         is(wrAddr) {

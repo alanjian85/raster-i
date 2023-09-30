@@ -11,7 +11,7 @@ class clk_wiz extends BlackBox {
     })
 }
 
-class ClkWiz extends Module { 
+class ClkWiz extends Module {
     val io = IO(new Bundle {
         val clkGraphics = Output(Clock())
         val clkDisplay  = Output(Clock())

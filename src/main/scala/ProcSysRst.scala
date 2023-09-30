@@ -3,7 +3,7 @@
 
 import chisel3._
 
-class proc_sys_rst extends BlackBox { 
+class proc_sys_rst extends BlackBox {
     val io = IO(new Bundle {
         val slowest_sync_clk = Input(Bool())
         val ext_reset_in = Input(Bool())

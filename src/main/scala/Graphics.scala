@@ -21,7 +21,7 @@ class Graphics extends Module {
   cosRom.io.addr := frameAngleReg
   bzRom.io.addr  := frameAngleReg
   czRom.io.addr  := frameAngleReg
-  
+
   val vertShader = Module(new VertShader)
   vertShader.io.cos  := cosRom.io.data
   vertShader.io.inBz := bzRom.io.data
@@ -72,7 +72,7 @@ class Graphics extends Module {
     pyReg(i) := pyReg(i - 1)
   }
 
-  val fbIdx = RegInit(1.U(1.W)) 
+  val fbIdx = RegInit(1.U(1.W))
   io.fbIdx := fbIdx
 
   val fbWriter = Module(new FbWriter)
