@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
-import chisel3.util._
 
 class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
   val r = UInt(rWidth.W)
@@ -14,12 +13,6 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
   def apply() = new RGB(rWidth, gWidth, bWidth)
 
   def apply(r: Int, g: Int, b: Int) = {
-    require(r >= 0)
-    require(unsignedBitLength(r) <= rWidth)
-    require(g >= 0)
-    require(unsignedBitLength(g) <= gWidth)
-    require(b >= 0)
-    require(unsignedBitLength(b) <= bWidth)
     val result = Wire(new RGB(rWidth, gWidth, bWidth))
     result.r := r.U(rWidth.W)
     result.g := g.U(gWidth.W)
