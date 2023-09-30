@@ -10,11 +10,12 @@ class Ditherer extends Module {
     val out = Output(Vec(4, RGB444()))
   })
 
-  val bayer = VecInit(
-    VecInit( 0.U,  8.U,  2.U, 10.U),
-    VecInit(12.U,  4.U, 14.U,  6.U),
-    VecInit( 3.U, 11.U,  1.U,  9.U),
-    VecInit(15.U,  7.U, 13.U,  5.U)
+  object BayerMat4 extends UMat4Factory(4)
+  val bayer = BayerMat4(
+     0,  8,  2, 10,
+    12,  4, 14,  6,
+     3, 11,  1,  9,
+    15,  7, 13,  5
   )
 
   def dither(x: UInt, threshold: UInt) = {

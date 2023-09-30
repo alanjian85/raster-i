@@ -14,9 +14,9 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
 
   def apply(r: Int, g: Int, b: Int) = {
     val result = Wire(new RGB(rWidth, gWidth, bWidth))
-    result.r := r.U(rWidth.W)
-    result.g := g.U(gWidth.W)
-    result.b := b.U(bWidth.W)
+    result.r := r.U
+    result.g := g.U
+    result.b := b.U
     result
   }
 
