@@ -26,6 +26,14 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
     result.b := b.U(bWidth.W)
     result
   }
+
+  def apply(r: UInt, g: UInt, b: UInt) = {
+    val result = Wire(new RGB(rWidth, gWidth, bWidth))
+    result.r := r
+    result.g := g
+    result.b := b
+    result
+  }
 }
 
 object RGB444 extends RGBFactory(4, 4, 4)

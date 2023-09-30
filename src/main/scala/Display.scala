@@ -12,16 +12,14 @@ class Display extends Module {
     })
 
     val scanSize = VgaTiming.width >> 2
-    val scanBuffer = SyncReadMem(scanSize, Vec(4, UInt(12.W)))
+    val scanBuffer = SyncReadMem(scanSize, Vec(4, RGB444()))
 
     val vgaSignal = Module(new VgaSignal)
     val vgaData = scanBuffer.read(vgaSignal.io.nextPos.x >> 2.U)
     val vgaPos = RegNext(vgaSignal.io.nextPos)
     vgaSignal.io.currPos := vgaPos
     val idx = vgaPos.x & "b11".U
-    vgaSignal.io.pix.r := vgaData(idx)(3, 0)
-    vgaSignal.io.pix.g := vgaData(idx)(7, 4)
-    vgaSignal.io.pix.b := vgaData(idx)(11, 8)
+    vgaSignal.io.pix := vgaData(idx)
     io.vga := vgaSignal.io.vga
 
     io.axi.addr.bits.id := DontCare
@@ -47,11 +45,11 @@ class Display extends Module {
     val ditherer = Module(new Ditherer)
     ditherer.io.row := vgaSignal.io.nextPos.y(1, 0)
     val rdData = io.axi.data.bits.data
-    ditherer.io.inPix := VecInit(
-      rdData( 23,  16) ## rdData( 15,   8) ## rdData(  7,  0),
-      rdData( 55,  48) ## rdData( 47,  40) ## rdData( 39, 32),
-      rdData( 87,  80) ## rdData( 79,  72) ## rdData( 71, 64),
-      rdData(119, 112) ## rdData(111, 104) ## rdData(103, 96)
+    ditherer.io.in := VecInit(
+      RGB888(rdData(  7,  0), rdData( 15,   8), rdData( 23,  16)),
+      RGB888(rdData( 39, 32), rdData( 47,  40), rdData( 55,  48)),
+      RGB888(rdData( 71, 64), rdData( 79,  72), rdData( 87,  80)),
+      RGB888(rdData(103, 96), rdData(111, 104), rdData(119, 112))
     )
 
     io.axi.data.bits.id := DontCare
@@ -62,6 +60,6 @@ class Display extends Module {
         when (recvIdxReg === (scanSize - 1).U) {
             recvIdxReg := 0.U
         }
-        scanBuffer.write(recvIdxReg, ditherer.io.outPix)
+        scanBuffer.write(recvIdxReg, ditherer.io.out)
     }
 }
