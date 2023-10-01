@@ -2,43 +2,47 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
-import chisel3.util._
-
-class TrinityIO extends Bundle {
-  val vga  = new VgaExt
-  val ddr3 = new Ddr3Ext
-}
 
 class Trinity extends Module {
-  val io = IO(new TrinityIO)
+  val io = IO(new Bundle {
+    val ddr3 = new Ddr3Ext
+    val vga  = new VgaExt
+  })
 
   val clkWiz = Module(new ClkWiz)
-  val vram = Module(new Vram)
+  val vram   = Module(new Vram)
   io.ddr3 <> vram.io.ddr3
 
-  val dispFbIdx = Wire(UInt(1.W))
-  val vblank = Wire(Bool())
-
-  val graphicsSysRst = Module(new ProcSysRst)
-  graphicsSysRst.clock := clkWiz.io.clkGraphics
-  vram.io.aclkGraphics := clkWiz.io.clkGraphics
-  vram.io.arstnGraphics := graphicsSysRst.io.periArstn
-  withClockAndReset(clkWiz.io.clkGraphics, graphicsSysRst.io.periRst) {
-    val graphics = Module(new Graphics)
-    graphics.io.vblank := RegNext(RegNext(vblank))
-    vram.io.axiGraphics <> graphics.io.axi
-    dispFbIdx := 1.U - graphics.io.fbIdx
-  }
+  val fbSwapper = Module(new FbSwapper)
+  val displayVsync = Wire(Bool())
+  val graphicsDone = Wire(Bool())
+  fbSwapper.io.displayVsync := RegNext(RegNext(displayVsync))
+  fbSwapper.io.graphicsDone := RegNext(RegNext(graphicsDone))
 
   val displaySysRst = Module(new ProcSysRst)
-  displaySysRst.clock := clkWiz.io.clkDisplay
-  vram.io.aclkDisplay := clkWiz.io.clkDisplay
+  displaySysRst.clock  := clkWiz.io.clkDisplay
+  vram.io.aclkDisplay  := clkWiz.io.clkDisplay
   vram.io.arstnDisplay := displaySysRst.io.periArstn
   withClockAndReset(clkWiz.io.clkDisplay, displaySysRst.io.periRst) {
     val display = Module(new Display)
-    display.io.fbIdx := RegNext(RegNext(dispFbIdx))
     vram.io.axiDisplay <> display.io.vram
-    io.vga := display.io.vga
-    vblank := RegNext(display.io.vga.vsync === VgaTiming.polarity.B)
+    io.vga             <> display.io.vga
+    display.io.fbIdx := RegNext(RegNext(fbSwapper.io.displayFbIdx))
+    displayVsync     := RegNext(display.io.vga.vsync === VgaTiming.polarity.B)
   }
+
+  val graphicsSysRst = Module(new ProcSysRst)
+  graphicsSysRst.clock  := clkWiz.io.clkGraphics
+  vram.io.aclkGraphics  := clkWiz.io.clkGraphics
+  vram.io.arstnGraphics := graphicsSysRst.io.periArstn
+  withClockAndReset(clkWiz.io.clkGraphics, graphicsSysRst.io.periRst) {
+    val graphics = Module(new Graphics)
+    vram.io.axiGraphics <> graphics.io.vram
+    graphics.io.fbIdx := RegNext(RegNext(fbSwapper.io.graphicsFbIdx))
+    graphicsDone      := RegNext(graphics.io.done)
+  }
+}
+
+object Trinity extends App {
+  emitVerilog(new Trinity, Array("--target-dir", "generated"))
 }

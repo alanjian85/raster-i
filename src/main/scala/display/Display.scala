@@ -5,7 +5,7 @@ import chisel3._
 
 class Display extends Module {
   val io = IO(new Bundle {
-    val fbIdx = Input(UInt(1.W))
+    val fbIdx = Input(UInt(FbSwapper.fbIdxWidth.W))
     val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
     val vga   = new VgaExt
   })
@@ -15,7 +15,7 @@ class Display extends Module {
   vgaSignal.io.currPos := vgaPos
   io.vga               := vgaSignal.io.vga
 
-  val fbReader = Module(new FbReader((in: Vec[RGB], row: UInt) => {
+  val fbReader = Module(new FbReader((in, row) => {
     val ditherer = Module(new Ditherer)
     ditherer.io.in  := in
     ditherer.io.row := row

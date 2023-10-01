@@ -8,7 +8,7 @@ class FbReader(convert: (Vec[RGB], UInt) => Vec[RGB]) extends Module {
   val nrBanks = Vram.dataWidth / IntRGB.alignedWidth
 
   val io = IO(new Bundle {
-      val fbIdx = Input(UInt(1.W))
+      val fbIdx = Input(UInt(FbSwapper.fbIdxWidth.W))
       val pos   = Input(TimingPos())
       val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
       val pix   = Output(Vec(nrBanks, ExtRGB()))

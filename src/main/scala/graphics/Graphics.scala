@@ -6,9 +6,9 @@ import chisel3.util._
 
 class Graphics extends Module {
   val io = IO(new Bundle {
-    val vblank = Input(Bool())
-    val axi = new WrAxi(28, 128)
-    val fbIdx = Output(UInt(1.W))
+    val fbIdx = Input(UInt(1.W))
+    val vram = new WrAxi(28, 128)
+    val done = Output(Bool())
   })
 
   val xReg = RegInit(0.U(log2Up(VgaTiming.width / 4).W))
@@ -72,11 +72,8 @@ class Graphics extends Module {
     pyReg(i) := pyReg(i - 1)
   }
 
-  val fbIdx = RegInit(1.U(1.W))
-  io.fbIdx := fbIdx
-
   val fbWriter = Module(new FbWriter)
-  fbWriter.io.fbIdx := fbIdx
+  fbWriter.io.fbIdx := io.fbIdx
   fbWriter.io.req.valid := false.B
   fbWriter.io.req.bits.pix := RegNext(pix)
   fbWriter.io.req.bits.vis := RegNext(vis)
@@ -88,7 +85,7 @@ class Graphics extends Module {
     angleReg(i) := angleReg(i - 1)
   }
   val reqAngleReg = angleReg(14)
-  io.axi <> fbWriter.io.axi
+  io.vram <> fbWriter.io.axi
 
   val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
   val currAngleReg = RegInit(0.U(log2Up(360).W))
@@ -100,6 +97,8 @@ class Graphics extends Module {
       currAngleReg := 0.U
     }
   }
+
+  io.done := false.B
 
   object State extends ChiselEnum {
     val flush, run, done = Value
@@ -149,12 +148,13 @@ class Graphics extends Module {
         pipeCnt := pipeCnt + 1.U
         fbWriter.io.req.valid := true.B
       } .otherwise {
-        fbWriter.io.req.valid := false.B
-        when (io.vblank) {
-          fbIdx := 1.U - fbIdx
+        when (io.fbIdx =/= RegNext(io.fbIdx)) {
           frameAngleReg := currAngleReg
           pipeCnt := 0.U
           state := flush
+        } .otherwise {
+          io.done := true.B
+          fbWriter.io.req.valid := false.B
         }
       }
     }
