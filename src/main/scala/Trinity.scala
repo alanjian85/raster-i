@@ -37,7 +37,7 @@ class Trinity extends Module {
   withClockAndReset(clkWiz.io.clkDisplay, displaySysRst.io.rst) {
     val display = Module(new Display)
     display.io.fbIdx := RegNext(RegNext(dispFbIdx))
-    vram.io.axiDisplay <> display.io.axi
+    vram.io.axiDisplay <> display.io.vram
     io.vga := display.io.vga
     vblank := RegNext(display.io.vga.vsync === VgaTiming.polarity.B)
   }

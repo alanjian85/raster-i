@@ -49,12 +49,9 @@ class WrAxi(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
   val resp = Flipped(Irrevocable(new AxiWrResp(idWidth)))
 }
 
-class RdWrAxi(addrWidth: Int, dataWidth: Int, rdIdWidth: Int = 0, wrIdWidth: Int = 0) extends Bundle {
-  val rdAddr = Irrevocable(new AxiRdAddr(addrWidth, rdIdWidth))
-  val rdData = Flipped(Irrevocable(new AxiRdData(dataWidth, rdIdWidth)))
-  val wrAddr = Irrevocable(new AxiWrAddr(addrWidth, wrIdWidth))
-  val wrData = Irrevocable(new AxiWrData(dataWidth))
-  val wrResp = Flipped(Irrevocable(new AxiWrResp(wrIdWidth)))
+class RdWrAxi(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
+  val rd = new RdAxi(addrWidth, dataWidth, idWidth)
+  val wr = new WrAxi(addrWidth, dataWidth, idWidth)
 }
 
 class RdAxiExt(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
@@ -199,48 +196,48 @@ class RdWrAxiExt(addrWidth: Int, dataWidth: Int, rdIdWidth: Int = 0, wrIdWidth: 
   val bready = Input(Bool())
 
   def connect(that: RdWrAxi) = {
-    arid     := that.rdAddr.bits.id
-    araddr   := that.rdAddr.bits.addr
-    arlen    := that.rdAddr.bits.len
-    arsize   := that.rdAddr.bits.size
-    arburst  := that.rdAddr.bits.burst
+    arid     := that.rd.addr.bits.id
+    araddr   := that.rd.addr.bits.addr
+    arlen    := that.rd.addr.bits.len
+    arsize   := that.rd.addr.bits.size
+    arburst  := that.rd.addr.bits.burst
     arlock   := false.B
     arcache  := "b0011".U
     arprot   := "b000".U
     arqos    := 0.U
     arregion := 0.U
-    arvalid  := that.rdAddr.valid
-    that.rdAddr.ready := arready
+    arvalid  := that.rd.addr.valid
+    that.rd.addr.ready := arready
 
-    that.rdData.bits.id   := rid
-    that.rdData.bits.data := rdata
-    that.rdData.bits.resp := rresp
-    that.rdData.bits.last := rlast
-    that.rdData.valid     := rvalid
-    rready := that.rdData.ready
+    that.rd.data.bits.id   := rid
+    that.rd.data.bits.data := rdata
+    that.rd.data.bits.resp := rresp
+    that.rd.data.bits.last := rlast
+    that.rd.data.valid     := rvalid
+    rready := that.rd.data.ready
 
-    awid     := that.wrAddr.bits.id
-    awaddr   := that.wrAddr.bits.addr
-    awlen    := that.wrAddr.bits.len
-    awsize   := that.wrAddr.bits.size
-    awburst  := that.wrAddr.bits.burst
+    awid     := that.wr.addr.bits.id
+    awaddr   := that.wr.addr.bits.addr
+    awlen    := that.wr.addr.bits.len
+    awsize   := that.wr.addr.bits.size
+    awburst  := that.wr.addr.bits.burst
     awlock   := false.B
     awcache  := "b0011".U
     awprot   := "b000".U
     awqos    := 0.U
     awregion := 0.U
-    awvalid  := that.wrAddr.valid
-    that.wrAddr.ready := awready
+    awvalid  := that.wr.addr.valid
+    that.wr.addr.ready := awready
 
-    wdata  := that.wrData.bits.data
-    wstrb  := that.wrData.bits.strb
-    wlast  := that.wrData.bits.last
-    wvalid := that.wrData.valid
-    that.wrData.ready := wready
+    wdata  := that.wr.data.bits.data
+    wstrb  := that.wr.data.bits.strb
+    wlast  := that.wr.data.bits.last
+    wvalid := that.wr.data.valid
+    that.wr.data.ready := wready
 
-    that.wrResp.bits.id   := bid
-    that.wrResp.bits.resp := bresp
-    that.wrResp.valid     := bvalid
-    bready := that.wrResp.ready
+    that.wr.resp.bits.id   := bid
+    that.wr.resp.bits.resp := bresp
+    that.wr.resp.valid     := bvalid
+    bready := that.wr.resp.ready
   }
 }
