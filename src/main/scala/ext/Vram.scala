@@ -46,27 +46,27 @@ class vram extends BlackBox {
 
 class Vram extends Module {
   val io = IO(new Bundle {
-    val axiGraphics = Flipped(new WrAxi(Vram.addrWidth, Vram.dataWidth))
-    val aclkGraphics = Input(Clock())
+    val axiGraphics   = Flipped(new WrAxi(Vram.addrWidth, Vram.dataWidth))
+    val aclkGraphics  = Input(Clock())
     val arstnGraphics = Input(Reset())
 
-    val axiDisplay = Flipped(new RdAxi(Vram.addrWidth, Vram.dataWidth))
-    val aclkDisplay = Input(Clock())
+    val axiDisplay   = Flipped(new RdAxi(Vram.addrWidth, Vram.dataWidth))
+    val aclkDisplay  = Input(Clock())
     val arstnDisplay = Input(Reset())
 
     val ddr3 = new Ddr3Ext
   })
 
   val vram = Module(new vram)
-  vram.io.clk := clock.asBool
+  vram.io.clk   := clock.asBool
   vram.io.reset := reset.asBool
 
   vram.io.graphics_axi.connect(io.axiGraphics)
-  vram.io.graphics_aclk := io.aclkGraphics.asBool
+  vram.io.graphics_aclk    := io.aclkGraphics.asBool
   vram.io.graphics_aresetn := io.arstnGraphics.asBool
 
   vram.io.display_axi.connect(io.axiDisplay)
-  vram.io.display_aclk := io.aclkDisplay.asBool
+  vram.io.display_aclk    := io.aclkDisplay.asBool
   vram.io.display_aresetn := io.arstnDisplay.asBool
 
   io.ddr3 <> vram.io.ddr3

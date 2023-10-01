@@ -4,32 +4,32 @@
 import chisel3._
 
 class proc_sys_rst extends BlackBox {
-    val io = IO(new Bundle {
-        val slowest_sync_clk = Input(Bool())
-        val ext_reset_in = Input(Bool())
-        val aux_reset_in = Input(Bool())
-        val mb_debug_sys_rst = Input(Bool())
-        val dcm_locked = Input(Bool())
-        val mb_reset = Output(Bool())
-        val bus_struct_reset = Output(Bool())
-        val peripheral_reset = Output(Bool())
-        val interconnect_aresetn = Output(Bool())
-        val peripheral_aresetn = Output(Bool())
-    })
+  val io = IO(new Bundle {
+    val slowest_sync_clk     = Input(Bool())
+    val ext_reset_in         = Input(Bool())
+    val aux_reset_in         = Input(Bool())
+    val mb_debug_sys_rst     = Input(Bool())
+    val dcm_locked           = Input(Bool())
+    val mb_reset             = Output(Bool())
+    val bus_struct_reset     = Output(Bool())
+    val peripheral_reset     = Output(Bool())
+    val interconnect_aresetn = Output(Bool())
+    val peripheral_aresetn   = Output(Bool())
+  })
 }
 
 class ProcSysRst extends Module {
     val io = IO(new Bundle {
-        val rst = Output(Reset())
-        val arstn = Output(Reset())
+        val periRst   = Output(Reset())
+        val periArstn = Output(Reset())
     })
 
     val procSysRst = Module(new proc_sys_rst)
     procSysRst.io.slowest_sync_clk := clock.asBool
-    procSysRst.io.ext_reset_in := reset.asBool
-    procSysRst.io.aux_reset_in := false.B
+    procSysRst.io.ext_reset_in     := reset.asBool
+    procSysRst.io.aux_reset_in     := false.B
     procSysRst.io.mb_debug_sys_rst := false.B
-    procSysRst.io.dcm_locked := true.B
-    io.rst := procSysRst.io.peripheral_reset
-    io.arstn := procSysRst.io.peripheral_aresetn
+    procSysRst.io.dcm_locked       := true.B
+    io.periRst   := procSysRst.io.peripheral_reset
+    io.periArstn := procSysRst.io.peripheral_aresetn
 }

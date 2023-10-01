@@ -22,8 +22,8 @@ class Trinity extends Module {
   val graphicsSysRst = Module(new ProcSysRst)
   graphicsSysRst.clock := clkWiz.io.clkGraphics
   vram.io.aclkGraphics := clkWiz.io.clkGraphics
-  vram.io.arstnGraphics := graphicsSysRst.io.arstn
-  withClockAndReset(clkWiz.io.clkGraphics, graphicsSysRst.io.rst) {
+  vram.io.arstnGraphics := graphicsSysRst.io.periArstn
+  withClockAndReset(clkWiz.io.clkGraphics, graphicsSysRst.io.periRst) {
     val graphics = Module(new Graphics)
     graphics.io.vblank := RegNext(RegNext(vblank))
     vram.io.axiGraphics <> graphics.io.axi
@@ -33,8 +33,8 @@ class Trinity extends Module {
   val displaySysRst = Module(new ProcSysRst)
   displaySysRst.clock := clkWiz.io.clkDisplay
   vram.io.aclkDisplay := clkWiz.io.clkDisplay
-  vram.io.arstnDisplay := displaySysRst.io.arstn
-  withClockAndReset(clkWiz.io.clkDisplay, displaySysRst.io.rst) {
+  vram.io.arstnDisplay := displaySysRst.io.periArstn
+  withClockAndReset(clkWiz.io.clkDisplay, displaySysRst.io.periRst) {
     val display = Module(new Display)
     display.io.fbIdx := RegNext(RegNext(dispFbIdx))
     vram.io.axiDisplay <> display.io.vram
