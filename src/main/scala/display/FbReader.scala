@@ -8,42 +8,40 @@ class FbReader(preprocess: (UInt, Vec[RGB]) => Vec[RGB]) extends Module {
   val io = IO(new Bundle {
       val fbIdx = Input(UInt(1.W))
       val pos   = Input(TimingPos())
-      val vram  = new RdAxi(28, 128)
+      val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
       val pix   = Output(Vec(4, RGB444()))
   })
 
-  val buffer = SyncReadMem(VgaTiming.width / 4, Vec(4, RGB444()))
+  val nrBanks = Vram.dataWidth / 32
+  val buffer  = SyncReadMem(VgaTiming.width / nrBanks, Vec(nrBanks, RGB444()))
 
   val addrWidth = log2Up(VgaTiming.width * VgaTiming.height) + 2
   val scanline  = RegInit(0.U(log2Up(VgaTiming.height).W))
   val valid     = RegInit(true.B)
   io.vram.addr.bits.id    := DontCare
   io.vram.addr.bits.addr  := (io.fbIdx << addrWidth) | (scanline * VgaTiming.width.U << 2)
-  io.vram.addr.bits.len   := (VgaTiming.width / 4 - 1).U
-  io.vram.addr.bits.size  := Axi.Size.s16
+  io.vram.addr.bits.len   := (VgaTiming.width / nrBanks - 1).U
+  io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
   io.vram.addr.valid      := valid
   when (valid && io.vram.addr.ready) {
     valid := false.B
   }
 
-  val rdIdx = RegInit(0.U(log2Up(VgaTiming.width / 4).W))
+  val rdIdx = RegInit(0.U(log2Up(VgaTiming.width / nrBanks).W))
   io.vram.data.bits.id := DontCare
   io.vram.data.ready   := true.B
   when (io.vram.data.valid) {
-    buffer.write(rdIdx, preprocess(scanline, VecInit(
-      RGB888.decode(io.vram.data.bits.data( 23,  0)),
-      RGB888.decode(io.vram.data.bits.data( 55, 32)),
-      RGB888.decode(io.vram.data.bits.data( 87, 64)),
-      RGB888.decode(io.vram.data.bits.data(119, 96))
-    )))
+    buffer.write(rdIdx, preprocess(scanline, VecInit(Seq.tabulate(nrBanks)(
+      i => RGB888.decode(io.vram.data.bits.data(23 + i * 32, i * 32))
+    ))))
     rdIdx := rdIdx + 1.U
-    when (rdIdx === (VgaTiming.width / 4 - 1).U) {
+    when (rdIdx === (VgaTiming.width / nrBanks - 1).U) {
       rdIdx := 0.U
     }
   }
 
-  io.pix := buffer.read(io.pos.x >> 2)
+  io.pix := buffer.read(io.pos.x / nrBanks.U)
   when (io.pos.y < VgaTiming.height.U && io.pos.x === (VgaTiming.width - 1).U) {
     scanline := scanline + 1.U
     when (scanline === (VgaTiming.height - 1).U) {

@@ -6,7 +6,7 @@ import chisel3._
 class Display extends Module {
   val io = IO(new Bundle {
     val fbIdx = Input(UInt(1.W))
-    val vram  = new RdAxi(28, 128)
+    val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
     val vga   = new VgaExt
   })
 

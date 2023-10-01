@@ -11,15 +11,17 @@ object Axi {
     val wrap  = "b10".U
   }
 
-  object Size extends Enumeration {
-    val s1   = "b000".U
-    val s2   = "b001".U
-    val s4   = "b010".U
-    val s8   = "b011".U
-    val s16  = "b100".U
-    val s32  = "b101".U
-    val s64  = "b110".U
-    val s128 = "b111".U
+  object size {
+    def apply(sz: Int) = sz match {
+      case 1   => "b000".U
+      case 2   => "b001".U
+      case 4   => "b010".U
+      case 8   => "b011".U
+      case 16  => "b100".U
+      case 32  => "b101".U
+      case 64  => "b110".U
+      case 128 => "b111".U
+    }
   }
 }
 

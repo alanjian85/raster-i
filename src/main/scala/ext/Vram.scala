@@ -22,17 +22,22 @@ class Ddr3Ext extends Bundle {
   val we_n    = Output(Bool())
 }
 
+object Vram {
+  val addrWidth = 28
+  val dataWidth = 128
+}
+
 class vram extends BlackBox {
   val io = IO(new Bundle {
-    val clk = Input(Bool())
+    val clk   = Input(Bool())
     val reset = Input(Bool())
 
-    val graphics_axi = new WrAxiExt(28, 128)
-    val graphics_aclk = Input(Bool())
+    val graphics_axi     = new WrAxiExt(Vram.addrWidth, Vram.dataWidth)
+    val graphics_aclk    = Input(Bool())
     val graphics_aresetn = Input(Bool())
 
-    val display_axi = new RdAxiExt(28, 128)
-    val display_aclk = Input(Bool())
+    val display_axi     = new RdAxiExt(Vram.addrWidth, Vram.dataWidth)
+    val display_aclk    = Input(Bool())
     val display_aresetn = Input(Bool())
 
     val ddr3 = new Ddr3Ext
@@ -41,11 +46,11 @@ class vram extends BlackBox {
 
 class Vram extends Module {
   val io = IO(new Bundle {
-    val axiGraphics = Flipped(new WrAxi(28, 128))
+    val axiGraphics = Flipped(new WrAxi(Vram.addrWidth, Vram.dataWidth))
     val aclkGraphics = Input(Clock())
     val arstnGraphics = Input(Reset())
 
-    val axiDisplay = Flipped(new RdAxi(28, 128))
+    val axiDisplay = Flipped(new RdAxi(Vram.addrWidth, Vram.dataWidth))
     val aclkDisplay = Input(Clock())
     val arstnDisplay = Input(Reset())
 
