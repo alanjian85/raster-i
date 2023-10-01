@@ -29,16 +29,16 @@ object TimingPos extends UVec2Factory(log2Up(VgaTiming.horizEnd), log2Up(VgaTimi
 object ScreenPos extends UVec2Factory(log2Up(VgaTiming.width), log2Up(VgaTiming.height))
 
 class VgaExt extends Bundle {
-  val r     = Output(UInt(4.W))
-  val g     = Output(UInt(4.W))
-  val b     = Output(UInt(4.W))
+  val r     = Output(UInt(ExtRGB.rWidth.W))
+  val g     = Output(UInt(ExtRGB.gWidth.W))
+  val b     = Output(UInt(ExtRGB.bWidth.W))
   val hsync = Output(Bool())
   val vsync = Output(Bool())
 }
 
 class VgaSignal extends Module {
   val io = IO(new Bundle {
-    val pix     = Input(RGB444())
+    val pix     = Input(ExtRGB())
     val currPos = Input(TimingPos())
     val nextPos = Output(TimingPos())
     val vga     = new VgaExt
@@ -56,9 +56,9 @@ class VgaSignal extends Module {
   io.nextPos := nextPos
 
   val active = io.currPos.x < VgaTiming.width.U && io.currPos.y < VgaTiming.height.U
-  io.vga.r := Mux(active, io.pix.r, "h0".U)
-  io.vga.g := Mux(active, io.pix.g, "h0".U)
-  io.vga.b := Mux(active, io.pix.b, "h0".U)
+  io.vga.r := Mux(active, io.pix.r, 0.U)
+  io.vga.g := Mux(active, io.pix.g, 0.U)
+  io.vga.b := Mux(active, io.pix.b, 0.U)
 
   val hsync = VgaTiming.hsyncSta.U <= io.currPos.x && io.currPos.x < VgaTiming.hsyncEnd.U
   val vsync = VgaTiming.vsyncSta.U <= io.currPos.y && io.currPos.y < VgaTiming.vsyncEnd.U

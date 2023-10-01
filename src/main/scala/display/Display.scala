@@ -15,15 +15,15 @@ class Display extends Module {
   vgaSignal.io.currPos := vgaPos
   io.vga               := vgaSignal.io.vga
 
-  val fbReader = Module(new FbReader((row: UInt, in: Vec[RGB]) => {
+  val fbReader = Module(new FbReader((in: Vec[RGB], row: UInt) => {
     val ditherer = Module(new Ditherer)
-    ditherer.io.row := row(1, 0)
     ditherer.io.in  := in
+    ditherer.io.row := row
     ditherer.io.out
   }))
   fbReader.io.fbIdx := io.fbIdx
   fbReader.io.pos   := vgaSignal.io.nextPos
   io.vram <> fbReader.io.vram
 
-  vgaSignal.io.pix := fbReader.io.pix(vgaPos.x(1, 0))
+  vgaSignal.io.pix := fbReader.io.pix(vgaPos.x % fbReader.nrBanks.U)
 }

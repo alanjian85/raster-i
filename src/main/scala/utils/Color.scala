@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
+import chisel3.util._
+import scala.math._
 
 class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
   val r = UInt(rWidth.W)
@@ -10,11 +12,12 @@ class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
 }
 
 class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
+  val width        = rWidth + gWidth + bWidth
+  val alignedWidth = pow(2, log2Up(width)).toInt
+
   def apply() = new RGB(rWidth, gWidth, bWidth)
 
-  def encode(pix: RGB) = {
-    pix.b ## pix.g ## pix.r
-  }
+  def encode(pix: RGB) = pix.b ## pix.g ## pix.r
 
   def decode(pix: UInt) = {
     val result = Wire(new RGB(rWidth, gWidth, bWidth))
@@ -25,5 +28,5 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
   }
 }
 
-object RGB444 extends RGBFactory(4, 4, 4)
-object RGB888 extends RGBFactory(8, 8, 8)
+object IntRGB extends RGBFactory(8, 8, 8)
+object ExtRGB extends RGBFactory(4, 4, 4)

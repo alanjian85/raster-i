@@ -4,22 +4,25 @@
 import chisel3._
 import chisel3.util._
 
-class FbReader(preprocess: (UInt, Vec[RGB]) => Vec[RGB]) extends Module {
+class FbReader(convert: (Vec[RGB], UInt) => Vec[RGB]) extends Module {
+  val nrBanks = Vram.dataWidth / IntRGB.alignedWidth
+
   val io = IO(new Bundle {
       val fbIdx = Input(UInt(1.W))
       val pos   = Input(TimingPos())
       val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
-      val pix   = Output(Vec(4, RGB444()))
+      val pix   = Output(Vec(nrBanks, ExtRGB()))
   })
 
-  val nrBanks = Vram.dataWidth / 32
-  val buffer  = SyncReadMem(VgaTiming.width / nrBanks, Vec(nrBanks, RGB444()))
+  val buffer  = SyncReadMem(VgaTiming.width / nrBanks, Vec(nrBanks, ExtRGB()))
 
-  val addrWidth = log2Up(VgaTiming.width * VgaTiming.height) + 2
+  val addrWidth = log2Up(VgaTiming.width * VgaTiming.height)
   val scanline  = RegInit(0.U(log2Up(VgaTiming.height).W))
   val valid     = RegInit(true.B)
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := (io.fbIdx << addrWidth) | (scanline * VgaTiming.width.U << 2)
+  io.vram.addr.bits.addr  := ((io.fbIdx << addrWidth) |
+                              (scanline * VgaTiming.width.U)) <<
+                             log2Up(IntRGB.alignedWidth / 8)
   io.vram.addr.bits.len   := (VgaTiming.width / nrBanks - 1).U
   io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
@@ -32,9 +35,12 @@ class FbReader(preprocess: (UInt, Vec[RGB]) => Vec[RGB]) extends Module {
   io.vram.data.bits.id := DontCare
   io.vram.data.ready   := true.B
   when (io.vram.data.valid) {
-    buffer.write(rdIdx, preprocess(scanline, VecInit(Seq.tabulate(nrBanks)(
-      i => RGB888.decode(io.vram.data.bits.data(23 + i * 32, i * 32))
-    ))))
+    buffer.write(rdIdx, convert(VecInit(Seq.tabulate(nrBanks)(
+      i => IntRGB.decode(io.vram.data.bits.data(
+        IntRGB.width + i * IntRGB.alignedWidth - 1,
+        i * IntRGB.alignedWidth
+      ))
+    )), scanline))
     rdIdx := rdIdx + 1.U
     when (rdIdx === (VgaTiming.width / nrBanks - 1).U) {
       rdIdx := 0.U
