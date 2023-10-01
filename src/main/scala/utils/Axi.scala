@@ -4,6 +4,25 @@
 import chisel3._
 import chisel3.util._
 
+object Axi {
+  object Burst {
+    val fixed = "b00".U
+    val incr  = "b01".U
+    val wrap  = "b10".U
+  }
+
+  object Size extends Enumeration {
+    val s1   = "b000".U
+    val s2   = "b001".U
+    val s4   = "b010".U
+    val s8   = "b011".U
+    val s16  = "b100".U
+    val s32  = "b101".U
+    val s64  = "b110".U
+    val s128 = "b111".U
+  }
+}
+
 class AxiRdAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
   val id    = UInt(idWidth.W)
   val addr  = UInt(addrWidth.W)

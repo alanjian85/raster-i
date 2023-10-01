@@ -20,8 +20,8 @@ class FbReader(preprocess: (UInt, Vec[RGB]) => Vec[RGB]) extends Module {
   io.vram.addr.bits.id    := DontCare
   io.vram.addr.bits.addr  := (io.fbIdx << addrWidth) | (scanline * VgaTiming.width.U << 2)
   io.vram.addr.bits.len   := (VgaTiming.width / 4 - 1).U
-  io.vram.addr.bits.size  := "b100".U
-  io.vram.addr.bits.burst := "b01".U
+  io.vram.addr.bits.size  := Axi.Size.s16
+  io.vram.addr.bits.burst := Axi.Burst.incr
   io.vram.addr.valid      := valid
   when (valid && io.vram.addr.ready) {
     valid := false.B
