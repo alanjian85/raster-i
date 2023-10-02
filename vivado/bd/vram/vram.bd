@@ -1326,6 +1326,9 @@
           "NUM_OUT_CLKS": {
             "value": "2"
           },
+          "PRIM_SOURCE": {
+            "value": "No_buffer"
+          },
           "SECONDARY_SOURCE": {
             "value": "Single_ended_clock_capable_pin"
           },
