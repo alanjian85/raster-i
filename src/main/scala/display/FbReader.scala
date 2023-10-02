@@ -4,26 +4,28 @@
 import chisel3._
 import chisel3.util._
 
-class FbReader(convert: (Vec[RGB], UInt) => Vec[RGB]) extends Module {
+object FbReader {
   val nrBanks = Vram.dataWidth / IntRGB.alignedWidth
+}
 
+class FbReader extends Module {
   val io = IO(new Bundle {
-      val fbIdx = Input(UInt(FbSwapper.fbIdxWidth.W))
-      val pos   = Input(TimingPos())
-      val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
-      val pix   = Output(Vec(nrBanks, ExtRGB()))
+      val fbIdx  = Input(UInt(FbSwapper.fbIdxWidth.W))
+      val rdPos  = Input(TimingPos())
+      val vram   = new RdAxi(Vram.addrWidth, Vram.dataWidth)
+      val we     = Output(Bool())
+      val wrIdx  = Output(UInt(log2Up(VgaTiming.width / FbReader.nrBanks).W))
+      val wrLine = Output(UInt(log2Up(VgaTiming.height).W))
+      val wrPix  = Output(Vec(FbReader.nrBanks, IntRGB()))
   })
 
-  val buffer  = SyncReadMem(VgaTiming.width / nrBanks, Vec(nrBanks, ExtRGB()))
-
-  val addrWidth = log2Up(VgaTiming.width * VgaTiming.height)
-  val scanline  = RegInit(0.U(log2Up(VgaTiming.height).W))
-  val valid     = RegInit(true.B)
+  val wrLine  = RegInit(0.U(log2Up(VgaTiming.height).W))
+  val valid   = RegInit(true.B)
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbIdx << addrWidth) |
-                              (scanline * VgaTiming.width.U)) <<
+  io.vram.addr.bits.addr  := ((io.fbIdx << log2Up(VgaTiming.width * VgaTiming.height)) |
+                              (wrLine << log2Up(VgaTiming.width))) <<
                              log2Up(IntRGB.alignedWidth / 8)
-  io.vram.addr.bits.len   := (VgaTiming.width / nrBanks - 1).U
+  io.vram.addr.bits.len   := (VgaTiming.width / FbReader.nrBanks - 1).U
   io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
   io.vram.addr.valid      := valid
@@ -31,28 +33,31 @@ class FbReader(convert: (Vec[RGB], UInt) => Vec[RGB]) extends Module {
     valid := false.B
   }
 
-  val rdIdx = RegInit(0.U(log2Up(VgaTiming.width / nrBanks).W))
+  val wrIdx = RegInit(0.U(log2Up(VgaTiming.width / FbReader.nrBanks).W))
   io.vram.data.bits.id := DontCare
   io.vram.data.ready   := true.B
+  io.we    := false.B
+  io.wrPix := VecInit(Seq.tabulate(FbReader.nrBanks)(
+    i => IntRGB.decode(io.vram.data.bits.data(
+      IntRGB.width + i * IntRGB.alignedWidth - 1,
+      i * IntRGB.alignedWidth
+    ))
+  ))
   when (io.vram.data.valid) {
-    buffer.write(rdIdx, convert(VecInit(Seq.tabulate(nrBanks)(
-      i => IntRGB.decode(io.vram.data.bits.data(
-        IntRGB.width + i * IntRGB.alignedWidth - 1,
-        i * IntRGB.alignedWidth
-      ))
-    )), scanline))
-    rdIdx := rdIdx + 1.U
-    when (rdIdx === (VgaTiming.width / nrBanks - 1).U) {
-      rdIdx := 0.U
+    io.we := true.B
+    wrIdx := wrIdx + 1.U
+    when (wrIdx === (VgaTiming.width / FbReader.nrBanks - 1).U) {
+      wrIdx := 0.U
     }
   }
+  io.wrIdx := wrIdx
 
-  io.pix := buffer.read(io.pos.x / nrBanks.U)
-  when (io.pos.y < VgaTiming.height.U && io.pos.x === (VgaTiming.width - 1).U) {
-    scanline := scanline + 1.U
-    when (scanline === (VgaTiming.height - 1).U) {
-      scanline := 0.U
+  when (io.rdPos.y < VgaTiming.height.U && io.rdPos.x === (VgaTiming.width - 1).U) {
+    valid  := true.B
+    wrLine := wrLine + 1.U
+    when (wrLine === (VgaTiming.height - 1).U) {
+      wrLine := 0.U
     }
-    valid := true.B
   }
+  io.wrLine := wrLine
 }
