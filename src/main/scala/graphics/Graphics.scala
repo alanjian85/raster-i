@@ -6,7 +6,7 @@ import chisel3.util._
 
 class Graphics extends Module {
   val io = IO(new Bundle {
-    val fbIdx = Input(UInt(1.W))
+    val fbId = Input(UInt(1.W))
     val vram = new WrAxi(28, 128)
     val done = Output(Bool())
   })
@@ -73,7 +73,7 @@ class Graphics extends Module {
   }
 
   val fbWriter = Module(new FbWriter)
-  fbWriter.io.fbIdx := io.fbIdx
+  fbWriter.io.fbIdx := io.fbId
   fbWriter.io.req.valid := false.B
   fbWriter.io.req.bits.pix := RegNext(pix)
   fbWriter.io.req.bits.vis := RegNext(vis)
@@ -148,7 +148,7 @@ class Graphics extends Module {
         pipeCnt := pipeCnt + 1.U
         fbWriter.io.req.valid := true.B
       } .otherwise {
-        when (io.fbIdx =/= RegNext(io.fbIdx)) {
+        when (io.fbId =/= RegNext(io.fbId)) {
           frameAngleReg := currAngleReg
           pipeCnt := 0.U
           state := flush

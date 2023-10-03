@@ -5,9 +5,9 @@ import chisel3._
 
 class Ditherer extends Module {
   val io = IO(new Bundle {
-    val in  = Input(Vec(4, IntRGB()))
+    val in  = Input(Vec(4, FbRGB()))
     val row = Input(UInt(2.W))
-    val out = Output(Vec(4, ExtRGB()))
+    val out = Output(Vec(4, VgaRGB()))
   })
 
   object BayerMat4 extends UMat4Factory(4)
@@ -28,7 +28,7 @@ class Ditherer extends Module {
   }
 
   def ditherRGB(pix: RGB, threshold: UInt) = {
-    val result = Wire(ExtRGB())
+    val result = Wire(VgaRGB())
     result.r := dither(pix.r, threshold)
     result.g := dither(pix.g, threshold)
     result.b := dither(pix.b, threshold)

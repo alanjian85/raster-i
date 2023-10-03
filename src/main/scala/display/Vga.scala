@@ -25,20 +25,21 @@ object VgaTiming {
   val polarity = false
 }
 
+object VgaRGB extends RGBFactory(4, 4, 4)
 object TimingPos extends UVec2Factory(log2Up(VgaTiming.horizEnd), log2Up(VgaTiming.vertiEnd))
 object ScreenPos extends UVec2Factory(log2Up(VgaTiming.width), log2Up(VgaTiming.height))
 
 class VgaExt extends Bundle {
-  val r     = Output(UInt(ExtRGB.rWidth.W))
-  val g     = Output(UInt(ExtRGB.gWidth.W))
-  val b     = Output(UInt(ExtRGB.bWidth.W))
+  val r     = Output(UInt(VgaRGB.rWidth.W))
+  val g     = Output(UInt(VgaRGB.gWidth.W))
+  val b     = Output(UInt(VgaRGB.bWidth.W))
   val hsync = Output(Bool())
   val vsync = Output(Bool())
 }
 
 class VgaSignal extends Module {
   val io = IO(new Bundle {
-    val pix     = Input(ExtRGB())
+    val pix     = Input(VgaRGB())
     val currPos = Input(TimingPos())
     val nextPos = Output(TimingPos())
     val vga     = new VgaExt

@@ -27,6 +27,3 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
     result
   }
 }
-
-object IntRGB extends RGBFactory(8, 8, 8)
-object ExtRGB extends RGBFactory(4, 4, 4)

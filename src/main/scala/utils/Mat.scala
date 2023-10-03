@@ -4,10 +4,10 @@
 import chisel3._
 
 class UMat4(eWidth: Int) extends Bundle {
-  val elems = Vec(4, Vec(4, UInt(eWidth.W)))
+  val elem = Vec(4, Vec(4, UInt(eWidth.W)))
 
-  def apply(idx: Int)  = elems(idx)
-  def apply(idx: UInt) = elems(idx)
+  def apply(idx: Int)  = elem(idx)
+  def apply(idx: UInt) = elem(idx)
 }
 
 class UMat4Factory(eWidth: Int) {
