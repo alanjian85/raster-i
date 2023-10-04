@@ -29,16 +29,24 @@ class Display extends Module {
   val buffer   = SyncReadMem(VgaTiming.width / Fb.nrBanks, Vec(Fb.nrBanks, VgaRGB()))
   val fbReader = Module(new FbReader)
   io.vram <> fbReader.io.vram
-  fbReader.io.fbId          := io.fbId
+  fbReader.io.fbId := io.fbId
   fbReader.io.req.valid     := rdReqValid
   fbReader.io.req.bits.line := rdReqLine
   when (rdReqValid && fbReader.io.req.ready) {
     rdReqValid := false.B
   }
   when (fbReader.io.res.valid) {
+    val pix = Wire(Vec(Fb.nrBanks, FbRGB()))
+    for (i <- 0 until Fb.nrBanks) {
+      val gammaCorrector = Module(new GammaCorrector)
+      gammaCorrector.io.in := fbReader.io.res.bits.pix(i)
+      pix(i) := gammaCorrector.io.out
+    }
+
     val ditherer = Module(new Ditherer)
-    ditherer.io.in  := fbReader.io.res.bits.pix
+    ditherer.io.in  := pix
     ditherer.io.row := rdReqLine
+
     buffer.write(fbReader.io.res.bits.idx, ditherer.io.out)
   }
 

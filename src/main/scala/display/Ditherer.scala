@@ -35,10 +35,8 @@ class Ditherer extends Module {
     res
   }
 
-  io.out := VecInit(
-    ditherRGB(io.in(0), bayer(io.row)(0)),
-    ditherRGB(io.in(1), bayer(io.row)(1)),
-    ditherRGB(io.in(2), bayer(io.row)(2)),
-    ditherRGB(io.in(3), bayer(io.row)(3))
-  )
+  io.out(0) := ditherRGB(io.in(0), bayer(io.row)(0))
+  io.out(1) := ditherRGB(io.in(1), bayer(io.row)(1))
+  io.out(2) := ditherRGB(io.in(2), bayer(io.row)(2))
+  io.out(3) := ditherRGB(io.in(3), bayer(io.row)(3))
 }
