@@ -8,3 +8,4 @@ trinity
 !*.xci
 !mig_*.prj
 !*.coe
+!top.v
