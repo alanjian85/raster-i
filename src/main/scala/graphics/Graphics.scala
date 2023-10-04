@@ -6,157 +6,34 @@ import chisel3.util._
 
 class Graphics extends Module {
   val io = IO(new Bundle {
-    val fbId = Input(UInt(1.W))
-    val vram = new WrAxi(28, 128)
+    val fbId = Input(UInt(Fb.idWidth.W))
+    val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
     val done = Output(Bool())
   })
 
-  val xReg = RegInit(0.U(log2Up(VgaTiming.width / 4).W))
-  val yReg = RegInit(0.U(log2Up(VgaTiming.height).W))
-  val frameAngleReg = RegInit(0.U(log2Up(360).W))
+  val color = Wire(FbRGB())
+  color.r := "hff".U
+  color.g := "hff".U
+  color.b := "hff".U
 
-  val cosRom = Module(new CosRom)
-  val bzRom  = Module(new BzRom)
-  val czRom  = Module(new CzRom)
-  cosRom.io.addr := frameAngleReg
-  bzRom.io.addr  := frameAngleReg
-  czRom.io.addr  := frameAngleReg
-
-  val vertShader = Module(new VertShader)
-  vertShader.io.cos  := cosRom.io.data
-  vertShader.io.inBz := bzRom.io.data
-  vertShader.io.inCz := czRom.io.data
-
-  val rastAxReg = RegNext(vertShader.io.ax)
-  val rastAyReg = RegNext(vertShader.io.ay)
-  val rastBxReg = RegNext(vertShader.io.bx)
-  val rastByReg = RegNext(vertShader.io.by)
-  val rastBzReg = RegNext(vertShader.io.bz)
-  val rastCxReg = RegNext(vertShader.io.cx)
-  val rastCyReg = RegNext(vertShader.io.cy)
-  val rastCzReg = RegNext(vertShader.io.cz)
-  val rastPxReg = RegNext(RegNext(RegNext(xReg)))
-  val rastPyReg = RegNext(RegNext(RegNext(yReg)))
-
-  val pix = Wire(Vec(4, UInt(32.W)))
-  val vis = Wire(Vec(4, Bool()))
-  for (i <- 0 until 4) {
-    val rasterizer = Module(new Rasterizer)
-    rasterizer.io.ax := rastAxReg
-    rasterizer.io.ay := rastAyReg
-    rasterizer.io.bx := rastBxReg
-    rasterizer.io.by := rastByReg
-    rasterizer.io.bz := rastBzReg
-    rasterizer.io.cx := rastCxReg
-    rasterizer.io.cy := rastCyReg
-    rasterizer.io.cz := rastCzReg
-    rasterizer.io.px := (rastPxReg << 2.U) | i.U
-    rasterizer.io.py := rastPyReg
-
-    val fragShader = Module(new FragShader)
-    fragShader.io.inVis := RegNext(rasterizer.io.visible)
-    fragShader.io.u     := RegNext(rasterizer.io.u)
-    fragShader.io.v     := RegNext(rasterizer.io.v)
-    fragShader.io.w     := RegNext(rasterizer.io.w)
-    fragShader.io.a     := RegNext(rasterizer.io.a)
-    pix(i) := fragShader.io.pix
-    vis(i) := fragShader.io.outVis
-  }
-
-  val pxReg = Reg(Vec(11, UInt(log2Up(VgaTiming.width / 4).W)))
-  val pyReg = Reg(Vec(11, UInt(log2Up(VgaTiming.height).W)))
-  pxReg(0) := rastPxReg
-  pyReg(0) := rastPyReg
-  for (i <- 1 until 11) {
-    pxReg(i) := pxReg(i - 1)
-    pyReg(i) := pyReg(i - 1)
+  val idx  = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  val line = RegInit(0.U(unsignedBitLength(VgaTiming.height).W))
+  io.done := line === VgaTiming.height.U
+  when (io.fbId =/= RegNext(io.fbId)) {
+    line := 0.U
   }
 
   val fbWriter = Module(new FbWriter)
-  fbWriter.io.fbIdx := io.fbId
-  fbWriter.io.req.valid := false.B
-  fbWriter.io.req.bits.pix := RegNext(pix)
-  fbWriter.io.req.bits.vis := RegNext(vis)
-  val reqXReg = RegNext(pxReg(10))
-  val reqYReg = RegNext(pyReg(10))
-  val angleReg = Reg(Vec(16, UInt(9.W)))
-  angleReg(0) := frameAngleReg
-  for (i <- 1 until 15) {
-    angleReg(i) := angleReg(i - 1)
-  }
-  val reqAngleReg = angleReg(14)
-  io.vram <> fbWriter.io.axi
-
-  val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
-  val currAngleReg = RegInit(0.U(log2Up(360).W))
-  cntReg := cntReg + 1.U
-  when (cntReg === 1388888.U) {
-    cntReg := 0.U
-    currAngleReg := currAngleReg + 1.U
-    when (currAngleReg === 359.U) {
-      currAngleReg := 0.U
-    }
-  }
-
-  io.done := false.B
-
-  object State extends ChiselEnum {
-    val flush, run, done = Value
-  }
-  import State._
-
-  val state = RegInit(flush)
-  val pipeCnt = RegInit(0.U(unsignedBitLength(15).W))
-  switch (state) {
-    is(flush) {
-      fbWriter.io.req.valid := false.B
-      pipeCnt := pipeCnt + 1.U
-      xReg := xReg + 1.U
-      when (xReg === ((VgaTiming.width / 4) - 1).U) {
-        xReg := 0.U
-        yReg := yReg + 1.U
-        when (yReg === (VgaTiming.height - 1).U) {
-          yReg := 0.U
-        }
-      }
-      when (pipeCnt === 14.U) {
-        pipeCnt := 0.U
-        state := run
-      }
-    }
-    is(run) {
-      fbWriter.io.req.valid := true.B
-      when (fbWriter.io.req.ready) {
-        xReg := xReg + 1.U
-        when (xReg === ((VgaTiming.width / 4) - 1).U) {
-          xReg := 0.U
-          yReg := yReg + 1.U
-          when (yReg === (VgaTiming.height - 1).U) {
-            yReg := 0.U
-            state := done
-          }
-        }
-      } .otherwise {
-        state := flush
-        xReg := reqXReg
-        yReg := reqYReg
-        frameAngleReg := reqAngleReg
-      }
-    }
-    is (done) {
-      when (pipeCnt <= 14.U) {
-        pipeCnt := pipeCnt + 1.U
-        fbWriter.io.req.valid := true.B
-      } .otherwise {
-        when (io.fbId =/= RegNext(io.fbId)) {
-          frameAngleReg := currAngleReg
-          pipeCnt := 0.U
-          state := flush
-        } .otherwise {
-          io.done := true.B
-          fbWriter.io.req.valid := false.B
-        }
-      }
+  io.vram <> fbWriter.io.vram
+  fbWriter.io.fbId := io.fbId
+  fbWriter.io.req.valid     := line =/= VgaTiming.height.U
+  fbWriter.io.req.bits.line := line
+  fbWriter.io.pix := VecInit(Seq.fill(4)(color))
+  when (line =/= VgaTiming.height.U && fbWriter.io.req.ready) {
+    idx := idx + 1.U
+    when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
+      idx  := 0.U
+      line := line + 1.U
     }
   }
 }

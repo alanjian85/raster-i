@@ -19,6 +19,8 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
 
   def encode(pix: RGB) = pix.b ## pix.g ## pix.r
 
+  def encodeAligned(pix: RGB) = 0.U((alignedWidth - width).W) ## pix.b ## pix.g ## pix.r
+
   def decode(pix: UInt) = {
     val res = Wire(new RGB(rWidth, gWidth, bWidth))
     res.r := pix(rWidth - 1, 0)

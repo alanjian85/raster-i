@@ -104,16 +104,15 @@ class FbRdReq extends Bundle {
   val line = UInt(log2Up(VgaTiming.height).W)
 }
 
-class FbRdRes extends Bundle {
-  val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
+class FbRdRes extends Bundle { val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
   val pix  = Vec(Fb.nrBanks, FbRGB())
 }
 
 class FbReader extends Module {
   val io = IO(new Bundle {
+    val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
     val fbId  = Input(UInt(Fb.idWidth.W))
     val req   = Flipped(Irrevocable(new FbRdReq))
-    val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
     val res   = Valid(new FbRdRes)
   })
 
@@ -144,4 +143,49 @@ class FbReader extends Module {
       idx  := 0.U
     }
   }
+}
+
+class FbWrReq extends Bundle {
+  val line = UInt(log2Up(VgaTiming.height).W)
+}
+
+class FbWriter extends Module {
+  val io = IO(new Bundle {
+    val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
+    val fbId = Input(UInt(Fb.idWidth.W))
+    val req  = Flipped(Irrevocable(new FbWrReq))
+    val pix  = Input(Vec(Fb.nrBanks, FbRGB()))
+    val idx  = Output(UInt(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  })
+
+  val idle = RegInit(true.B)
+  io.vram.addr.bits.id    := DontCare
+  io.vram.addr.bits.addr  := ((io.fbId << log2Up(VgaTiming.width * VgaTiming.height)) |
+                             (io.req.bits.line << log2Up(VgaTiming.width))) <<
+                             log2Up(FbRGB.alignedWidth / 8)
+  io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
+  io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
+  io.vram.addr.bits.burst := Axi.Burst.incr
+  io.vram.addr.valid      := idle && io.req.valid
+  io.req.ready := idle && io.vram.addr.ready
+  when (idle && io.req.valid && io.vram.addr.ready) {
+    idle := false.B
+  }
+
+  val idx = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  io.vram.data.bits.data := io.pix.reverse.map(FbRGB.encodeAligned(_)).reduce(_ ## _)
+  io.vram.data.bits.strb := Fill(Vram.dataWidth / 8, 1.U)
+  io.vram.data.bits.last := idx === (VgaTiming.width / Fb.nrBanks - 1).U
+  io.vram.data.valid     := !idle
+  io.idx := idx
+  when (!idle && io.vram.data.ready) {
+    io.idx := idx + 1.U
+    idx    := idx + 1.U
+    when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
+      idle := true.B
+      idx  := 0.U
+    }
+  }
+
+  io.vram.resp.ready := true.B
 }
