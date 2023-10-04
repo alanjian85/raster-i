@@ -104,7 +104,8 @@ class FbRdReq extends Bundle {
   val line = UInt(log2Up(VgaTiming.height).W)
 }
 
-class FbRdRes extends Bundle { val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
+class FbRdRes extends Bundle {
+  val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
   val pix  = Vec(Fb.nrBanks, FbRGB())
 }
 

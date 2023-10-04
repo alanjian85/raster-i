@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 import chisel3._
+import chisel3.util._
 
 class Ditherer extends Module {
   val io = IO(new Bundle {
-    val in  = Input(Vec(4, FbRGB()))
+    val in  = Flipped(Valid(new FbRdRes))
     val row = Input(UInt(2.W))
-    val out = Output(Vec(4, VgaRGB()))
+    val out = Valid(new FbRdRes)
   })
 
   object BayerMat4 extends UMat4Factory(4)
@@ -35,8 +36,10 @@ class Ditherer extends Module {
     res
   }
 
-  io.out(0) := ditherRGB(io.in(0), bayer(io.row)(0))
-  io.out(1) := ditherRGB(io.in(1), bayer(io.row)(1))
-  io.out(2) := ditherRGB(io.in(2), bayer(io.row)(2))
-  io.out(3) := ditherRGB(io.in(3), bayer(io.row)(3))
+  io.out.bits.idx    := io.in.bits.idx
+  io.out.bits.pix(0) := ditherRGB(io.in.bits.pix(0), bayer(io.row)(0))
+  io.out.bits.pix(1) := ditherRGB(io.in.bits.pix(1), bayer(io.row)(1))
+  io.out.bits.pix(2) := ditherRGB(io.in.bits.pix(2), bayer(io.row)(2))
+  io.out.bits.pix(3) := ditherRGB(io.in.bits.pix(3), bayer(io.row)(3))
+  io.out.valid       := io.in.valid
 }

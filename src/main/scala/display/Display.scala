@@ -35,19 +35,11 @@ class Display extends Module {
   when (rdReqValid && fbReader.io.req.ready) {
     rdReqValid := false.B
   }
-  when (fbReader.io.res.valid) {
-    val pix = Wire(Vec(Fb.nrBanks, FbRGB()))
-    for (i <- 0 until Fb.nrBanks) {
-      val gammaCorrector = Module(new GammaCorrector)
-      gammaCorrector.io.in := fbReader.io.res.bits.pix(i)
-      pix(i) := gammaCorrector.io.out
-    }
-
-    val ditherer = Module(new Ditherer)
-    ditherer.io.in  := pix
-    ditherer.io.row := rdReqLine
-
-    buffer.write(fbReader.io.res.bits.idx, ditherer.io.out)
+  val ditherer = Module(new Ditherer)
+  ditherer.io.in  := fbReader.io.res
+  ditherer.io.row := rdReqLine
+  when (ditherer.io.out.valid) {
+    buffer.write(ditherer.io.out.bits.idx, ditherer.io.out.bits.pix)
   }
 
   val pixBanks = buffer.read(vgaSignal.io.nextPos.x >> log2Up(Fb.nrBanks))
