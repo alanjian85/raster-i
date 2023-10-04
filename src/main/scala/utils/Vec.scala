@@ -12,9 +12,9 @@ class UVec2Factory(val xWidth: Int, val yWidth: Int) {
   def apply() = new UVec2(xWidth, yWidth)
 
   def apply(x: Int, y: Int) = {
-    val result = Wire(new UVec2(xWidth, yWidth))
-    result.x := x.U
-    result.y := y.U
-    result
+    val res = Wire(new UVec2(xWidth, yWidth))
+    res.x := x.U
+    res.y := y.U
+    res
   }
 }

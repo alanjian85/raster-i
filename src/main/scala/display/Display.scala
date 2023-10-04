@@ -16,16 +16,30 @@ class Display extends Module {
   vgaSignal.io.currPos := vgaPos
   io.vga               := vgaSignal.io.vga
 
+  val rdReqValid = RegInit(true.B)
+  val rdReqLine  = RegInit(0.U(log2Up(VgaTiming.height).W))
+  when (vgaPos.y < VgaTiming.height.U && vgaPos.x === (VgaTiming.width - 1).U) {
+    rdReqValid := true.B
+    rdReqLine  := rdReqLine + 1.U
+    when (rdReqLine === (VgaTiming.height - 1).U) {
+      rdReqLine := 0.U
+    }
+  }
+
   val buffer   = SyncReadMem(VgaTiming.width / Fb.nrBanks, Vec(Fb.nrBanks, VgaRGB()))
   val fbReader = Module(new FbReader)
-  fbReader.io.fbId := io.fbId
-  fbReader.io.pos  := vgaSignal.io.nextPos
+  fbReader.io.fbId          := io.fbId
+  fbReader.io.req.valid     := rdReqValid
+  fbReader.io.req.bits.line := rdReqLine
+  when (rdReqValid && fbReader.io.req.ready) {
+    rdReqValid := false.B
+  }
   io.vram <> fbReader.io.vram
-  when (fbReader.io.req.valid) {
+  when (fbReader.io.res.valid) {
     val ditherer = Module(new Ditherer)
-    ditherer.io.in  := fbReader.io.req.bits.pix
-    ditherer.io.row := fbReader.io.req.bits.line
-    buffer.write(fbReader.io.req.bits.idx, ditherer.io.out)
+    ditherer.io.in  := fbReader.io.res.bits.pix
+    ditherer.io.row := rdReqLine
+    buffer.write(fbReader.io.res.bits.idx, ditherer.io.out)
   }
 
   val pixBanks = buffer.read(vgaSignal.io.nextPos.x >> log2Up(Fb.nrBanks))

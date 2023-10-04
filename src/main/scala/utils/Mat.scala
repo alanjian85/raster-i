@@ -18,26 +18,26 @@ class UMat4Factory(eWidth: Int) {
             e20: Int, e21: Int, e22: Int, e23: Int,
             e30: Int, e31: Int, e32: Int, e33: Int)
   = {
-    val result = Wire(new UMat4(eWidth))
-    result(0)(0) := e00.U
-    result(0)(1) := e01.U
-    result(0)(2) := e02.U
-    result(0)(3) := e03.U
+    val res = Wire(new UMat4(eWidth))
+    res(0)(0) := e00.U
+    res(0)(1) := e01.U
+    res(0)(2) := e02.U
+    res(0)(3) := e03.U
 
-    result(1)(0) := e10.U
-    result(1)(1) := e11.U
-    result(1)(2) := e12.U
-    result(1)(3) := e13.U
+    res(1)(0) := e10.U
+    res(1)(1) := e11.U
+    res(1)(2) := e12.U
+    res(1)(3) := e13.U
 
-    result(2)(0) := e20.U
-    result(2)(1) := e21.U
-    result(2)(2) := e22.U
-    result(2)(3) := e23.U
+    res(2)(0) := e20.U
+    res(2)(1) := e21.U
+    res(2)(2) := e22.U
+    res(2)(3) := e23.U
 
-    result(3)(0) := e30.U
-    result(3)(1) := e31.U
-    result(3)(2) := e32.U
-    result(3)(3) := e33.U
-    result
+    res(3)(0) := e30.U
+    res(3)(1) := e31.U
+    res(3)(2) := e32.U
+    res(3)(3) := e33.U
+    res
   }
 }

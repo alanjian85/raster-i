@@ -20,10 +20,10 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
   def encode(pix: RGB) = pix.b ## pix.g ## pix.r
 
   def decode(pix: UInt) = {
-    val result = Wire(new RGB(rWidth, gWidth, bWidth))
-    result.r := pix(rWidth - 1, 0)
-    result.g := pix(rWidth + gWidth - 1, rWidth)
-    result.b := pix(rWidth + gWidth + bWidth - 1, rWidth + gWidth)
-    result
+    val res = Wire(new RGB(rWidth, gWidth, bWidth))
+    res.r := pix(rWidth - 1, 0)
+    res.g := pix(rWidth + gWidth - 1, rWidth)
+    res.b := pix(rWidth + gWidth + bWidth - 1, rWidth + gWidth)
+    res
   }
 }

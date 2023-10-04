@@ -85,16 +85,15 @@ class FbSwapper extends Module {
     val graphicsFbId = Output(UInt(Fb.idWidth.W))
   })
 
+  val swapped      = RegInit(false.B)
   val displayFbId  = RegInit(0.U(Fb.idWidth.W))
   val graphicsFbId = RegInit(1.U(Fb.idWidth.W))
   io.displayFbId  := displayFbId
   io.graphicsFbId := graphicsFbId
-
-  val swapped = RegInit(false.B)
   when (!swapped && io.displayVsync && io.graphicsDone) {
+    swapped      := true.B
     displayFbId  := ~displayFbId
     graphicsFbId := ~graphicsFbId
-    swapped      := true.B
   }
   when (!io.graphicsDone) {
     swapped := false.B
@@ -102,58 +101,47 @@ class FbSwapper extends Module {
 }
 
 class FbRdReq extends Bundle {
-  val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
   val line = UInt(log2Up(VgaTiming.height).W)
+}
+
+class FbRdRes extends Bundle {
+  val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
   val pix  = Vec(Fb.nrBanks, FbRGB())
 }
 
 class FbReader extends Module {
   val io = IO(new Bundle {
     val fbId  = Input(UInt(Fb.idWidth.W))
-    val pos = Input(TimingPos())
+    val req   = Flipped(Irrevocable(new FbRdReq))
     val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
-    val req   = Valid(new FbRdReq)
+    val res   = Valid(new FbRdRes)
   })
 
-  val rdLine = RegInit(0.U(log2Up(VgaTiming.height).W))
-  val valid  = RegInit(true.B)
   io.vram.addr.bits.id    := DontCare
   io.vram.addr.bits.addr  := ((io.fbId << log2Up(VgaTiming.width * VgaTiming.height)) |
-                              (rdLine << log2Up(VgaTiming.width))) <<
+                              (io.req.bits.line << log2Up(VgaTiming.width))) <<
                              log2Up(FbRGB.alignedWidth / 8)
   io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
   io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
-  io.vram.addr.valid      := valid
-  when (valid && io.vram.addr.ready) {
-    valid := false.B
-  }
+  io.vram.addr.valid      := io.req.valid
+  io.req.ready            := io.vram.addr.ready
 
-  val rdIdx = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  val idx = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
   io.vram.data.bits.id := DontCare
   io.vram.data.ready   := true.B
-  io.req.valid := false.B
-  io.req.bits.pix   := VecInit(Seq.tabulate(Fb.nrBanks)(
+  io.res.valid    := io.vram.data.valid
+  io.res.bits.idx := idx
+  io.res.bits.pix := VecInit(Seq.tabulate(Fb.nrBanks)(
     i => FbRGB.decode(io.vram.data.bits.data(
       FbRGB.width + i * FbRGB.alignedWidth - 1,
       i * FbRGB.alignedWidth
     ))
   ))
   when (io.vram.data.valid) {
-    io.req.valid := true.B
-    rdIdx := rdIdx + 1.U
-    when (rdIdx === (VgaTiming.width / Fb.nrBanks - 1).U) {
-      rdIdx := 0.U
+    idx := idx + 1.U
+    when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
+      idx  := 0.U
     }
   }
-  io.req.bits.idx := rdIdx
-
-  when (io.pos.y < VgaTiming.height.U && io.pos.x === (VgaTiming.width - 1).U) {
-    valid  := true.B
-    rdLine := rdLine + 1.U
-    when (rdLine === (VgaTiming.height - 1).U) {
-      rdLine := 0.U
-    }
-  }
-  io.req.bits.line := rdLine
 }

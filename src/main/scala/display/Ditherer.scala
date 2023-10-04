@@ -20,19 +20,19 @@ class Ditherer extends Module {
 
   def dither(x: UInt, threshold: UInt) = {
     val sum = x +& threshold
-    val result = WireDefault(sum(7, 4))
+    val res = WireDefault(sum(7, 4))
     when (sum(8)) {
-        result := "hf".U
+        res := "hf".U
     }
-    result
+    res
   }
 
   def ditherRGB(pix: RGB, threshold: UInt) = {
-    val result = Wire(VgaRGB())
-    result.r := dither(pix.r, threshold)
-    result.g := dither(pix.g, threshold)
-    result.b := dither(pix.b, threshold)
-    result
+    val res = Wire(VgaRGB())
+    res.r := dither(pix.r, threshold)
+    res.g := dither(pix.g, threshold)
+    res.b := dither(pix.b, threshold)
+    res
   }
 
   io.out := VecInit(
