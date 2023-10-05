@@ -134,7 +134,7 @@ class FbReader extends Module {
   io.res.bits.idx := idx
   io.res.bits.pix := VecInit(Seq.tabulate(Fb.nrBanks)(
     i => FbRGB.decode(io.vram.data.bits.data(
-      FbRGB.width + i * FbRGB.alignedWidth - 1,
+      (i + 1) * FbRGB.alignedWidth - 1,
       i * FbRGB.alignedWidth
     ))
   ))
@@ -180,8 +180,9 @@ class FbWriter extends Module {
   io.vram.data.valid     := !idle
   io.idx := idx
   when (!idle && io.vram.data.ready) {
-    io.idx := idx + 1.U
-    idx    := idx + 1.U
+    val nextIdx = idx + 1.U
+    io.idx := nextIdx
+    idx    := nextIdx
     when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
       idle := true.B
       idx  := 0.U

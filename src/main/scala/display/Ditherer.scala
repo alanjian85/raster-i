@@ -4,11 +4,16 @@
 import chisel3._
 import chisel3.util._
 
+class DitherRes extends Bundle {
+  val idx  = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
+  val pix  = Vec(Fb.nrBanks, VgaRGB())
+}
+
 class Ditherer extends Module {
   val io = IO(new Bundle {
     val in  = Flipped(Valid(new FbRdRes))
     val row = Input(UInt(2.W))
-    val out = Valid(new FbRdRes)
+    val out = Valid(new DitherRes)
   })
 
   object BayerMat4 extends UMat4Factory(4)
