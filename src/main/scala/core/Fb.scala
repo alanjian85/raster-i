@@ -90,12 +90,13 @@ class FbSwapper extends Module {
   val graphicsFbId = RegInit(1.U(Fb.idWidth.W))
   io.displayFbId  := displayFbId
   io.graphicsFbId := graphicsFbId
-  when (!swapped && io.displayVsync && io.graphicsDone) {
-    swapped      := true.B
-    displayFbId  := ~displayFbId
-    graphicsFbId := ~graphicsFbId
-  }
-  when (!io.graphicsDone) {
+  when (io.displayVsync && io.graphicsDone) {
+    when (!swapped) {
+      swapped      := true.B
+      displayFbId  := ~displayFbId
+      graphicsFbId := ~graphicsFbId
+    }
+  } .otherwise {
     swapped := false.B
   }
 }
@@ -147,7 +148,7 @@ class FbReader extends Module {
 }
 
 class FbWrReq extends Bundle {
-  val line = UInt(log2Up(VgaTiming.height).W)
+  val pix = Vec(Fb.nrBanks, FbRGB())
 }
 
 class FbWriter extends Module {
@@ -155,38 +156,41 @@ class FbWriter extends Module {
     val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
     val fbId = Input(UInt(Fb.idWidth.W))
     val req  = Flipped(Irrevocable(new FbWrReq))
-    val pix  = Input(Vec(Fb.nrBanks, FbRGB()))
     val idx  = Output(UInt(log2Up(VgaTiming.width / Fb.nrBanks).W))
   })
 
-  val idle = RegInit(true.B)
+  val addrWidth = log2Up(VgaTiming.width * VgaTiming.height)
+  val addrValid = RegInit(false.B)
+  val addr      = RegInit(0.U(addrWidth.W))
+  val idx       = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbId << log2Up(VgaTiming.width * VgaTiming.height)) |
-                             (io.req.bits.line << log2Up(VgaTiming.width))) <<
-                             log2Up(FbRGB.alignedWidth / 8)
+  io.vram.addr.bits.addr  := (io.fbId << addrWidth | addr) << log2Up(FbRGB.alignedWidth / 8)
   io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
   io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
-  io.vram.addr.valid      := idle && io.req.valid
-  io.req.ready := idle && io.vram.addr.ready
-  when (idle && io.req.valid && io.vram.addr.ready) {
-    idle := false.B
+  when (!addrValid && idx === 0.U) {
+    addrValid := true.B
+  }
+  when (addrValid && io.vram.addr.ready) {
+    addrValid := false.B
+    addr      := addr + VgaTiming.width.U
+    when (addr === (VgaTiming.width * (VgaTiming.height - 1)).U) {
+      addr := 0.U
+    }
   }
 
-  val idx = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
-  io.vram.data.bits.data := io.pix.reverse.map(FbRGB.encodeAligned(_)).reduce(_ ## _)
+  val last = idx === (VgaTiming.width / Fb.nrBanks - 1).U
+  io.vram.data.valid     := io.req.valid
+  io.vram.data.bits.data := io.req.bits.pix.reverse.map(FbRGB.encodeAligned(_)).reduce(_ ## _)
   io.vram.data.bits.strb := Fill(Vram.dataWidth / 8, 1.U)
-  io.vram.data.bits.last := idx === (VgaTiming.width / Fb.nrBanks - 1).U
-  io.vram.data.valid     := !idle
+  io.vram.data.bits.last := last
+  io.req.ready := io.vram.data.ready
   io.idx := idx
-  when (!idle && io.vram.data.ready) {
-    val nextIdx = idx + 1.U
-    io.idx := nextIdx
+  when (io.req.valid && io.vram.data.ready) {
+    val nextIdx = Mux(last, 0.U, idx + 1.U)
     idx    := nextIdx
-    when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
-      idle := true.B
-      idx  := 0.U
-    }
+    io.idx := nextIdx
   }
 
   io.vram.resp.ready := true.B

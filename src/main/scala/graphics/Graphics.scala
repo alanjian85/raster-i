@@ -12,26 +12,22 @@ class Graphics extends Module {
   })
 
   val line = RegInit(0.U(unsignedBitLength(VgaTiming.height).W))
-  io.done := line === VgaTiming.height.U
-  when (io.fbId =/= RegNext(io.fbId)) {
-    line := 0.U
-  }
-
+  val done = line === VgaTiming.height.U
   val fbWriter = Module(new FbWriter)
   io.vram <> fbWriter.io.vram
   fbWriter.io.fbId := io.fbId
-  fbWriter.io.req.valid     := line =/= VgaTiming.height.U
-  fbWriter.io.req.bits.line := line
+  fbWriter.io.req.valid := !done
   val color = Wire(FbRGB())
   color.r := RegNext(fbWriter.io.idx(7, 4) ## 0.U(4.W))
   color.g := color.r
   color.b := color.r
   val gammaCorrector = Module(new GammaCorrector)
   gammaCorrector.io.in := color
-  fbWriter.io.pix := VecInit(Seq.fill(4)(
+  fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(
     Mux(line < (VgaTiming.height / 2).U, color, gammaCorrector.io.out)
   ))
-  when (line =/= VgaTiming.height.U && fbWriter.io.req.ready) {
+  when (!done && fbWriter.io.req.ready && fbWriter.io.idx === 0.U) {
     line := line + 1.U
   }
+  io.done := done
 }

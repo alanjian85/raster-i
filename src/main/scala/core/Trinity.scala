@@ -13,7 +13,7 @@ class Trinity extends Module {
   val vram   = Module(new Vram)
   io.ddr3 <> vram.io.ddr3
 
-  val fbSwapper = Module(new FbSwapper)
+  val fbSwapper    = Module(new FbSwapper)
   val displayVsync = Wire(Bool())
   val graphicsDone = Wire(Bool())
   fbSwapper.io.displayVsync := RegNext(RegNext(displayVsync))

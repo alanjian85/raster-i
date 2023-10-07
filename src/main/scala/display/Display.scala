@@ -7,14 +7,14 @@ import chisel3.util._
 class Display extends Module {
   val io = IO(new Bundle {
     val fbId = Input(UInt(Fb.idWidth.W))
-    val vram  = new RdAxi(Vram.addrWidth, Vram.dataWidth)
-    val vga   = new VgaExt
+    val vram = new RdAxi(Vram.addrWidth, Vram.dataWidth)
+    val vga  = new VgaExt
   })
 
   val vgaSignal = Module(new VgaSignal)
   val vgaPos    = RegNext(vgaSignal.io.nextPos)
   vgaSignal.io.currPos := vgaPos
-  io.vga               := vgaSignal.io.vga
+  io.vga := vgaSignal.io.vga
 
   val rdReqValid = RegInit(true.B)
   val rdReqLine  = RegInit(0.U(log2Up(VgaTiming.height).W))
