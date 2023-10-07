@@ -160,6 +160,7 @@ class FbWriter extends Module {
   })
 
   val addrWidth = log2Up(VgaTiming.width * VgaTiming.height)
+  val addrBegan = RegInit(false.B)
   val addrValid = RegInit(false.B)
   val addr      = RegInit(0.U(addrWidth.W))
   val idx       = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
@@ -169,7 +170,8 @@ class FbWriter extends Module {
   io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
   io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
   io.vram.addr.bits.burst := Axi.Burst.incr
-  when (!addrValid && idx === 0.U) {
+  when (io.req.valid && !addrBegan) {
+    addrBegan := true.B
     addrValid := true.B
   }
   when (addrValid && io.vram.addr.ready) {
@@ -188,7 +190,11 @@ class FbWriter extends Module {
   io.req.ready := io.vram.data.ready
   io.idx := idx
   when (io.req.valid && io.vram.data.ready) {
-    val nextIdx = Mux(last, 0.U, idx + 1.U)
+    val nextIdx = WireDefault(idx + 1.U)
+    when (last) {
+      nextIdx   := 0.U
+      addrBegan := false.B
+    }
     idx    := nextIdx
     io.idx := nextIdx
   }

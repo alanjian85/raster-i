@@ -29,5 +29,8 @@ class Graphics extends Module {
   when (!done && fbWriter.io.req.ready && fbWriter.io.idx === 0.U) {
     line := line + 1.U
   }
+  when (RegNext(io.fbId) =/= io.fbId) {
+    line := 0.U
+  }
   io.done := done
 }
