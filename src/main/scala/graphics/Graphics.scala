@@ -23,7 +23,7 @@ class Graphics extends Module {
   color.b := color.r
   val gammaCorrector = Module(new GammaCorrector)
   gammaCorrector.io.in := color
-  fbWriter.io.req.bits.pix := VecInit(Seq.fill(4)(
+  fbWriter.io.req.bits.pix := VecInit(Seq.fill(Fb.nrBanks)(
     Mux(line < (Fb.height / 2).U, color, gammaCorrector.io.out)
   ))
   when (!done && fbWriter.io.req.ready && fbWriter.io.idx === 0.U) {

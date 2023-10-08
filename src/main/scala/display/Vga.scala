@@ -57,12 +57,12 @@ class VgaSignal extends Module {
   io.nextPos := nextPos
 
   val active = io.currPos.x < VgaTiming.width.U && io.currPos.y < VgaTiming.height.U
-  io.vga.r := Mux(active, io.pix.r, 0.U)
-  io.vga.g := Mux(active, io.pix.g, 0.U)
-  io.vga.b := Mux(active, io.pix.b, 0.U)
+  io.vga.r := RegNext(Mux(active, io.pix.r, 0.U))
+  io.vga.g := RegNext(Mux(active, io.pix.g, 0.U))
+  io.vga.b := RegNext(Mux(active, io.pix.b, 0.U))
 
   val hsync = VgaTiming.hsyncSta.U <= io.currPos.x && io.currPos.x < VgaTiming.hsyncEnd.U
   val vsync = VgaTiming.vsyncSta.U <= io.currPos.y && io.currPos.y < VgaTiming.vsyncEnd.U
-  io.vga.hsync := hsync === VgaTiming.polarity.B
-  io.vga.vsync := vsync === VgaTiming.polarity.B
+  io.vga.hsync := RegNext(hsync === VgaTiming.polarity.B)
+  io.vga.vsync := RegNext(vsync === VgaTiming.polarity.B)
 }
