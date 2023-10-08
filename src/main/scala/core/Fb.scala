@@ -199,7 +199,7 @@ class FbWriter extends Module {
   val idx  = RegInit(0.U(log2Up(Fb.nrIndices).W))
   val last = idx === Fb.maxIdx.U
   io.vram.data.valid     := io.req.valid
-  io.vram.data.bits.data := io.req.bits.pix.reverse.map(FbRGB.encodeAligned(_)).reduce(_ ## _)
+  io.vram.data.bits.data := io.req.bits.pix.reverse.map(_.encodeAligned()).reduce(_ ## _)
   io.vram.data.bits.strb := Fill(Vram.dataBytes, 1.U)
   io.vram.data.bits.last := last
   io.req.ready := io.vram.data.ready
