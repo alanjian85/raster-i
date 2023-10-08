@@ -29,12 +29,12 @@ class Display extends Module {
       rdReqLine := 0.U
     }
   }
-
-  val ditherer = Module(new Ditherer)
-  ditherer.io.in  := fbReader.io.res
-  ditherer.io.row := rdReqLine
-  when (ditherer.io.out.valid) {
-    buffer.write(ditherer.io.out.bits.idx, ditherer.io.out.bits.pix)
+  when (fbReader.io.res.valid) {
+    val pix = Wire(Vec(Fb.nrBanks, VgaRGB()))
+    for (i <- 0 until Fb.nrBanks) {
+      pix(i) := fbReader.io.res.bits.pix(i).map(dither(_, rdReqLine, i))
+    }
+    buffer.write(fbReader.io.res.bits.idx, pix)
   }
 
   val pixBanks = buffer.read(vgaSignal.io.nextPos.x >> log2Up(Fb.nrBanks))

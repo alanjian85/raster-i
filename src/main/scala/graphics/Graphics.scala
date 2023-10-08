@@ -21,10 +21,8 @@ class Graphics extends Module {
   color.r := RegNext(fbWriter.io.idx(7, 4) ## 0.U(4.W))
   color.g := color.r
   color.b := color.r
-  val gammaCorrector = Module(new GammaCorrector)
-  gammaCorrector.io.in := color
   fbWriter.io.req.bits.pix := VecInit(Seq.fill(Fb.nrBanks)(
-    Mux(line < (Fb.height / 2).U, color, gammaCorrector.io.out)
+    color.map(color => Mux(line < (Fb.height / 2).U, color, gammaCorrect(color)))
   ))
   when (!done && fbWriter.io.req.ready && fbWriter.io.idx === 0.U) {
     line := line + 1.U
