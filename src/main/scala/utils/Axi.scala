@@ -25,7 +25,7 @@ object Axi {
   }
 }
 
-class AxiRdAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
+class AxiRdAddr(val addrWidth: Int, val idWidth: Int = 0) extends Bundle {
   val id    = UInt(idWidth.W)
   val addr  = UInt(addrWidth.W)
   val len   = UInt(8.W)
@@ -33,14 +33,14 @@ class AxiRdAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
   val burst = UInt(2.W)
 }
 
-class AxiRdData(dataWidth: Int, idWidth: Int = 0) extends Bundle {
+class AxiRdData(val dataWidth: Int, val idWidth: Int = 0) extends Bundle {
   val id   = UInt(idWidth.W)
   val data = UInt(dataWidth.W)
   val resp = UInt(2.W)
   val last = Bool()
 }
 
-class AxiWrAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
+class AxiWrAddr(val addrWidth: Int, val idWidth: Int = 0) extends Bundle {
   val id    = UInt(idWidth.W)
   val addr  = UInt(addrWidth.W)
   val len   = UInt(8.W)
@@ -48,29 +48,29 @@ class AxiWrAddr(addrWidth: Int, idWidth: Int = 0) extends Bundle {
   val burst = UInt(2.W)
 }
 
-class AxiWrData(dataWidth: Int) extends Bundle {
+class AxiWrData(val dataWidth: Int) extends Bundle {
   val data = UInt(dataWidth.W)
   val strb = UInt((dataWidth / 8).W)
   val last = Bool()
 }
 
-class AxiWrResp(idWidth: Int = 0) extends Bundle {
+class AxiWrResp(val idWidth: Int = 0) extends Bundle {
   val id   = UInt(idWidth.W)
   val resp = UInt(2.W)
 }
 
-class RdAxi(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
+class RdAxi(val addrWidth: Int, val dataWidth: Int, val idWidth: Int = 0) extends Bundle {
   val addr = Irrevocable(new AxiRdAddr(addrWidth, idWidth))
   val data = Flipped(Irrevocable(new AxiRdData(dataWidth, idWidth)))
 }
 
-class WrAxi(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
+class WrAxi(val addrWidth: Int, val dataWidth: Int, val idWidth: Int = 0) extends Bundle {
   val addr = Irrevocable(new AxiWrAddr(addrWidth, idWidth))
   val data = Irrevocable(new AxiWrData(dataWidth))
   val resp = Flipped(Irrevocable(new AxiWrResp(idWidth)))
 }
 
-class RdWrAxi(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
+class RdWrAxi(val addrWidth: Int, val dataWidth: Int, val idWidth: Int = 0) extends Bundle {
   val rd = new RdAxi(addrWidth, dataWidth, idWidth)
   val wr = new WrAxi(addrWidth, dataWidth, idWidth)
 }
