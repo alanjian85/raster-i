@@ -23,6 +23,9 @@ class Ddr3Ext extends Bundle {
 object Vram {
   val addrWidth = 28
   val dataWidth = 128
+
+  val dataBytes = dataWidth / 8
+  val beatsSize = Axi.size(dataBytes)
 }
 
 class vram extends BlackBox {
@@ -75,7 +78,14 @@ object FbRGB extends RGBFactory(8, 8, 8)
 object Fb {
   val idWidth   = 1
   val nrBanks   = Vram.dataWidth / FbRGB.alignedWidth
-  val addrWidth = log2Up(VgaTiming.width * VgaTiming.height)
+  val width     = (VgaTiming.width + nrBanks - 1) / nrBanks * nrBanks
+  val height    = VgaTiming.height
+
+  val addrWidth = log2Up(Fb.width * Fb.height)
+  val lastLine  = width * (height - 1)
+
+  val nrIndices = width / nrBanks
+  val maxIdx    = nrIndices - 1
 }
 
 class FbSwapper extends Module {
@@ -103,7 +113,7 @@ class FbSwapper extends Module {
 }
 
 class FbRdRes extends Bundle {
-  val idx = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
+  val idx = UInt(log2Up(Fb.nrIndices).W)
   val pix = Vec(Fb.nrBanks, FbRGB())
 }
 
@@ -119,14 +129,14 @@ class FbReader extends Module {
   val addr      = RegInit(0.U(Fb.addrWidth.W))
   io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.alignedWidth / 8)
-  io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
-  io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
+  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.nrBytes)
+  io.vram.addr.bits.len   := Fb.maxIdx.U
+  io.vram.addr.bits.size  := Vram.beatsSize
   io.vram.addr.bits.burst := Axi.Burst.incr
   when (io.req) {
     addrValid := true.B
-    addr      := addr + VgaTiming.width.U
-    when (addr === (VgaTiming.width * (VgaTiming.height - 1)).U) {
+    addr      := addr + Fb.width.U
+    when (addr === Fb.lastLine.U) {
       addr := 0.U
     }
   }
@@ -134,7 +144,7 @@ class FbReader extends Module {
     addrValid := false.B
   }
 
-  val idx = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
+  val idx = RegInit(0.U(log2Up(Fb.nrIndices).W))
   io.vram.data.bits.id := DontCare
   io.vram.data.ready   := true.B
   io.res.valid    := io.vram.data.valid
@@ -147,7 +157,7 @@ class FbReader extends Module {
   ))
   when (io.vram.data.valid) {
     idx := idx + 1.U
-    when (idx === (VgaTiming.width / Fb.nrBanks - 1).U) {
+    when (idx === Fb.maxIdx.U) {
       idx  := 0.U
     }
   }
@@ -162,7 +172,7 @@ class FbWriter extends Module {
     val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
     val fbId = Input(UInt(Fb.idWidth.W))
     val req  = Flipped(Irrevocable(new FbWrReq))
-    val idx  = Output(UInt(log2Up(VgaTiming.width / Fb.nrBanks).W))
+    val idx  = Output(UInt(log2Up(Fb.nrIndices).W))
   })
 
   val addrValid = RegInit(false.B)
@@ -170,9 +180,9 @@ class FbWriter extends Module {
   val addrBegan = RegInit(false.B)
   io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.alignedWidth / 8)
-  io.vram.addr.bits.len   := (VgaTiming.width / Fb.nrBanks - 1).U
-  io.vram.addr.bits.size  := Axi.size(Vram.dataWidth / 8)
+  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.nrBytes)
+  io.vram.addr.bits.len   := Fb.maxIdx.U
+  io.vram.addr.bits.size  := Vram.beatsSize
   io.vram.addr.bits.burst := Axi.Burst.incr
   when (io.req.valid && !addrBegan) {
     addrBegan := true.B
@@ -180,17 +190,17 @@ class FbWriter extends Module {
   }
   when (addrValid && io.vram.addr.ready) {
     addrValid := false.B
-    addr      := addr + VgaTiming.width.U
-    when (addr === (VgaTiming.width * (VgaTiming.height - 1)).U) {
+    addr      := addr + Fb.width.U
+    when (addr === Fb.lastLine.U) {
       addr := 0.U
     }
   }
 
-  val idx  = RegInit(0.U(log2Up(VgaTiming.width / Fb.nrBanks).W))
-  val last = idx === (VgaTiming.width / Fb.nrBanks - 1).U
+  val idx  = RegInit(0.U(log2Up(Fb.nrIndices).W))
+  val last = idx === Fb.maxIdx.U
   io.vram.data.valid     := io.req.valid
   io.vram.data.bits.data := io.req.bits.pix.reverse.map(FbRGB.encodeAligned(_)).reduce(_ ## _)
-  io.vram.data.bits.strb := Fill(Vram.dataWidth / 8, 1.U)
+  io.vram.data.bits.strb := Fill(Vram.dataBytes, 1.U)
   io.vram.data.bits.last := last
   io.req.ready := io.vram.data.ready
   io.idx := idx

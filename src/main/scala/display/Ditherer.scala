@@ -5,7 +5,7 @@ import chisel3._
 import chisel3.util._
 
 class DitherRes extends Bundle {
-  val idx = UInt(log2Up(VgaTiming.width / Fb.nrBanks).W)
+  val idx = UInt(log2Up(Fb.nrIndices).W)
   val pix = Vec(Fb.nrBanks, VgaRGB())
 }
 

@@ -6,9 +6,12 @@ A rasterization-based GPU created for real-time rendering
 ## Overview
 The project Trinity, as its name implies, is not only an open-source hardware implementation of a [graphics processing unit (GPU)](https://en.wikipedia.org/wiki/Graphics_processing_unit). In essence, It consists of a GPU hardware together with its driver and architecture (and tools targeting the architecture). They are all a piece of Trinity.
 
-The motivation is to build a full-featured and open-source GPU that can runs on common FPGA platforms. Presently, It is primarily written in [Scala](https://scala-lang.org/) and [Chisel](https://www.chisel-lang.org/), an open-source and relatively high-level (in comparison with Verilog, SystemVerilog and VHDL) hardware description language (HDL) that can be used to describe combinational and synchronous circuits. 
+The motivation is to build a full-featured and open-source GPU that can runs on common FPGA platforms. Presently, It is primarily written in [Scala](https://scala-lang.org/) and [Chisel](https://www.chisel-lang.org/), an open-source and relatively high-level (in comparison with Verilog, SystemVerilog and VHDL) hardware description language (HDL) that can be used to describe combinational and synchronous circuits.
 
 On the contrary with other open-source GPUs, the ambition of this project is to build a hardware that supports both 3D real-time rendering and programmable pipeline (in the form of [shader](https://en.wikipedia.org/wiki/Shader), a program that models the shading of objects with its parallel nature) at the same time. And the ultimate goal is to support modern graphics APIs such as [OpenGL 4](https://www.opengl.org/) and [Vulkan](https://www.vulkan.org/).
+
+## Features
+* Support of any screen resolutions with width no greater than 1024
 
 ## Build instructions
 

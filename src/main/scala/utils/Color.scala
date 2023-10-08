@@ -14,6 +14,7 @@ class RGB(val rWidth: Int, val gWidth: Int, val bWidth: Int) extends Bundle {
 class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
   val width        = rWidth + gWidth + bWidth
   val alignedWidth = pow(2, log2Up(width)).toInt
+  val nrBytes      = alignedWidth / 8
 
   def apply() = new RGB(rWidth, gWidth, bWidth)
 
