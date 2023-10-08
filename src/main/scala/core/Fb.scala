@@ -173,11 +173,13 @@ class FbWriter extends Module {
     val fbId = Input(UInt(Fb.idWidth.W))
     val req  = Flipped(Irrevocable(new FbWrReq))
     val idx  = Output(UInt(log2Up(Fb.nrIndices).W))
+    val done = Output(Bool())
   })
 
   val addrValid = RegInit(false.B)
   val addr      = RegInit(0.U(Fb.addrWidth.W))
   val addrBegan = RegInit(false.B)
+  val done      = RegInit(false.B)
   io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
   io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.nrBytes)
@@ -187,14 +189,17 @@ class FbWriter extends Module {
   when (io.req.valid && !addrBegan) {
     addrBegan := true.B
     addrValid := true.B
+    done      := false.B
   }
   when (addrValid && io.vram.addr.ready) {
     addrValid := false.B
     addr      := addr + Fb.width.U
     when (addr === Fb.lastLine.U) {
       addr := 0.U
+      done := true.B
     }
   }
+  io.done := done
 
   val idx  = RegInit(0.U(log2Up(Fb.nrIndices).W))
   val last = idx === Fb.maxIdx.U

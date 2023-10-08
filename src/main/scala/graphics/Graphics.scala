@@ -30,5 +30,5 @@ class Graphics extends Module {
   when (RegNext(io.fbId) =/= io.fbId) {
     line := 0.U
   }
-  io.done := done
+  io.done := fbWriter.io.done
 }
