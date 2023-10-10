@@ -9,10 +9,10 @@ object gammaCorrect {
 
   def apply(x: UInt) = {
     val res = WireDefault(0.U(x.getWidth.W))
-    for (i <- 1 until pow(2, x.getWidth).toInt) {
+    for (i <- 1 until 1 << x.getWidth) {
       when (x === i.U) {
-        val max = pow(2, x.getWidth) - 1
-        res := (pow(i / max, gamma) * max).toInt.U
+        val max = (1 << x.getWidth) - 1
+        res := (pow(i.toDouble / max, gamma) * max).toInt.U
       }
     }
     res

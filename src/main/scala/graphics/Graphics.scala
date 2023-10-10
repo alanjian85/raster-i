@@ -18,7 +18,7 @@ class Graphics extends Module {
   fbWriter.io.fbId := io.fbId
   fbWriter.io.req.valid := !done
   val color = Wire(FbRGB())
-  color.r := RegNext(fbWriter.io.idx(7, 4) ## 0.U(4.W))
+  color.r := RegNext((fbWriter.io.idx >> 4) ## 0.U(4.W))
   color.g := color.r
   color.b := color.r
   fbWriter.io.req.bits.pix := VecInit(Seq.fill(Fb.nrBanks)(

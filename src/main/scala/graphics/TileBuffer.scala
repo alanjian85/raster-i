@@ -7,15 +7,17 @@ import chisel3.util._
 object Tile {
   val width = 32
 
-  val row = (Fb.width  + width - 1) / width * width
-  val col = (Fb.height + width - 1) / width * width
+  val nrRows = (Fb.width  + width - 1) / width * width
+  val nrCols = (Fb.height + width - 1) / width * width
 }
 
 class Tile extends Bundle {
   val elem = Vec(Tile.width, Vec(Tile.width, FbRGB()))
 
-  def apply(idx: Int)  = elem(idx)
-  def apply(idx: UInt) = elem(idx)
+  def apply(i: Int,  j: Int)  = elem(i)(j)
+  def apply(i: Int,  j: UInt) = elem(i)(j)
+  def apply(i: UInt, j: Int)  = elem(i)(j)
+  def apply(i: UInt, j: UInt) = elem(i)(j)
 }
 
 class TileBuffer extends Module {

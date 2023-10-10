@@ -32,7 +32,9 @@ class Display extends Module {
   when (fbReader.io.res.valid) {
     val pix = Wire(Vec(Fb.nrBanks, VgaRGB()))
     for (i <- 0 until Fb.nrBanks) {
-      pix(i) := fbReader.io.res.bits.pix(i).map(dither(_, rdReqLine, i))
+      pix(i).r := dither(VgaRGB.rWidth, fbReader.io.res.bits.pix(i).r, rdReqLine, i)
+      pix(i).g := dither(VgaRGB.gWidth, fbReader.io.res.bits.pix(i).g, rdReqLine, i)
+      pix(i).b := dither(VgaRGB.bWidth, fbReader.io.res.bits.pix(i).b, rdReqLine, i)
     }
     buffer.write(fbReader.io.res.bits.idx, pix)
   }
