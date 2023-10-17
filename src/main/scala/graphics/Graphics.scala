@@ -11,24 +11,34 @@ class Graphics extends Module {
     val done = Output(Bool())
   })
 
-  val line = RegInit(0.U(unsignedBitLength(Fb.height).W))
-  val done = line === Fb.height.U
+  val col = RegInit(0.U(log2Up(Tile.nrCols).W))
+  val row = RegInit(0.U(unsignedBitLength(Tile.nrRows).W))
+  when (RegNext(io.fbId) =/= io.fbId) {
+    col := 0.U
+    row := 0.U
+  }
+
+  val tileBuffer = Module(new TileBuffer)
+  val valid = row < Tile.nrRows.U
+  tileBuffer.io.inReq.valid := valid
+  when (valid && tileBuffer.io.inReq.ready) {
+    col := col + 1.U
+    when (col === (Tile.nrCols - 1).U) {
+      col := 0.U
+      row := row + 1.U
+    }
+  }
+  for (i <- 0 until Tile.size) {
+    for (j <- 0 until Tile.size) {
+      tileBuffer.io.inReq.bits(i)(j).r := col << 2.U
+      tileBuffer.io.inReq.bits(i)(j).g := row << 2.U
+      tileBuffer.io.inReq.bits(i)(j).b := "hff".U
+    }
+  }
+
   val fbWriter = Module(new FbWriter)
   io.vram <> fbWriter.io.vram
   fbWriter.io.fbId := io.fbId
-  fbWriter.io.req.valid := !done
-  val color = Wire(FbRGB())
-  color.r := RegNext((fbWriter.io.idx >> 4) ## 0.U(4.W))
-  color.g := color.r
-  color.b := color.r
-  fbWriter.io.req.bits.pix := VecInit(Seq.fill(Fb.nrBanks)(
-    color.map(color => Mux(line < (Fb.height / 2).U, color, gammaCorrect(color)))
-  ))
-  when (!done && fbWriter.io.req.ready && fbWriter.io.idx === 0.U) {
-    line := line + 1.U
-  }
-  when (RegNext(io.fbId) =/= io.fbId) {
-    line := 0.U
-  }
-  io.done := fbWriter.io.done
+  fbWriter.io.req <> tileBuffer.io.outReq
+  io.done := !valid && fbWriter.io.done
 }

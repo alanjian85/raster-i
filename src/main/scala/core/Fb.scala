@@ -172,7 +172,6 @@ class FbWriter extends Module {
     val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
     val fbId = Input(UInt(Fb.idWidth.W))
     val req  = Flipped(Irrevocable(new FbWrReq))
-    val idx  = Output(UInt(log2Up(Fb.nrIndices).W))
     val done = Output(Bool())
   })
 
@@ -208,15 +207,12 @@ class FbWriter extends Module {
   io.vram.data.bits.strb := Fill(Vram.dataBytes, 1.U)
   io.vram.data.bits.last := last
   io.req.ready := io.vram.data.ready
-  io.idx := idx
   when (io.req.valid && io.vram.data.ready) {
-    val nextIdx = WireDefault(idx + 1.U)
+    idx := idx + 1.U
     when (last) {
-      nextIdx   := 0.U
+      idx       := 0.U
       addrBegan := false.B
     }
-    idx    := nextIdx
-    io.idx := nextIdx
   }
 
   io.vram.resp.ready := true.B

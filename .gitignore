@@ -1,6 +1,7 @@
 .bloop
 .metals
 .vscode
+.bsp
 generated
 project
 target

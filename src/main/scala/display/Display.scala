@@ -16,7 +16,7 @@ class Display extends Module {
   vgaSignal.io.currPos := vgaPos
   io.vga := vgaSignal.io.vga
 
-  val buffer    = SyncReadMem(Fb.nrIndices, Vec(Fb.nrBanks, VgaRGB()))
+  val buf       = SyncReadMem(Fb.nrIndices, Vec(Fb.nrBanks, VgaRGB()))
   val fbReader  = Module(new FbReader)
   val rdReqLine = RegInit(0.U(log2Up(Fb.height).W))
   io.vram <> fbReader.io.vram
@@ -36,9 +36,9 @@ class Display extends Module {
       pix(i).g := dither(VgaRGB.gWidth, fbReader.io.res.bits.pix(i).g, rdReqLine, i)
       pix(i).b := dither(VgaRGB.bWidth, fbReader.io.res.bits.pix(i).b, rdReqLine, i)
     }
-    buffer.write(fbReader.io.res.bits.idx, pix)
+    buf.write(fbReader.io.res.bits.idx, pix)
   }
 
-  val pixBanks = buffer.read(vgaSignal.io.nextPos.x >> log2Up(Fb.nrBanks))
+  val pixBanks = buf.read(vgaSignal.io.nextPos.x >> log2Up(Fb.nrBanks))
   vgaSignal.io.pix := pixBanks(vgaPos.x(log2Up(Fb.nrBanks) - 1, 0))
 }

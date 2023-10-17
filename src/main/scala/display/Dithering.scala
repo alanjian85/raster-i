@@ -25,7 +25,6 @@ object dither {
           bayer(i)(j) := c.U
         }
       }
-
       val sum = x +& bayer(row)(col)
       res := sum >> dstWidth
       when (sum(x.getWidth)) {
