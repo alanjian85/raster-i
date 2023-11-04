@@ -24,13 +24,13 @@ class Graphics extends Module {
   val dx1 = x2 - x1
   val dx2 = x0 - x2
 
-  val dy0 = y1 - y0
-  val dy1 = y2 - y1
-  val dy2 = y0 - y2
+  val dy0 = y0 - y1
+  val dy1 = y1 - y2
+  val dy2 = y2 - y0
 
-  val re0 = x0 * dy0 - y0 * dx0
-  val re1 = x1 * dy1 - y1 * dx1
-  val re2 = x2 * dy2 - y2 * dx2
+  val re0 = dx0 * y0 + dy0 * x0
+  val re1 = dx1 * y1 + dy1 * x1
+  val re2 = dx2 * y2 + dy2 * x2
 
   val eWidth = signedBitLength(2 * (VgaTiming.width - 1) * (VgaTiming.height - 1))
   val e0 = RegInit(re0.S(eWidth.W))
@@ -51,14 +51,14 @@ class Graphics extends Module {
   val valid = row < Tile.nrRows.U
   tileBuffer.io.inReq.valid := valid
   when (valid && tileBuffer.io.inReq.ready) {
-    e0  := e0 - (Tile.size * dy0).S
-    e1  := e1 - (Tile.size * dy1).S
-    e2  := e2 - (Tile.size * dy2).S
+    e0  := e0 - (dy0 * Tile.size).S
+    e1  := e1 - (dy1 * Tile.size).S
+    e2  := e2 - (dy2 * Tile.size).S
     col := col + 1.U
     when (col === (Tile.nrCols - 1).U) {
-      e0  := e0 + (Tile.size * ((Tile.nrCols - 1) * dy0 + dx0)).S
-      e1  := e1 + (Tile.size * ((Tile.nrCols - 1) * dy1 + dx1)).S
-      e2  := e2 + (Tile.size * ((Tile.nrCols - 1) * dy2 + dx2)).S
+      e0  := e0 + ((dy0 * (Tile.nrCols - 1) - dx0) * Tile.size).S
+      e1  := e1 + ((dy1 * (Tile.nrCols - 1) - dx1) * Tile.size).S
+      e2  := e2 + ((dy2 * (Tile.nrCols - 1) - dx2) * Tile.size).S
       col := 0.U
       row := row + 1.U
     }
@@ -67,10 +67,10 @@ class Graphics extends Module {
 
   for (i <- 0 until Tile.size) {
     for (j <- 0 until Tile.size) {
-      val pe0 = e0 + (i * dx0 - j * dy0).S
-      val pe1 = e1 + (i * dx1 - j * dy1).S
-      val pe2 = e2 + (i * dx2 - j * dy2).S
-      val visible = pe0 < 0.S && pe1 < 0.S && pe2 < 0.S
+      val pe0 = e0 - (dx0 * i + dy0 * j).S
+      val pe1 = e1 - (dx1 * i + dy1 * j).S
+      val pe2 = e2 - (dx2 * i + dy2 * j).S
+      val visible = pe0 >= 0.S && pe1 >= 0.S && pe2 >= 0.S
       tileBuffer.io.inReq.bits(i)(j).r := Mux(visible, 255.U, 0.U)
       tileBuffer.io.inReq.bits(i)(j).g := Mux(visible, 255.U, 0.U)
       tileBuffer.io.inReq.bits(i)(j).b := Mux(visible, 255.U, 0.U)
