@@ -48,26 +48,22 @@ class TileBuffer extends Module {
   val idx  = RegInit(0.U(log2Up(Tile.size / Fb.nrBanks).W))
   val nextFron = WireDefault(fron)
   val nextCol  = WireDefault(col)
-  val nextRow  = WireDefault(row)
-  val nextIdx  = WireDefault(idx)
   val writing  = size >= Tile.nrCols.U
   io.outReq.valid := writing
   val pix = Wire(Vec(Fb.nrBanks, FbRGB()))
   for (i <- 0 until Fb.nrBanks) {
-    pix(i) := buf.read(nextFron + nextCol)(nextRow)(nextIdx << log2Up(Fb.nrBanks) | i.U)
+    pix(i) := buf.read(nextFron + nextCol)(row)(idx << log2Up(Fb.nrBanks) | i.U)
   }
   io.outReq.bits.pix := pix
   when (writing && io.outReq.ready) {
-    nextIdx := idx + 1.U
-    idx     := nextIdx
+    idx := idx + 1.U
     when (idx === (Tile.size / Fb.nrBanks - 1).U) {
-      nextIdx := 0.U
+      idx     := 0.U
       nextCol := col + 1.U
-      col := nextCol
+      col     := nextCol
       when (col === (Tile.nrCols - 1).U) {
         nextCol := 0.U
-        nextRow := row + 1.U
-        row     := nextRow
+        row     := row + 1.U
         when (row === (Tile.size - 1).U) {
           row      := 0.U
           nextFron := fron + Tile.nrCols.U
