@@ -5,6 +5,25 @@ import chisel3._
 import chisel3.util._
 
 class Graphics extends Module {
+  def incrDiv(da: Int, b: Int, quo: SInt, rem: SInt) = {
+    val dquo = da / b
+    var drem = da % b
+    val rquo = WireDefault(quo + dquo.S)
+    val rrem = WireDefault(rem + drem.S)
+    if (drem > 0) {
+      when (rem >= (b - drem).S) {
+        rquo := quo + dquo.S + 1.S
+        rrem := rem - b.S + drem.S
+      }
+    } else {
+      when (rem <= -(b + drem).S) {
+        rquo := quo + dquo.S - 1.S
+        rrem := rem + b.S + drem.S
+      }
+    }
+    (rquo, rrem)
+  }
+
   val io = IO(new Bundle {
     val fbId = Input(UInt(Fb.idWidth.W))
     val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
@@ -32,6 +51,25 @@ class Graphics extends Module {
   val re1 = dx1 * y1 + dy1 * x1
   val re2 = dx2 * y2 + dy2 * x2
 
+  val a = dy0 * dx2 - dx0 * dy2
+
+  val rr = re1 * 255 / a
+  val rg = re2 * 255 / a
+  val rb = re0 * 255 / a
+
+  val rgbWidth = signedBitLength(2 * (VgaTiming.width - 1) * (VgaTiming.height - 1) * 255 / a)
+  val r = RegInit(rr.S(rgbWidth.W))
+  val g = RegInit(rg.S(rgbWidth.W))
+  val b = RegInit(rb.S(rgbWidth.W))
+
+  val rer = re1 * 255 % a
+  val reg = re2 * 255 % a
+  val reb = re0 * 255 % a
+
+  val er = RegInit(rer.S(signedBitLength(a - 1).W))
+  val eg = RegInit(reg.S(signedBitLength(a - 1).W))
+  val eb = RegInit(reb.S(signedBitLength(a - 1).W))
+
   val eWidth = signedBitLength(2 * (VgaTiming.width - 1) * (VgaTiming.height - 1))
   val e0 = RegInit(re0.S(eWidth.W))
   val e1 = RegInit(re1.S(eWidth.W))
@@ -43,6 +81,12 @@ class Graphics extends Module {
     e0  := re0.S
     e1  := re1.S
     e2  := re2.S
+    r   := rr.S
+    g   := rg.S
+    b   := rb.S
+    er  := rer.S
+    eg  := reg.S
+    eb  := reb.S
     col := 0.U
     row := 0.U
   }
@@ -54,11 +98,29 @@ class Graphics extends Module {
     e0  := e0 - (dy0 * Tile.size).S
     e1  := e1 - (dy1 * Tile.size).S
     e2  := e2 - (dy2 * Tile.size).S
+    val (rquo, rrem) = incrDiv(-dy1 * Tile.size * 255, a, r, er)
+    r  := rquo
+    er := rrem
+    val (gquo, grem) = incrDiv(-dy2 * Tile.size * 255, a, g, eg)
+    g  := gquo
+    eg := grem
+    val (bquo, brem) = incrDiv(-dy0 * Tile.size * 255, a, b, eb)
+    b  := bquo
+    eb := brem
     col := col + 1.U
     when (col === (Tile.nrCols - 1).U) {
       e0  := e0 + ((dy0 * (Tile.nrCols - 1) - dx0) * Tile.size).S
       e1  := e1 + ((dy1 * (Tile.nrCols - 1) - dx1) * Tile.size).S
       e2  := e2 + ((dy2 * (Tile.nrCols - 1) - dx2) * Tile.size).S
+      val (rquo, rrem) = incrDiv((dy1 * (Tile.nrCols - 1) - dx1) * Tile.size * 255, a, r, er)
+      r  := rquo
+      er := rrem
+      val (gquo, grem) = incrDiv((dy2 * (Tile.nrCols - 1) - dx2) * Tile.size * 255, a, g, eg)
+      g  := gquo
+      eg := grem
+      val (bquo, brem) = incrDiv((dy0 * (Tile.nrCols - 1) - dx0) * Tile.size * 255, a, b, eb)
+      b  := bquo
+      eb := brem
       col := 0.U
       row := row + 1.U
     }
@@ -71,9 +133,12 @@ class Graphics extends Module {
       val pe1 = e1 - (dx1 * i + dy1 * j).S
       val pe2 = e2 - (dx2 * i + dy2 * j).S
       val visible = pe0 >= 0.S && pe1 >= 0.S && pe2 >= 0.S
-      tileBuffer.io.inReq.bits(i)(j).r := Mux(visible, 255.U, 0.U)
-      tileBuffer.io.inReq.bits(i)(j).g := Mux(visible, 255.U, 0.U)
-      tileBuffer.io.inReq.bits(i)(j).b := Mux(visible, 255.U, 0.U)
+      val (rquo, _) = incrDiv(-(dx1 * i + dy1 * j) * 255, a, r, er)
+      val (gquo, _) = incrDiv(-(dx2 * i + dy2 * j) * 255, a, g, eg)
+      val (bquo, _) = incrDiv(-(dx0 * i + dy0 * j) * 255, a, b, eb)
+      tileBuffer.io.inReq.bits(i)(j).r := Mux(visible, rquo.asUInt, 0.U)
+      tileBuffer.io.inReq.bits(i)(j).g := Mux(visible, gquo.asUInt, 0.U)
+      tileBuffer.io.inReq.bits(i)(j).b := Mux(visible, bquo.asUInt, 0.U)
     }
   }
 
