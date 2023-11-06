@@ -254,7 +254,7 @@ class Graphics extends Module {
       val pe0 = e0 - (dx0v(currAngle) * i.S + dy0v(currAngle) * j.S)
       val pe1 = e1 - (dx1v(currAngle) * i.S + dy1v(currAngle) * j.S)
       val pe2 = e2 - (dx2v(currAngle) * i.S + dy2v(currAngle) * j.S)
-      val visible = pe0 >= 0.S && pe1 >= 0.S && pe2 >= 0.S
+      val visible = pe0 > 0.S && (pe1 > 0.S && pe2 > 0.S) || pe0 < 0.S && (pe1 < 0.S && pe2 < 0.S)
       //val (rquo, _) = incrDiv(dquorv(currAngle)(i)(j), dremrv(currAngle)(i)(j), av(currAngle), r, er)
       //val (gquo, _) = incrDiv(dquogv(currAngle)(i)(j), dremgv(currAngle)(i)(j), av(currAngle), g, eg)
       //val (bquo, _) = incrDiv(dquobv(currAngle)(i)(j), drembv(currAngle)(i)(j), av(currAngle), b, eb)
