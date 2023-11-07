@@ -37,7 +37,7 @@ class Graphics extends Module {
   val e1v = Wire(Vec(360, SInt(32.W)))
   val e2v = Wire(Vec(360, SInt(32.W)))
 
-  val av = Wire(Vec(360, SInt(signedBitLength(444 * 384).W)))
+  val av = Wire(Vec(360, SInt(32.W)))
 
   val rv = Wire(Vec(360, SInt(32.W)))
   val gv = Wire(Vec(360, SInt(32.W)))
@@ -47,29 +47,21 @@ class Graphics extends Module {
   val egv = Wire(Vec(360, SInt(32.W)))
   val ebv = Wire(Vec(360, SInt(32.W)))
 
-  val dquorv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength((Tile.size - 1) * 255 / 384).W))))
-  val dquogv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength((Tile.size - 1) * 255 / (2 * 384)).W))))
-  val dquobv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength((Tile.size - 1) * 255 / (2 * 384)).W))))
+  val dquorxv = Wire(Vec(360, SInt(32.W)))
+  val dquogxv = Wire(Vec(360, SInt(32.W)))
+  val dquobxv = Wire(Vec(360, SInt(32.W)))
 
-  val dremrv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength(444 * 384 - 1).W))))
-  val dremgv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength(444 * 384 - 1).W))))
-  val drembv = Wire(Vec(360, Vec(Tile.size + 1, SInt(signedBitLength(444 * 384 - 1).W))))
+  val dremrxv = Wire(Vec(360, SInt(32.W)))
+  val dremgxv = Wire(Vec(360, SInt(32.W)))
+  val drembxv = Wire(Vec(360, SInt(32.W)))
 
-  val dquorxv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / (2 * 444)).W)))
-  val dquogxv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / 444).W)))
-  val dquobxv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / 444).W)))
+  val dquoryv = Wire(Vec(360, SInt(32.W)))
+  val dquogyv = Wire(Vec(360, SInt(32.W)))
+  val dquobyv = Wire(Vec(360, SInt(32.W)))
 
-  val dremrxv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
-  val dremgxv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
-  val drembxv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
-
-  val dquoryv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / 384).W)))
-  val dquogyv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / (2 * 384)).W)))
-  val dquobyv = Wire(Vec(360, SInt(signedBitLength(Tile.size * 255 / (2 * 384)).W)))
-
-  val dremryv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
-  val dremgyv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
-  val drembyv = Wire(Vec(360, SInt(signedBitLength(444 * 384 - 1).W)))
+  val dremryv = Wire(Vec(360, SInt(32.W)))
+  val dremgyv = Wire(Vec(360, SInt(32.W)))
+  val drembyv = Wire(Vec(360, SInt(32.W)))
 
   for (i <- 0 until 360) {
     val angle = math.toRadians(i)
@@ -107,7 +99,7 @@ class Graphics extends Module {
     e2v(i) := e2.S
 
     val a = dy0 * dx2 - dx0 * dy2
-    av(i) := a.S
+    av(i) := math.abs(a).S
 
     val r = if (a == 0) 0 else e1 * 255 / a
     val g = if (a == 0) 0 else e2 * 255 / a
@@ -116,26 +108,12 @@ class Graphics extends Module {
     gv(i) := g.S
     bv(i) := b.S
 
-    val er = if (a == 0) 0 else e1 * 255 % a
-    val eg = if (a == 0) 0 else e2 * 255 % a
-    val eb = if (a == 0) 0 else e0 * 255 % a
+    val er = if (a == 0) 0 else if (a > 0) e1 * 255 % a else -e1 * 255 % a
+    val eg = if (a == 0) 0 else if (a > 0) e2 * 255 % a else -e2 * 255 % a
+    val eb = if (a == 0) 0 else if (a > 0) e0 * 255 % a else -e0 * 255 % a
     erv(i) := er.S
     egv(i) := eg.S
     ebv(i) := eb.S
-
-    for (j <- 0 to Tile.size) {
-      val dividendr = -dx1 * j * 255
-      val dividendg = -dx2 * j * 255
-      val dividendb = -dx0 * j * 255
-
-      dquorv(i)(j) := (if (a == 0) 0 else dividendr / a).S
-      dquogv(i)(j) := (if (a == 0) 0 else dividendg / a).S
-      dquobv(i)(j) := (if (a == 0) 0 else dividendb / a).S
-
-      dremrv(i)(j) := (if (a == 0) 0 else dividendr % a).S
-      dremgv(i)(j) := (if (a == 0) 0 else dividendg % a).S
-      drembv(i)(j) := (if (a == 0) 0 else dividendb % a).S
-    }
 
     val dividendrx = -dy1 * Tile.size * 255
     val dividendgx = -dy2 * Tile.size * 255
@@ -145,9 +123,9 @@ class Graphics extends Module {
     dquogxv(i) := (if (a == 0) 0 else dividendgx / a).S
     dquobxv(i) := (if (a == 0) 0 else dividendbx / a).S
 
-    dremrxv(i) := (if (a == 0) 0 else dividendrx % a).S
-    dremgxv(i) := (if (a == 0) 0 else dividendgx % a).S
-    drembxv(i) := (if (a == 0) 0 else dividendbx % a).S
+    dremrxv(i) := (if (a == 0) 0 else if (a > 0) dividendrx % a else -dividendrx % a).S
+    dremgxv(i) := (if (a == 0) 0 else if (a > 0) dividendgx % a else -dividendgx % a).S
+    drembxv(i) := (if (a == 0) 0 else if (a > 0) dividendbx % a else -dividendbx % a).S
 
     val dividendry = -dx1 * Tile.size * 255
     val dividendgy = -dx2 * Tile.size * 255
@@ -157,9 +135,9 @@ class Graphics extends Module {
     dquogyv(i) := (if (a == 0) 0 else dividendgy / a).S
     dquobyv(i) := (if (a == 0) 0 else dividendby / a).S
 
-    dremryv(i) := (if (a == 0) 0 else dividendry % a).S
-    dremgyv(i) := (if (a == 0) 0 else dividendgy % a).S
-    drembyv(i) := (if (a == 0) 0 else dividendby % a).S
+    dremryv(i) := (if (a == 0) 0 else if (a > 0) dividendry % a else -dividendry % a).S
+    dremgyv(i) := (if (a == 0) 0 else if (a > 0) dividendgy % a else -dividendgy % a).S
+    drembyv(i) := (if (a == 0) 0 else if (a > 0) dividendby % a else -dividendby % a).S
   }
 
   val currAngle = RegInit(0.U(log2Up(360).W))
@@ -285,17 +263,11 @@ class Graphics extends Module {
 
 
   for (i <- 0 until Tile.size) {
-    val pe0 = e0 - dx0v(currAngle) * i.S
-    val pe1 = e1 - dx1v(currAngle) * i.S
-    val pe2 = e2 - dx2v(currAngle) * i.S
-    val visible = pe0 > 0.S && (pe1 > 0.S && pe2 > 0.S) || pe0 < 0.S && (pe1 < 0.S && pe2 < 0.S)
+    val visible = e0 > 0.S && (e1 > 0.S && e2 > 0.S) || e0 < 0.S && (e1 < 0.S && e2 < 0.S)
     for (j <- 0 until Tile.size) {
-      val (rquo, _) = incrDiv(dquorv(currAngle)(i), dremrv(currAngle)(i), av(currAngle), r, er)
-      val (gquo, _) = incrDiv(dquogv(currAngle)(i), dremgv(currAngle)(i), av(currAngle), g, eg)
-      val (bquo, _) = incrDiv(dquobv(currAngle)(i), drembv(currAngle)(i), av(currAngle), b, eb)
-      tileBuffer.io.inReq.bits(i)(j).r := Mux(visible, rquo.asUInt, 0.U)
-      tileBuffer.io.inReq.bits(i)(j).g := Mux(visible, gquo.asUInt, 0.U)
-      tileBuffer.io.inReq.bits(i)(j).b := Mux(visible, bquo.asUInt, 0.U)
+      tileBuffer.io.inReq.bits(i)(j).r := Mux(visible, r.asUInt, 0.U)
+      tileBuffer.io.inReq.bits(i)(j).g := Mux(visible, g.asUInt, 0.U)
+      tileBuffer.io.inReq.bits(i)(j).b := Mux(visible, b.asUInt, 0.U)
     }
   }
 
