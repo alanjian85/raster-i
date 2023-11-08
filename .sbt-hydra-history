@@ -1,0 +1,1 @@
+(setq sbt-hydra:hydra-previous-commands '("trinity/run "))

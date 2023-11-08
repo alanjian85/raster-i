@@ -23,7 +23,7 @@ class Tile extends Bundle {
   def apply(idx: UInt) = elem(idx)
 }
 
-class TileBuffer extends Module {
+class TileWriter extends Module {
   val io = IO(new Bundle {
     val inReq  = Flipped(Decoupled(new Tile))
     val outReq = Irrevocable(new FbWrReq)

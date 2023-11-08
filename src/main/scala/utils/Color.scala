@@ -34,6 +34,22 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
 
   def apply() = new RGB(rWidth, gWidth, bWidth)
 
+  def apply(x: Int) = {
+    val res = Wire(new RGB(rWidth, gWidth, bWidth))
+    res.r := x.U(rWidth.W)
+    res.g := x.U(gWidth.W)
+    res.b := x.U(bWidth.W)
+    res
+  }
+
+  def apply(r: UInt, g: UInt, b: UInt) = {
+    val res = Wire(new RGB(rWidth, gWidth, bWidth))
+    res.r := r
+    res.g := g
+    res.b := b
+    res
+  }
+
   def decode(pix: UInt) = {
     val res = Wire(new RGB(rWidth, gWidth, bWidth))
     res.r := pix(rWidth - 1, 0)
