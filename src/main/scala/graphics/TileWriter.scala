@@ -51,8 +51,9 @@ class TileWriter extends Module {
   val writing  = size >= Tile.nrCols.U
   io.outReq.valid := writing
   val pix = Wire(Vec(Fb.nrBanks, FbRGB()))
+  val tile = buf.read(nextFron + nextCol)
   for (i <- 0 until Fb.nrBanks) {
-    pix(i) := buf.read(nextFron + nextCol)(row)(idx << log2Up(Fb.nrBanks) | i.U)
+    pix(i) := tile(row)(idx << log2Up(Fb.nrBanks) | i.U)
   }
   io.outReq.bits.pix := pix
   when (writing && io.outReq.ready) {
