@@ -275,7 +275,6 @@ class Graphics extends Module {
     reg := egv(angle)
     reb := ebv(angle)
 
-    col := 0.U
     row := 0.U
   }
 
@@ -358,6 +357,8 @@ class Graphics extends Module {
       val (gquo, grem) = incrDiv(dquogrv(currAngle), dremgrv(currAngle), av(currAngle), rg, reg)
       g   := gquo
       eg  := grem
+      ig  := gquo
+      ieg := grem
       cg  := gquo
       ceg := grem
       rg  := gquo
@@ -366,6 +367,8 @@ class Graphics extends Module {
       val (bquo, brem) = incrDiv(dquobrv(currAngle), drembrv(currAngle), av(currAngle), rb, reb)
       b   := bquo
       eb  := brem
+      ib  := bquo
+      ieb := brem
       cb  := bquo
       ceb := brem
       rb  := bquo
@@ -385,57 +388,59 @@ class Graphics extends Module {
     tileBuffer(i)(j) := Mux(visible, rgb, FbRGB(0))
 
     j := j + 1.U
+
+    e0 := e0 - dy0v(currAngle)
+    e1 := e1 - dy1v(currAngle)
+    e2 := e2 - dy2v(currAngle)
+
+    val (rquo, rrem) = incrDiv(dquorjv(currAngle), dremrjv(currAngle), av(currAngle), r, er)
+    r   := rquo
+    er  := rrem
+
+    val (gquo, grem) = incrDiv(dquogjv(currAngle), dremgjv(currAngle), av(currAngle), g, eg)
+    g   := gquo
+    eg  := grem
+
+    val (bquo, brem) = incrDiv(dquobjv(currAngle), drembjv(currAngle), av(currAngle), b, eb)
+    b   := bquo
+    eb  := brem
+
     when (j === (Tile.size - 1).U) {
       j := 0.U
       i := i + 1.U
+
+      val ne0 = ie0 - dx0v(currAngle)
+      e0  := ne0
+      ie0 := ne0
+      val ne1 = ie1 - dx1v(currAngle)
+      e1  := ne1
+      ie1 := ne1
+      val ne2 = ie2 - dx2v(currAngle)
+      e2  := ne2
+      ie2 := ne2
+
+      val (rquo, rrem) = incrDiv(dquoriv(currAngle), dremriv(currAngle), av(currAngle), ir, ier)
+      r   := rquo
+      er  := rrem
+      ir  := rquo
+      ier := rrem
+
+      val (gquo, grem) = incrDiv(dquogiv(currAngle), dremgiv(currAngle), av(currAngle), ig, ieg)
+      g   := gquo
+      eg  := grem
+      ig  := gquo
+      ieg := grem
+
+      val (bquo, brem) = incrDiv(dquobiv(currAngle), drembiv(currAngle), av(currAngle), ib, ieb)
+      b   := bquo
+      eb  := brem
+      ib  := bquo
+      ieb := brem
+
       when (i === (Tile.size - 1).U) {
         i := 0.U
         valid := true.B
-      } .otherwise {
-        val ne0 = ie0 - dx0v(currAngle)
-        e0  := ne0
-        ie0 := ne0
-        val ne1 = ie1 - dx1v(currAngle)
-        e1  := ne1
-        ie1 := ne1
-        val ne2 = ie2 - dx2v(currAngle)
-        e2  := ne2
-        ie2 := ne2
-
-        val (rquo, rrem) = incrDiv(dquoriv(currAngle), dremriv(currAngle), av(currAngle), ir, ier)
-        r   := rquo
-        er  := rrem
-        ir  := rquo
-        ier := rrem
-
-        val (gquo, grem) = incrDiv(dquogiv(currAngle), dremgiv(currAngle), av(currAngle), ig, ieg)
-        g   := gquo
-        eg  := grem
-        ig  := gquo
-        ieg := grem
-
-        val (bquo, brem) = incrDiv(dquobiv(currAngle), drembiv(currAngle), av(currAngle), ib, ieb)
-        b   := bquo
-        eb  := brem
-        ib  := bquo
-        ieb := brem
       }
-    } .otherwise {
-      e0 := e0 - dy0v(currAngle)
-      e1 := e1 - dy1v(currAngle)
-      e2 := e2 - dy2v(currAngle)
-
-      val (rquo, rrem) = incrDiv(dquorjv(currAngle), dremrjv(currAngle), av(currAngle), r, er)
-      r   := rquo
-      er  := rrem
-
-      val (gquo, grem) = incrDiv(dquogjv(currAngle), dremgjv(currAngle), av(currAngle), g, eg)
-      g   := gquo
-      eg  := grem
-
-      val (bquo, brem) = incrDiv(dquobjv(currAngle), drembjv(currAngle), av(currAngle), b, eb)
-      b   := bquo
-      eb  := brem
     }
   }
 
