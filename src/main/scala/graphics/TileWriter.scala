@@ -35,12 +35,14 @@ class TileWriter extends Module {
   val size = RegInit(0.U(unsignedBitLength(buf.length).W))
 
   val nextRear = Mux(rear =/= (buf.length - 1).U, rear + 1.U, 0.U)
+  val nextSize = WireDefault(size)
   val full     = nextRear === fron
   io.inReq.ready := !full
   when (!full && io.inReq.valid) {
     buf.write(rear, io.inReq.bits)
     rear := nextRear
-    size := size + 1.U
+    nextSize := size + 1.U
+    size := nextSize
   }
 
   val col  = RegInit(0.U(log2Up(Tile.nrCols).W))
@@ -72,7 +74,7 @@ class TileWriter extends Module {
           when (fron === (buf.length - Tile.nrCols).U) {
             nextFron := 0.U
           }
-          size := size - Tile.nrCols.U
+          size := nextSize - Tile.nrCols.U
         }
       }
     }
