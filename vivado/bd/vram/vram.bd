@@ -53,8 +53,7 @@
             "value": "128"
           },
           "FREQ_HZ": {
-            "value": "100000000",
-            "value_src": "default"
+            "value": "100000000"
           },
           "HAS_BRESP": {
             "value": "1"
