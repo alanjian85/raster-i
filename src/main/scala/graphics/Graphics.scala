@@ -146,9 +146,9 @@ class Graphics extends Module {
     diffInfos(i).dremgj := (if (a == 0) 0 else if (a > 0) dividendgj % a else -dividendgj % a).S
     diffInfos(i).drembj := (if (a == 0) 0 else if (a > 0) dividendbj % a else -dividendbj % a).S
 
-    val dividendri = -dx1 * 255
-    val dividendgi = -dx2 * 255
-    val dividendbi = -dx0 * 255
+    val dividendri = (-dx1 + dy1 * (Tile.size - 1)) * 255
+    val dividendgi = (-dx2 + dy2 * (Tile.size - 1)) * 255
+    val dividendbi = (-dx0 + dy0 * (Tile.size - 1)) * 255
 
     diffInfos(i).dquori := (if (a == 0) 0 else dividendri / a).S
     diffInfos(i).dquogi := (if (a == 0) 0 else dividendgi / a).S
@@ -158,9 +158,9 @@ class Graphics extends Module {
     diffInfos(i).dremgi := (if (a == 0) 0 else if (a > 0) dividendgi % a else -dividendgi % a).S
     diffInfos(i).drembi := (if (a == 0) 0 else if (a > 0) dividendbi % a else -dividendbi % a).S
 
-    val dividendrc = -dy1 * Tile.size * 255
-    val dividendgc = -dy2 * Tile.size * 255
-    val dividendbc = -dy0 * Tile.size * 255
+    val dividendrc = (-dy1 + dx1) * Tile.size * 255
+    val dividendgc = (-dy2 + dx2) * Tile.size * 255
+    val dividendbc = (-dy0 + dx0) * Tile.size * 255
 
     diffInfos(i).dquorc := (if (a == 0) 0 else dividendrc / a).S
     diffInfos(i).dquogc := (if (a == 0) 0 else dividendgc / a).S
@@ -170,9 +170,9 @@ class Graphics extends Module {
     diffInfos(i).dremgc := (if (a == 0) 0 else if (a > 0) dividendgc % a else -dividendgc % a).S
     diffInfos(i).drembc := (if (a == 0) 0 else if (a > 0) dividendbc % a else -dividendbc % a).S
 
-    val dividendrr = -dx1 * Tile.size * 255
-    val dividendgr = -dx2 * Tile.size * 255
-    val dividendbr = -dx0 * Tile.size * 255
+    val dividendrr = dy1 * (Tile.nrCols - 1) * Tile.size * 255
+    val dividendgr = dy2 * (Tile.nrCols - 1) * Tile.size * 255
+    val dividendbr = dy0 * (Tile.nrCols - 1) * Tile.size * 255
 
     diffInfos(i).dquorr := (if (a == 0) 0 else dividendrr / a).S
     diffInfos(i).dquogr := (if (a == 0) 0 else dividendgr / a).S
@@ -212,28 +212,10 @@ class Graphics extends Module {
   val r = RegInit(diffInfos(0).r)
   val g = RegInit(diffInfos(0).g)
   val b = RegInit(diffInfos(0).b)
-  val ir = RegInit(diffInfos(0).r)
-  val ig = RegInit(diffInfos(0).g)
-  val ib = RegInit(diffInfos(0).b)
-  val cr = RegInit(diffInfos(0).r)
-  val cg = RegInit(diffInfos(0).g)
-  val cb = RegInit(diffInfos(0).b)
-  val rr = RegInit(diffInfos(0).r)
-  val rg = RegInit(diffInfos(0).g)
-  val rb = RegInit(diffInfos(0).b)
 
   val er = RegInit(diffInfos(0).er)
   val eg = RegInit(diffInfos(0).eg)
   val eb = RegInit(diffInfos(0).eb)
-  val ier = RegInit(diffInfos(0).er)
-  val ieg = RegInit(diffInfos(0).eg)
-  val ieb = RegInit(diffInfos(0).eb)
-  val cer = RegInit(diffInfos(0).er)
-  val ceg = RegInit(diffInfos(0).eg)
-  val ceb = RegInit(diffInfos(0).eb)
-  val rer = RegInit(diffInfos(0).er)
-  val reg = RegInit(diffInfos(0).eg)
-  val reb = RegInit(diffInfos(0).eb)
 
   val col = RegInit(0.U(log2Up(Tile.nrCols).W))
   val row = RegInit(0.U(unsignedBitLength(Tile.nrRows).W))
@@ -256,28 +238,10 @@ class Graphics extends Module {
     r := diffInfos(angle).r
     g := diffInfos(angle).g
     b := diffInfos(angle).b
-    ir := diffInfos(angle).r
-    ig := diffInfos(angle).g
-    ib := diffInfos(angle).b
-    cr := diffInfos(angle).r
-    cg := diffInfos(angle).g
-    cb := diffInfos(angle).b
-    rr := diffInfos(angle).r
-    rg := diffInfos(angle).g
-    rb := diffInfos(angle).b
 
     er := diffInfos(angle).r
     eg := diffInfos(angle).g
     eb := diffInfos(angle).b
-    ier := diffInfos(angle).r
-    ieg := diffInfos(angle).g
-    ieb := diffInfos(angle).b
-    cer := diffInfos(angle).r
-    ceg := diffInfos(angle).g
-    ceb := diffInfos(angle).b
-    rer := diffInfos(angle).r
-    reg := diffInfos(angle).g
-    reb := diffInfos(angle).b
 
     row := 0.U
   }
@@ -303,29 +267,17 @@ class Graphics extends Module {
     ie2 := ne2
     ce2 := ne2
 
-    val (rquo, rrem) = incrDiv(diffInfo.dquorc, diffInfo.dremrc, diffInfo.a, cr, cer)
+    val (rquo, rrem) = incrDiv(diffInfo.dquorc, diffInfo.dremrc, diffInfo.a, r, er)
     r   := rquo
     er  := rrem
-    ir  := rquo
-    ier := rrem
-    cr  := rquo
-    ceg := rrem
 
-    val (gquo, grem) = incrDiv(diffInfo.dquogc, diffInfo.dremgc, diffInfo.a, cg, ceg)
+    val (gquo, grem) = incrDiv(diffInfo.dquogc, diffInfo.dremgc, diffInfo.a, g, eg)
     g   := gquo
     eg  := grem
-    ig  := gquo
-    ieg := grem
-    cg  := gquo
-    ceg := grem
 
-    val (bquo, brem) = incrDiv(diffInfo.dquobc, diffInfo.drembc, diffInfo.a, cb, ceb)
+    val (bquo, brem) = incrDiv(diffInfo.dquobc, diffInfo.drembc, diffInfo.a, b, eb)
     b   := bquo
     eb  := brem
-    ib  := bquo
-    ieb := brem
-    cb  := bquo
-    ceb := brem
 
     col := col + 1.U
 
@@ -348,35 +300,17 @@ class Graphics extends Module {
       ce2 := ne2
       re2 := ne2
 
-      val (rquo, rrem) = incrDiv(diffInfo.dquorr, diffInfo.dremrr, diffInfo.a, rr, rer)
+      val (rquo, rrem) = incrDiv(diffInfo.dquorr, diffInfo.dremrr, diffInfo.a, r, er)
       r   := rquo
       er  := rrem
-      ir  := rquo
-      ier := rrem
-      cr  := rquo
-      cer := rrem
-      rr  := rquo
-      rer := rrem
 
-      val (gquo, grem) = incrDiv(diffInfo.dquogr, diffInfo.dremgr, diffInfo.a, rg, reg)
+      val (gquo, grem) = incrDiv(diffInfo.dquogr, diffInfo.dremgr, diffInfo.a, g, eg)
       g   := gquo
       eg  := grem
-      ig  := gquo
-      ieg := grem
-      cg  := gquo
-      ceg := grem
-      rg  := gquo
-      reg := grem
 
-      val (bquo, brem) = incrDiv(diffInfo.dquobr, diffInfo.drembr, diffInfo.a, rb, reb)
+      val (bquo, brem) = incrDiv(diffInfo.dquobr, diffInfo.drembr, diffInfo.a, b, eb)
       b   := bquo
       eb  := brem
-      ib  := bquo
-      ieb := brem
-      cb  := bquo
-      ceb := brem
-      rb  := bquo
-      reb := brem
 
       col := 0.U
       row := row + 1.U
@@ -423,23 +357,17 @@ class Graphics extends Module {
       e2  := ne2
       ie2 := ne2
 
-      val (rquo, rrem) = incrDiv(diffInfo.dquori, diffInfo.dremri, diffInfo.a, ir, ier)
+      val (rquo, rrem) = incrDiv(diffInfo.dquori, diffInfo.dremri, diffInfo.a, r, er)
       r   := rquo
       er  := rrem
-      ir  := rquo
-      ier := rrem
 
-      val (gquo, grem) = incrDiv(diffInfo.dquogi, diffInfo.dremgi, diffInfo.a, ig, ieg)
+      val (gquo, grem) = incrDiv(diffInfo.dquogi, diffInfo.dremgi, diffInfo.a, g, eg)
       g   := gquo
       eg  := grem
-      ig  := gquo
-      ieg := grem
 
-      val (bquo, brem) = incrDiv(diffInfo.dquobi, diffInfo.drembi, diffInfo.a, ib, ieb)
+      val (bquo, brem) = incrDiv(diffInfo.dquobi, diffInfo.drembi, diffInfo.a, b, eb)
       b   := bquo
       eb  := brem
-      ib  := bquo
-      ieb := brem
 
       when (i === (Tile.size - 1).U) {
         i := 0.U
