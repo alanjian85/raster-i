@@ -59,15 +59,6 @@ class Graphics extends Module {
   val e0 = RegInit(diffInfos(0).e0)
   val e1 = RegInit(diffInfos(0).e1)
   val e2 = RegInit(diffInfos(0).e2)
-  val ie0 = RegInit(diffInfos(0).e0)
-  val ie1 = RegInit(diffInfos(0).e1)
-  val ie2 = RegInit(diffInfos(0).e2)
-  val ce0 = RegInit(diffInfos(0).e0)
-  val ce1 = RegInit(diffInfos(0).e1)
-  val ce2 = RegInit(diffInfos(0).e2)
-  val re0 = RegInit(diffInfos(0).e0)
-  val re1 = RegInit(diffInfos(0).e1)
-  val re2 = RegInit(diffInfos(0).e2)
 
   val r = RegInit(diffInfos(0).r)
   val g = RegInit(diffInfos(0).g)
@@ -85,15 +76,6 @@ class Graphics extends Module {
     e0 := diffInfos(angle).e0
     e1 := diffInfos(angle).e1
     e2 := diffInfos(angle).e2
-    ie0 := diffInfos(angle).e0
-    ie1 := diffInfos(angle).e1
-    ie2 := diffInfos(angle).e2
-    ce0 := diffInfos(angle).e0
-    ce1 := diffInfos(angle).e1
-    ce2 := diffInfos(angle).e2
-    re0 := diffInfos(angle).e0
-    re1 := diffInfos(angle).e1
-    re2 := diffInfos(angle).e2
 
     r := diffInfos(angle).r
     g := diffInfos(angle).g
@@ -112,20 +94,9 @@ class Graphics extends Module {
   when (valid && tileWriter.io.inReq.ready) {
     valid := false.B
 
-    val ne0 = ce0 - diffInfo.dy0 * Tile.size.S
-    e0  := ne0
-    ie0 := ne0
-    ce0 := ne0
-
-    val ne1 = ce1 - diffInfo.dy1 * Tile.size.S
-    e1  := ne1
-    ie1 := ne1
-    ce1 := ne1
-
-    val ne2 = ce2 - diffInfo.dy2 * Tile.size.S
-    e2  := ne2
-    ie2 := ne2
-    ce2 := ne2
+    e0  := e0 + diffInfo.dc0
+    e1  := e1 + diffInfo.dc1
+    e2  := e2 + diffInfo.dc2
 
     val (rquo, rrem) = incrDiv(diffInfo.dquorc, diffInfo.dremrc, diffInfo.a, r, er)
     r   := rquo
@@ -142,23 +113,9 @@ class Graphics extends Module {
     col := col + 1.U
 
     when (col === (Tile.nrCols - 1).U) {
-      val ne0 = re0 - diffInfo.dx0 * Tile.size.S
-      e0  := ne0
-      ie0 := ne0
-      ce0 := ne0
-      re0 := ne0
-
-      val ne1 = re1 - diffInfo.dx1 * Tile.size.S
-      e1  := ne1
-      ie1 := ne1
-      ce1 := ne1
-      re1 := ne1
-
-      val ne2 = re2 - diffInfo.dx2 * Tile.size.S
-      e2  := ne2
-      ie2 := ne2
-      ce2 := ne2
-      re2 := ne2
+      e0  := e0 + diffInfo.dr0
+      e1  := e1 + diffInfo.dr1
+      e2  := e2 + diffInfo.dr2
 
       val (rquo, rrem) = incrDiv(diffInfo.dquorr, diffInfo.dremrr, diffInfo.a, r, er)
       r   := rquo
@@ -187,9 +144,9 @@ class Graphics extends Module {
 
     j := j + 1.U
 
-    e0 := e0 - diffInfo.dy0
-    e1 := e1 - diffInfo.dy1
-    e2 := e2 - diffInfo.dy2
+    e0 := e0 + diffInfo.dj0
+    e1 := e1 + diffInfo.dj1
+    e2 := e2 + diffInfo.dj2
 
     val (rquo, rrem) = incrDiv(diffInfo.dquorj, diffInfo.dremrj, diffInfo.a, r, er)
     r   := rquo
@@ -207,15 +164,9 @@ class Graphics extends Module {
       j := 0.U
       i := i + 1.U
 
-      val ne0 = ie0 - diffInfo.dx0
-      e0  := ne0
-      ie0 := ne0
-      val ne1 = ie1 - diffInfo.dx1
-      e1  := ne1
-      ie1 := ne1
-      val ne2 = ie2 - diffInfo.dx2
-      e2  := ne2
-      ie2 := ne2
+      e0  := e0 + diffInfo.di0
+      e1  := e1 + diffInfo.di1
+      e2  := e2 + diffInfo.di2
 
       val (rquo, rrem) = incrDiv(diffInfo.dquori, diffInfo.dremri, diffInfo.a, r, er)
       r   := rquo

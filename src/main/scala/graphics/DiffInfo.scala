@@ -1,5 +1,4 @@
 import chisel3._
-
 object DiffInfo {
   def build(p0: (Int, Int), p1: (Int, Int), p2: (Int, Int)) =  {
     val diffInfo = Wire(new DiffInfo)
@@ -7,16 +6,26 @@ object DiffInfo {
     val dx0 = p1._1 - p0._1
     val dx1 = p2._1 - p1._1
     val dx2 = p0._1 - p2._1
-    diffInfo.dx0 := dx0.S
-    diffInfo.dx1 := dx1.S
-    diffInfo.dx2 := dx2.S
 
     val dy0 = p0._2 - p1._2
     val dy1 = p1._2 - p2._2
     val dy2 = p2._2 - p0._2
-    diffInfo.dy0 := dy0.S
-    diffInfo.dy1 := dy1.S
-    diffInfo.dy2 := dy2.S
+
+    diffInfo.dj0 := (-dy0).S // The negate operator of SInt is broken, WTF???
+    diffInfo.dj1 := (-dy1).S
+    diffInfo.dj2 := (-dy2).S
+
+    diffInfo.di0 := (-dx0 + dy0 * (Tile.size - 1)).S
+    diffInfo.di1 := (-dx1 + dy1 * (Tile.size - 1)).S
+    diffInfo.di2 := (-dx2 + dy2 * (Tile.size - 1)).S
+
+    diffInfo.dc0 := ((-dy0 + dx0) * Tile.size).S
+    diffInfo.dc1 := ((-dy1 + dx1) * Tile.size).S
+    diffInfo.dc2 := ((-dy2 + dx2) * Tile.size).S
+
+    diffInfo.dr0 := (dy0 * (Tile.nrCols - 1) * Tile.size).S
+    diffInfo.dr1 := (dy1 * (Tile.nrCols - 1) * Tile.size).S
+    diffInfo.dr2 := (dy2 * (Tile.nrCols - 1) * Tile.size).S
 
     val e0 = dx0 * p0._2 + dy0 * p0._1
     val e1 = dx1 * p1._2 + dy1 * p1._1
@@ -99,15 +108,23 @@ class DiffInfo extends Bundle {
   val e1 = SInt(32.W)
   val e2 = SInt(32.W)
 
-  val dx0 = SInt(32.W)
-  val dx1 = SInt(32.W)
-  val dx2 = SInt(32.W)
+  val dj0 = SInt()
+  val dj1 = SInt()
+  val dj2 = SInt()
 
-  val dy0 = SInt(32.W)
-  val dy1 = SInt(32.W)
-  val dy2 = SInt(32.W)
+  val di0 = SInt()
+  val di1 = SInt()
+  val di2 = SInt()
 
-  val a = SInt(32.W)
+  val dc0 = SInt()
+  val dc1 = SInt()
+  val dc2 = SInt()
+
+  val dr0 = SInt()
+  val dr1 = SInt()
+  val dr2 = SInt()
+
+  val a = SInt()
 
   val r = SInt(32.W)
   val g = SInt(32.W)
@@ -117,35 +134,35 @@ class DiffInfo extends Bundle {
   val eg = SInt(32.W)
   val eb = SInt(32.W)
 
-  val dquorj = SInt(32.W)
-  val dquogj = SInt(32.W)
-  val dquobj = SInt(32.W)
+  val dquorj = SInt()
+  val dquogj = SInt()
+  val dquobj = SInt()
 
-  val dremrj = SInt(32.W)
-  val dremgj = SInt(32.W)
-  val drembj = SInt(32.W)
+  val dremrj = SInt()
+  val dremgj = SInt()
+  val drembj = SInt()
 
-  val dquori = SInt(32.W)
-  val dquogi = SInt(32.W)
-  val dquobi = SInt(32.W)
+  val dquori = SInt()
+  val dquogi = SInt()
+  val dquobi = SInt()
 
-  val dremri = SInt(32.W)
-  val dremgi = SInt(32.W)
-  val drembi = SInt(32.W)
+  val dremri = SInt()
+  val dremgi = SInt()
+  val drembi = SInt()
 
-  val dquorc = SInt(32.W)
-  val dquogc = SInt(32.W)
-  val dquobc = SInt(32.W)
+  val dquorc = SInt()
+  val dquogc = SInt()
+  val dquobc = SInt()
 
-  val dremrc = SInt(32.W)
-  val dremgc = SInt(32.W)
-  val drembc = SInt(32.W)
+  val dremrc = SInt()
+  val dremgc = SInt()
+  val drembc = SInt()
 
-  val dquorr = SInt(32.W)
-  val dquogr = SInt(32.W)
-  val dquobr = SInt(32.W)
+  val dquorr = SInt()
+  val dquogr = SInt()
+  val dquobr = SInt()
 
-  val dremrr = SInt(32.W)
-  val dremgr = SInt(32.W)
-  val drembr = SInt(32.W)
+  val dremrr = SInt()
+  val dremgr = SInt()
+  val drembr = SInt()
 }
