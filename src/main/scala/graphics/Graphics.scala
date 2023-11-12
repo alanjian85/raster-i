@@ -4,6 +4,62 @@
 import chisel3._
 import chisel3.util._
 
+class DiffInfo extends Bundle {
+  val e0 = SInt(32.W)
+  val e1 = SInt(32.W)
+  val e2 = SInt(32.W)
+
+  val dx0 = SInt(32.W)
+  val dx1 = SInt(32.W)
+  val dx2 = SInt(32.W)
+
+  val dy0 = SInt(32.W)
+  val dy1 = SInt(32.W)
+  val dy2 = SInt(32.W)
+
+  val a = SInt(32.W)
+
+  val r = SInt(32.W)
+  val g = SInt(32.W)
+  val b = SInt(32.W)
+
+  val er = SInt(32.W)
+  val eg = SInt(32.W)
+  val eb = SInt(32.W)
+
+  val dquorj = SInt(32.W)
+  val dquogj = SInt(32.W)
+  val dquobj = SInt(32.W)
+
+  val dremrj = SInt(32.W)
+  val dremgj = SInt(32.W)
+  val drembj = SInt(32.W)
+
+  val dquori = SInt(32.W)
+  val dquogi = SInt(32.W)
+  val dquobi = SInt(32.W)
+
+  val dremri = SInt(32.W)
+  val dremgi = SInt(32.W)
+  val drembi = SInt(32.W)
+
+  val dquorc = SInt(32.W)
+  val dquogc = SInt(32.W)
+  val dquobc = SInt(32.W)
+
+  val dremrc = SInt(32.W)
+  val dremgc = SInt(32.W)
+  val drembc = SInt(32.W)
+
+  val dquorr = SInt(32.W)
+  val dquogr = SInt(32.W)
+  val dquobr = SInt(32.W)
+
+  val dremrr = SInt(32.W)
+  val dremgr = SInt(32.W)
+  val drembr = SInt(32.W)
+}
+
 class Graphics extends Module {
   def incrDiv(dquo: SInt, drem: SInt, divisor: SInt, quo: SInt, rem: SInt) = {
     val rquo = WireDefault(quo + dquo)
@@ -25,69 +81,7 @@ class Graphics extends Module {
     val done = Output(Bool())
   })
 
-
-  val e0v = Wire(Vec(360, SInt(32.W)))
-  val e1v = Wire(Vec(360, SInt(32.W)))
-  val e2v = Wire(Vec(360, SInt(32.W)))
-
-  val rv = Wire(Vec(360, SInt(32.W)))
-  val gv = Wire(Vec(360, SInt(32.W)))
-  val bv = Wire(Vec(360, SInt(32.W)))
-
-  val erv = Wire(Vec(360, SInt(32.W)))
-  val egv = Wire(Vec(360, SInt(32.W)))
-  val ebv = Wire(Vec(360, SInt(32.W)))
-
-  var as = Seq[SInt]()
-
-  var dj0s = Seq[SInt]()
-  var dj1s = Seq[SInt]()
-  var dj2s = Seq[SInt]()
-
-  var di0s = Seq[SInt]()
-  var di1s = Seq[SInt]()
-  var di2s = Seq[SInt]()
-
-  var dc0s = Seq[SInt]()
-  var dc1s = Seq[SInt]()
-  var dc2s = Seq[SInt]()
-
-  var dr0s = Seq[SInt]()
-  var dr1s = Seq[SInt]()
-  var dr2s = Seq[SInt]()
-
-  var dquorjs = Seq[SInt]()
-  var dquogjs = Seq[SInt]()
-  var dquobjs = Seq[SInt]()
-
-  var dremrjs = Seq[SInt]()
-  var dremgjs = Seq[SInt]()
-  var drembjs = Seq[SInt]()
-
-  var dquoris = Seq[SInt]()
-  var dquogis = Seq[SInt]()
-  var dquobis = Seq[SInt]()
-
-  var dremris = Seq[SInt]()
-  var dremgis = Seq[SInt]()
-  var drembis = Seq[SInt]()
-
-  var dquorcs = Seq[SInt]()
-  var dquogcs = Seq[SInt]()
-  var dquobcs = Seq[SInt]()
-
-  var dremrcs = Seq[SInt]()
-  var dremgcs = Seq[SInt]()
-  var drembcs = Seq[SInt]()
-
-  var dquorrs = Seq[SInt]()
-  var dquogrs = Seq[SInt]()
-  var dquobrs = Seq[SInt]()
-
-  var dremrrs = Seq[SInt]()
-  var dremgrs = Seq[SInt]()
-  var drembrs = Seq[SInt]()
-
+  val diffInfos = Wire(Vec(360, new DiffInfo))
   for (i <- 0 until 360) {
     val angle = math.toRadians(i)
 
@@ -105,151 +99,90 @@ class Graphics extends Module {
     val dx0 = x1 - x0
     val dx1 = x2 - x1
     val dx2 = x0 - x2
+    diffInfos(i).dx0 := dx0.S
+    diffInfos(i).dx1 := dx1.S
+    diffInfos(i).dx2 := dx2.S
 
     val dy0 = y0 - y1
     val dy1 = y1 - y2
     val dy2 = y2 - y0
-
-    dj0s :+= -dy0.S
-    dj1s :+= -dy1.S
-    dj2s :+= -dy2.S
-
-    di0s :+= (dy0 * (Tile.size - 1) - dx0).S
-    di1s :+= (dy1 * (Tile.size - 1) - dx1).S
-    di2s :+= (dy2 * (Tile.size - 1) - dx2).S
-
-    dc0s :+= ((-dy0 + dx0) * Tile.size).S
-    dc1s :+= ((-dy1 + dx1) * Tile.size).S
-    dc2s :+= ((-dy2 + dx2) * Tile.size).S
-
-    dr0s :+= (dy0 * (Tile.nrCols - 1) * Tile.size).S
-    dr1s :+= (dy1 * (Tile.nrCols - 1) * Tile.size).S
-    dr2s :+= (dy2 * (Tile.nrCols - 1) * Tile.size).S
+    diffInfos(i).dy0 := dy0.S
+    diffInfos(i).dy1 := dy1.S
+    diffInfos(i).dy2 := dy2.S
 
     val e0 = dx0 * y0 + dy0 * x0
     val e1 = dx1 * y1 + dy1 * x1
     val e2 = dx2 * y2 + dy2 * x2
-    e0v(i) := e0.S
-    e1v(i) := e1.S
-    e2v(i) := e2.S
+    diffInfos(i).e0 := e0.S
+    diffInfos(i).e1 := e1.S
+    diffInfos(i).e2 := e2.S
 
     val a = dy0 * dx2 - dx0 * dy2
-    as :+= math.abs(a).S
+    diffInfos(i).a := math.abs(a).S
 
     val r = if (a == 0) 0 else e1 * 255 / a
     val g = if (a == 0) 0 else e2 * 255 / a
     val b = if (a == 0) 0 else e0 * 255 / a
-    rv(i) := r.S
-    gv(i) := g.S
-    bv(i) := b.S
+    diffInfos(i).r := r.S
+    diffInfos(i).g := g.S
+    diffInfos(i).b := b.S
 
     val er = if (a == 0) 0 else if (a > 0) e1 * 255 % a else -e1 * 255 % a
     val eg = if (a == 0) 0 else if (a > 0) e2 * 255 % a else -e2 * 255 % a
     val eb = if (a == 0) 0 else if (a > 0) e0 * 255 % a else -e0 * 255 % a
-    erv(i) := er.S
-    egv(i) := eg.S
-    ebv(i) := eb.S
+    diffInfos(i).er := er.S
+    diffInfos(i).eg := eg.S
+    diffInfos(i).eb := eb.S
 
     val dividendrj = -dy1 * 255
     val dividendgj = -dy2 * 255
     val dividendbj = -dy0 * 255
 
-    dquorjs :+= (if (a == 0) 0 else dividendrj / a).S
-    dquogjs :+= (if (a == 0) 0 else dividendgj / a).S
-    dquobjs :+= (if (a == 0) 0 else dividendbj / a).S
+    diffInfos(i).dquorj := (if (a == 0) 0 else dividendrj / a).S
+    diffInfos(i).dquogj := (if (a == 0) 0 else dividendgj / a).S
+    diffInfos(i).dquobj := (if (a == 0) 0 else dividendbj / a).S
 
-    dremrjs :+= (if (a == 0) 0 else if (a > 0) dividendrj % a else -dividendrj % a).S
-    dremgjs :+= (if (a == 0) 0 else if (a > 0) dividendgj % a else -dividendgj % a).S
-    drembjs :+= (if (a == 0) 0 else if (a > 0) dividendbj % a else -dividendbj % a).S
+    diffInfos(i).dremrj := (if (a == 0) 0 else if (a > 0) dividendrj % a else -dividendrj % a).S
+    diffInfos(i).dremgj := (if (a == 0) 0 else if (a > 0) dividendgj % a else -dividendgj % a).S
+    diffInfos(i).drembj := (if (a == 0) 0 else if (a > 0) dividendbj % a else -dividendbj % a).S
 
-    val dividendri = (dy1 * (Tile.size - 1) - dx1) * 255
-    val dividendgi = (dy2 * (Tile.size - 1) - dx2) * 255
-    val dividendbi = (dy0 * (Tile.size - 1) - dx0) * 255
+    val dividendri = -dx1 * 255
+    val dividendgi = -dx2 * 255
+    val dividendbi = -dx0 * 255
 
-    dquoris :+= (if (a == 0) 0 else dividendri / a).S
-    dquogis :+= (if (a == 0) 0 else dividendgi / a).S
-    dquobis :+= (if (a == 0) 0 else dividendbi / a).S
+    diffInfos(i).dquori := (if (a == 0) 0 else dividendri / a).S
+    diffInfos(i).dquogi := (if (a == 0) 0 else dividendgi / a).S
+    diffInfos(i).dquobi := (if (a == 0) 0 else dividendbi / a).S
 
-    dremris :+= (if (a == 0) 0 else if (a > 0) dividendri % a else -dividendri % a).S
-    dremgis :+= (if (a == 0) 0 else if (a > 0) dividendgi % a else -dividendgi % a).S
-    drembis :+= (if (a == 0) 0 else if (a > 0) dividendbi % a else -dividendbi % a).S
+    diffInfos(i).dremri := (if (a == 0) 0 else if (a > 0) dividendri % a else -dividendri % a).S
+    diffInfos(i).dremgi := (if (a == 0) 0 else if (a > 0) dividendgi % a else -dividendgi % a).S
+    diffInfos(i).drembi := (if (a == 0) 0 else if (a > 0) dividendbi % a else -dividendbi % a).S
 
-    val dividendrc = (-dy1 + dx1) * Tile.size * 255
-    val dividendgc = (-dy2 + dx2) * Tile.size * 255
-    val dividendbc = (-dy0 + dx0) * Tile.size * 255
+    val dividendrc = -dy1 * Tile.size * 255
+    val dividendgc = -dy2 * Tile.size * 255
+    val dividendbc = -dy0 * Tile.size * 255
 
-    dquorcs :+= (if (a == 0) 0 else dividendrc / a).S
-    dquogcs :+= (if (a == 0) 0 else dividendgc / a).S
-    dquobcs :+= (if (a == 0) 0 else dividendbc / a).S
+    diffInfos(i).dquorc := (if (a == 0) 0 else dividendrc / a).S
+    diffInfos(i).dquogc := (if (a == 0) 0 else dividendgc / a).S
+    diffInfos(i).dquobc := (if (a == 0) 0 else dividendbc / a).S
 
-    dremrcs :+= (if (a == 0) 0 else if (a > 0) dividendrc % a else -dividendrc % a).S
-    dremgcs :+= (if (a == 0) 0 else if (a > 0) dividendgc % a else -dividendgc % a).S
-    drembcs :+= (if (a == 0) 0 else if (a > 0) dividendbc % a else -dividendbc % a).S
+    diffInfos(i).dremrc := (if (a == 0) 0 else if (a > 0) dividendrc % a else -dividendrc % a).S
+    diffInfos(i).dremgc := (if (a == 0) 0 else if (a > 0) dividendgc % a else -dividendgc % a).S
+    diffInfos(i).drembc := (if (a == 0) 0 else if (a > 0) dividendbc % a else -dividendbc % a).S
 
-    val dividendrr = dy1 * (Tile.nrCols - 1) * Tile.size * 255
-    val dividendgr = dy2 * (Tile.nrCols - 1) * Tile.size * 255
-    val dividendbr = dy0 * (Tile.nrCols - 1) * Tile.size * 255
+    val dividendrr = -dx1 * Tile.size * 255
+    val dividendgr = -dx2 * Tile.size * 255
+    val dividendbr = -dx0 * Tile.size * 255
 
-    dquorrs :+= (if (a == 0) 0 else dividendrr / a).S
-    dquogrs :+= (if (a == 0) 0 else dividendgr / a).S
-    dquobrs :+= (if (a == 0) 0 else dividendbr / a).S
+    diffInfos(i).dquorr := (if (a == 0) 0 else dividendrr / a).S
+    diffInfos(i).dquogr := (if (a == 0) 0 else dividendgr / a).S
+    diffInfos(i).dquobr := (if (a == 0) 0 else dividendbr / a).S
 
-    dremrrs :+= (if (a == 0) 0 else if (a > 0) dividendrr % a else -dividendrr % a).S
-    dremgrs :+= (if (a == 0) 0 else if (a > 0) dividendgr % a else -dividendgr % a).S
-    drembrs :+= (if (a == 0) 0 else if (a > 0) dividendbr % a else -dividendbr % a).S
+    diffInfos(i).dremrr := (if (a == 0) 0 else if (a > 0) dividendrr % a else -dividendrr % a).S
+    diffInfos(i).dremgr := (if (a == 0) 0 else if (a > 0) dividendgr % a else -dividendgr % a).S
+    diffInfos(i).drembr := (if (a == 0) 0 else if (a > 0) dividendbr % a else -dividendbr % a).S
   }
 
-  val av = VecInit(as)
-
-  val dj0v = VecInit(dj0s)
-  val dj1v = VecInit(dj1s)
-  val dj2v = VecInit(dj2s)
-
-  val di0v = VecInit(di0s)
-  val di1v = VecInit(di1s)
-  val di2v = VecInit(di2s)
-
-  val dc0v = VecInit(dc0s)
-  val dc1v = VecInit(dc1s)
-  val dc2v = VecInit(dc2s)
-
-  val dr0v = VecInit(dr0s)
-  val dr1v = VecInit(dr1s)
-  val dr2v = VecInit(dr2s)
-
-  val dquorjv = VecInit(dquorjs)
-  val dquogjv = VecInit(dquogjs)
-  val dquobjv = VecInit(dquobjs)
-
-  val dremrjv = VecInit(dremrjs)
-  val dremgjv = VecInit(dremgjs)
-  val drembjv = VecInit(drembjs)
-
-  val dquoriv = VecInit(dquoris)
-  val dquogiv = VecInit(dquogis)
-  val dquobiv = VecInit(dquobis)
-
-  val dremriv = VecInit(dremris)
-  val dremgiv = VecInit(dremgis)
-  val drembiv = VecInit(drembis)
-
-  val dquorcv = VecInit(dquorcs)
-  val dquogcv = VecInit(dquogcs)
-  val dquobcv = VecInit(dquobcs)
-
-  val dremrcv = VecInit(dremrcs)
-  val dremgcv = VecInit(dremgcs)
-  val drembcv = VecInit(drembcs)
-
-  val dquorrv = VecInit(dquorrs)
-  val dquogrv = VecInit(dquogrs)
-  val dquobrv = VecInit(dquobrs)
-
-  val dremrrv = VecInit(dremrrs)
-  val dremgrv = VecInit(dremgrs)
-  val drembrv = VecInit(drembrs)
-
-  val currAngle = RegInit(0.U(log2Up(360).W))
   val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
   val angle = RegInit(0.U(log2Up(360).W))
   cntReg := cntReg + 1.U
@@ -261,34 +194,90 @@ class Graphics extends Module {
     }
   }
 
-  val e0 = RegInit(e0v(0))
-  val e1 = RegInit(e1v(0))
-  val e2 = RegInit(e2v(0))
+  val diffInfo = RegInit(diffInfos(0))
 
-  val r = RegInit(rv(0))
-  val g = RegInit(gv(0))
-  val b = RegInit(bv(0))
+  val e0 = RegInit(diffInfos(0).e0)
+  val e1 = RegInit(diffInfos(0).e1)
+  val e2 = RegInit(diffInfos(0).e2)
+  val ie0 = RegInit(diffInfos(0).e0)
+  val ie1 = RegInit(diffInfos(0).e1)
+  val ie2 = RegInit(diffInfos(0).e2)
+  val ce0 = RegInit(diffInfos(0).e0)
+  val ce1 = RegInit(diffInfos(0).e1)
+  val ce2 = RegInit(diffInfos(0).e2)
+  val re0 = RegInit(diffInfos(0).e0)
+  val re1 = RegInit(diffInfos(0).e1)
+  val re2 = RegInit(diffInfos(0).e2)
 
-  val er = RegInit(erv(0))
-  val eg = RegInit(egv(0))
-  val eb = RegInit(ebv(0))
+  val r = RegInit(diffInfos(0).r)
+  val g = RegInit(diffInfos(0).g)
+  val b = RegInit(diffInfos(0).b)
+  val ir = RegInit(diffInfos(0).r)
+  val ig = RegInit(diffInfos(0).g)
+  val ib = RegInit(diffInfos(0).b)
+  val cr = RegInit(diffInfos(0).r)
+  val cg = RegInit(diffInfos(0).g)
+  val cb = RegInit(diffInfos(0).b)
+  val rr = RegInit(diffInfos(0).r)
+  val rg = RegInit(diffInfos(0).g)
+  val rb = RegInit(diffInfos(0).b)
+
+  val er = RegInit(diffInfos(0).er)
+  val eg = RegInit(diffInfos(0).eg)
+  val eb = RegInit(diffInfos(0).eb)
+  val ier = RegInit(diffInfos(0).er)
+  val ieg = RegInit(diffInfos(0).eg)
+  val ieb = RegInit(diffInfos(0).eb)
+  val cer = RegInit(diffInfos(0).er)
+  val ceg = RegInit(diffInfos(0).eg)
+  val ceb = RegInit(diffInfos(0).eb)
+  val rer = RegInit(diffInfos(0).er)
+  val reg = RegInit(diffInfos(0).eg)
+  val reb = RegInit(diffInfos(0).eb)
 
   val col = RegInit(0.U(log2Up(Tile.nrCols).W))
   val row = RegInit(0.U(unsignedBitLength(Tile.nrRows).W))
   when (RegNext(io.fbId) =/= io.fbId) {
-    currAngle := angle
+    diffInfo := diffInfos(angle)
 
-    e0 := e0v(angle)
-    e1 := e1v(angle)
-    e2 := e2v(angle)
+    e0 := diffInfos(angle).e0
+    e1 := diffInfos(angle).e1
+    e2 := diffInfos(angle).e2
+    ie0 := diffInfos(angle).e0
+    ie1 := diffInfos(angle).e1
+    ie2 := diffInfos(angle).e2
+    ce0 := diffInfos(angle).e0
+    ce1 := diffInfos(angle).e1
+    ce2 := diffInfos(angle).e2
+    re0 := diffInfos(angle).e0
+    re1 := diffInfos(angle).e1
+    re2 := diffInfos(angle).e2
 
-    r := rv(angle)
-    g := gv(angle)
-    b := bv(angle)
+    r := diffInfos(angle).r
+    g := diffInfos(angle).g
+    b := diffInfos(angle).b
+    ir := diffInfos(angle).r
+    ig := diffInfos(angle).g
+    ib := diffInfos(angle).b
+    cr := diffInfos(angle).r
+    cg := diffInfos(angle).g
+    cb := diffInfos(angle).b
+    rr := diffInfos(angle).r
+    rg := diffInfos(angle).g
+    rb := diffInfos(angle).b
 
-    er := erv(angle)
-    eg := egv(angle)
-    eb := ebv(angle)
+    er := diffInfos(angle).r
+    eg := diffInfos(angle).g
+    eb := diffInfos(angle).b
+    ier := diffInfos(angle).r
+    ieg := diffInfos(angle).g
+    ieb := diffInfos(angle).b
+    cer := diffInfos(angle).r
+    ceg := diffInfos(angle).g
+    ceb := diffInfos(angle).b
+    rer := diffInfos(angle).r
+    reg := diffInfos(angle).g
+    reb := diffInfos(angle).b
 
     row := 0.U
   }
@@ -299,40 +288,95 @@ class Graphics extends Module {
   when (valid && tileWriter.io.inReq.ready) {
     valid := false.B
 
-    e0  := e0 + dc0v(currAngle)
-    e1  := e1 + dc1v(currAngle)
-    e2  := e2 + dc2v(currAngle)
+    val ne0 = ce0 - diffInfo.dy0 * Tile.size.S
+    e0  := ne0
+    ie0 := ne0
+    ce0 := ne0
 
-    val (rquo, rrem) = incrDiv(dquorcv(currAngle), dremrcv(currAngle), av(currAngle), r, er)
+    val ne1 = ce1 - diffInfo.dy1 * Tile.size.S
+    e1  := ne1
+    ie1 := ne1
+    ce1 := ne1
+
+    val ne2 = ce2 - diffInfo.dy2 * Tile.size.S
+    e2  := ne2
+    ie2 := ne2
+    ce2 := ne2
+
+    val (rquo, rrem) = incrDiv(diffInfo.dquorc, diffInfo.dremrc, diffInfo.a, cr, cer)
     r   := rquo
     er  := rrem
+    ir  := rquo
+    ier := rrem
+    cr  := rquo
+    ceg := rrem
 
-    val (gquo, grem) = incrDiv(dquogcv(currAngle), dremgcv(currAngle), av(currAngle), g, eg)
+    val (gquo, grem) = incrDiv(diffInfo.dquogc, diffInfo.dremgc, diffInfo.a, cg, ceg)
     g   := gquo
     eg  := grem
+    ig  := gquo
+    ieg := grem
+    cg  := gquo
+    ceg := grem
 
-    val (bquo, brem) = incrDiv(dquobcv(currAngle), drembcv(currAngle), av(currAngle), b, eb)
+    val (bquo, brem) = incrDiv(diffInfo.dquobc, diffInfo.drembc, diffInfo.a, cb, ceb)
     b   := bquo
     eb  := brem
+    ib  := bquo
+    ieb := brem
+    cb  := bquo
+    ceb := brem
 
     col := col + 1.U
 
     when (col === (Tile.nrCols - 1).U) {
-      e0  := e0 + dr0v(currAngle)
-      e1  := e1 + dr1v(currAngle)
-      e2  := e2 + dr2v(currAngle)
+      val ne0 = re0 - diffInfo.dx0 * Tile.size.S
+      e0  := ne0
+      ie0 := ne0
+      ce0 := ne0
+      re0 := ne0
 
-      val (rquo, rrem) = incrDiv(dquorrv(currAngle), dremrrv(currAngle), av(currAngle), r, er)
+      val ne1 = re1 - diffInfo.dx1 * Tile.size.S
+      e1  := ne1
+      ie1 := ne1
+      ce1 := ne1
+      re1 := ne1
+
+      val ne2 = re2 - diffInfo.dx2 * Tile.size.S
+      e2  := ne2
+      ie2 := ne2
+      ce2 := ne2
+      re2 := ne2
+
+      val (rquo, rrem) = incrDiv(diffInfo.dquorr, diffInfo.dremrr, diffInfo.a, rr, rer)
       r   := rquo
       er  := rrem
+      ir  := rquo
+      ier := rrem
+      cr  := rquo
+      cer := rrem
+      rr  := rquo
+      rer := rrem
 
-      val (gquo, grem) = incrDiv(dquogrv(currAngle), dremgrv(currAngle), av(currAngle), g, eg)
+      val (gquo, grem) = incrDiv(diffInfo.dquogr, diffInfo.dremgr, diffInfo.a, rg, reg)
       g   := gquo
       eg  := grem
+      ig  := gquo
+      ieg := grem
+      cg  := gquo
+      ceg := grem
+      rg  := gquo
+      reg := grem
 
-      val (bquo, brem) = incrDiv(dquobrv(currAngle), drembrv(currAngle), av(currAngle), b, eb)
+      val (bquo, brem) = incrDiv(diffInfo.dquobr, diffInfo.drembr, diffInfo.a, rb, reb)
       b   := bquo
       eb  := brem
+      ib  := bquo
+      ieb := brem
+      cb  := bquo
+      ceb := brem
+      rb  := bquo
+      reb := brem
 
       col := 0.U
       row := row + 1.U
@@ -342,26 +386,26 @@ class Graphics extends Module {
   val tileBuffer = Reg(Vec(Tile.size, Vec(Tile.size, FbRGB())))
   val i = RegInit(0.U(log2Up(Tile.size).W))
   val j = RegInit(0.U(log2Up(Tile.size).W))
+  val visible = e0 > 0.S && (e1 > 0.S && e2 > 0.S) || e0 < 0.S && (e1 < 0.S && e2 < 0.S)
   when (row =/= Tile.nrRows.U && !valid) {
     val rgb = FbRGB(r.asUInt, g.asUInt, b.asUInt)
-    val visible = e0 > 0.S && (e1 > 0.S && e2 > 0.S) || e0 < 0.S && (e1 < 0.S && e2 < 0.S)
     tileBuffer(i)(j) := Mux(visible, rgb, FbRGB(0))
 
     j := j + 1.U
 
-    e0 := e0 + dj0v(currAngle)
-    e1 := e1 + dj1v(currAngle)
-    e2 := e2 + dj2v(currAngle)
+    e0 := e0 - diffInfo.dy0
+    e1 := e1 - diffInfo.dy1
+    e2 := e2 - diffInfo.dy2
 
-    val (rquo, rrem) = incrDiv(dquorjv(currAngle), dremrjv(currAngle), av(currAngle), r, er)
+    val (rquo, rrem) = incrDiv(diffInfo.dquorj, diffInfo.dremrj, diffInfo.a, r, er)
     r   := rquo
     er  := rrem
 
-    val (gquo, grem) = incrDiv(dquogjv(currAngle), dremgjv(currAngle), av(currAngle), g, eg)
+    val (gquo, grem) = incrDiv(diffInfo.dquogj, diffInfo.dremgj, diffInfo.a, g, eg)
     g   := gquo
     eg  := grem
 
-    val (bquo, brem) = incrDiv(dquobjv(currAngle), drembjv(currAngle), av(currAngle), b, eb)
+    val (bquo, brem) = incrDiv(diffInfo.dquobj, diffInfo.drembj, diffInfo.a, b, eb)
     b   := bquo
     eb  := brem
 
@@ -369,21 +413,33 @@ class Graphics extends Module {
       j := 0.U
       i := i + 1.U
 
-      e0 := e0 + di0v(currAngle)
-      e1 := e1 + di1v(currAngle)
-      e2 := e2 + di2v(currAngle)
+      val ne0 = ie0 - diffInfo.dx0
+      e0  := ne0
+      ie0 := ne0
+      val ne1 = ie1 - diffInfo.dx1
+      e1  := ne1
+      ie1 := ne1
+      val ne2 = ie2 - diffInfo.dx2
+      e2  := ne2
+      ie2 := ne2
 
-      val (rquo, rrem) = incrDiv(dquoriv(currAngle), dremriv(currAngle), av(currAngle), r, er)
+      val (rquo, rrem) = incrDiv(diffInfo.dquori, diffInfo.dremri, diffInfo.a, ir, ier)
       r   := rquo
       er  := rrem
+      ir  := rquo
+      ier := rrem
 
-      val (gquo, grem) = incrDiv(dquogiv(currAngle), dremgiv(currAngle), av(currAngle), g, eg)
+      val (gquo, grem) = incrDiv(diffInfo.dquogi, diffInfo.dremgi, diffInfo.a, ig, ieg)
       g   := gquo
       eg  := grem
+      ig  := gquo
+      ieg := grem
 
-      val (bquo, brem) = incrDiv(dquobiv(currAngle), drembiv(currAngle), av(currAngle), b, eb)
+      val (bquo, brem) = incrDiv(diffInfo.dquobi, diffInfo.drembi, diffInfo.a, ib, ieb)
       b   := bquo
       eb  := brem
+      ib  := bquo
+      ieb := brem
 
       when (i === (Tile.size - 1).U) {
         i := 0.U
@@ -402,5 +458,5 @@ class Graphics extends Module {
   io.vram <> fbWriter.io.vram
   fbWriter.io.fbId := io.fbId
   fbWriter.io.req <> tileWriter.io.outReq
-  io.done := fbWriter.io.done
+  io.done := row === Tile.nrRows.U && fbWriter.io.done
 }
