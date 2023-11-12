@@ -81,9 +81,9 @@ class Graphics extends Module {
     g := diffInfos(angle).g
     b := diffInfos(angle).b
 
-    er := diffInfos(angle).r
-    eg := diffInfos(angle).g
-    eb := diffInfos(angle).b
+    er := diffInfos(angle).er
+    eg := diffInfos(angle).eg
+    eb := diffInfos(angle).eb
 
     row := 0.U
   }

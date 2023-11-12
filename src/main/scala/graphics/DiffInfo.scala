@@ -63,9 +63,9 @@ object DiffInfo {
     diffInfo.dremgj := (if (a == 0) 0 else if (a > 0) dividendgj % a else -dividendgj % a).S
     diffInfo.drembj := (if (a == 0) 0 else if (a > 0) dividendbj % a else -dividendbj % a).S
 
-    val dividendri = (-dx1 + dy1 * (Tile.size - 1)) * 255
-    val dividendgi = (-dx2 + dy2 * (Tile.size - 1)) * 255
-    val dividendbi = (-dx0 + dy0 * (Tile.size - 1)) * 255
+    val dividendri = (dy1 * (Tile.size - 1) - dx1) * 255
+    val dividendgi = (dy2 * (Tile.size - 1) - dx2) * 255
+    val dividendbi = (dy0 * (Tile.size - 1) - dx0) * 255
 
     diffInfo.dquori := (if (a == 0) 0 else dividendri / a).S
     diffInfo.dquogi := (if (a == 0) 0 else dividendgi / a).S
