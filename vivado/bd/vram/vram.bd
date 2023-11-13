@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x3A58F1BF9F623D5",
+      "boundary_crc": "0x3A58F1BC32486E6",
       "device": "xc7a100tcsg324-1",
       "name": "vram",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -53,7 +53,7 @@
             "value": "128"
           },
           "FREQ_HZ": {
-            "value": "100000000"
+            "value": "50000000"
           },
           "HAS_BRESP": {
             "value": "1"
@@ -593,7 +593,7 @@
             "value_src": "default"
           },
           "FREQ_HZ": {
-            "value": "100000000"
+            "value": "50000000"
           },
           "FREQ_TOLERANCE_HZ": {
             "value": "0",

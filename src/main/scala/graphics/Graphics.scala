@@ -5,89 +5,96 @@ import chisel3._
 import chisel3.util._
 
 class Graphics extends Module {
-  def incrDiv(dquo: SInt, drem: SInt, divisor: SInt, quo: SInt, rem: SInt) = {
-    val nquo = quo + dquo;
-    val nrem = rem + drem;
-    val rquo = WireDefault(nquo)
-    val rrem = WireDefault(nrem)
-    when (drem > 0.S && rem >= divisor - drem) {
-      rquo := nquo + 1.S
-      rrem := nrem - divisor
-    }
-    when (drem < 0.S && rem <= -divisor - drem) {
-      rquo := nquo - 1.S
-      rrem := nrem + divisor
-    }
-    (rquo, rrem)
-  }
-
   val io = IO(new Bundle {
     val fbId = Input(UInt(Fb.idWidth.W))
     val vram = new WrAxi(Vram.addrWidth, Vram.dataWidth)
     val done = Output(Bool())
   })
 
-  val diffInfos = Wire(Vec(360, new DiffInfo))
-  for (i <- 0 until 360) {
-    val angle = math.toRadians(i)
-
-    val x0 = 512
-    val y0 = 192
-
-    val z1 = 1 / (2 - math.sin(angle))
-    val x1 = 512 - (222 * z1 * math.cos(angle)).toInt
-    val y1 = 384 + (192 * z1).toInt
-
-    val z2 = 1 / (2 + math.sin(angle))
-    val x2 = 512 + (222 * z2 * math.cos(angle)).toInt
-    val y2 = 384 + (192 * z2).toInt
-
-    diffInfos(i) := DiffInfo.build((x0, y0), (x1, y1), (x2, y2))
-  }
-
-  val cntReg = RegInit(0.U(unsignedBitLength(1388888).W))
+  val cnt = RegInit(0.U(unsignedBitLength(1388888).W))
   val angle = RegInit(0.U(log2Up(360).W))
-  cntReg := cntReg + 1.U
-  when (cntReg === 1388888.U) {
-    cntReg := 0.U
+  cnt := cnt + 1.U
+  when (cnt === 1388888.U) {
+    cnt := 0.U
     angle := angle + 1.U
     when (angle === 359.U) {
       angle := 0.U
     }
   }
 
-  val diffInfo = RegInit(diffInfos(0))
+  val nrDraws = 2
+  val drawId = RegInit(0.U(log2Up(nrDraws).W))
 
-  val e0 = RegInit(diffInfos(0).e0)
-  val e1 = RegInit(diffInfos(0).e1)
-  val e2 = RegInit(diffInfos(0).e2)
+  val color = Wire(Vec(nrDraws, UInt(8.W)))
 
-  val r = RegInit(diffInfos(0).r)
-  val g = RegInit(diffInfos(0).g)
-  val b = RegInit(diffInfos(0).b)
+  val x0v = Wire(Vec(nrDraws, Vec(360, UInt())))
+  val y0v = Wire(Vec(nrDraws, Vec(360, UInt())))
+  val x1v = Wire(Vec(nrDraws, Vec(360, UInt())))
+  val y1v = Wire(Vec(nrDraws, Vec(360, UInt())))
+  val x2v = Wire(Vec(nrDraws, Vec(360, UInt())))
+  val y2v = Wire(Vec(nrDraws, Vec(360, UInt())))
 
-  val er = RegInit(diffInfos(0).er)
-  val eg = RegInit(diffInfos(0).eg)
-  val eb = RegInit(diffInfos(0).eb)
+  val dx0v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  val dy0v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  val dx1v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  val dy1v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  val dx2v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  val dy2v = Wire(Vec(nrDraws, Vec(360, SInt())))
+  for (i <- 0 until 360) {
+    color(0) := 0.U
+
+    x0v(0)(i) := 0.U
+    y0v(0)(i) := 0.U
+    x1v(0)(i) := 0.U
+    y1v(0)(i) := 0.U
+    x2v(0)(i) := 0.U
+    y2v(0)(i) := 0.U
+
+    dx0v(0)(i) := 0.S
+    dx1v(0)(i) := 0.S
+    dx2v(0)(i) := 0.S
+    dy0v(0)(i) := 0.S
+    dy1v(0)(i) := 0.S
+    dy2v(0)(i) := 0.S
+
+    val angle = math.toRadians(i)
+    val x0 = 512
+    val y0 = 192
+    val z1 = 1 / (2 - math.sin(angle))
+    val x1 = 512 - (222 * z1 * math.cos(angle)).toInt
+    val y1 = 384 + (192 * z1).toInt
+    val z2 = 1 / (2 + math.sin(angle))
+    val x2 = 512 + (222 * z2 * math.cos(angle)).toInt
+    val y2 = 384 + (192 * z2).toInt
+
+    color(1) := 255.U
+
+    x0v(1)(i) := x0.U
+    y0v(1)(i) := y0.U
+    x1v(1)(i) := x1.U
+    y1v(1)(i) := y1.U
+    x2v(1)(i) := x2.U
+    y2v(1)(i) := y2.U
+
+    dx0v(1)(i) := (x1 - x0).S
+    dx1v(1)(i) := (x2 - x1).S
+    dx2v(1)(i) := (x0 - x2).S
+    dy0v(1)(i) := (y0 - y1).S
+    dy1v(1)(i) := (y1 - y2).S
+    dy2v(1)(i) := (y2 - y0).S
+  }
 
   val col = RegInit(0.U(log2Up(Tile.nrCols).W))
   val row = RegInit(0.U(unsignedBitLength(Tile.nrRows).W))
+  val x = RegInit(0.U(log2Up(Fb.width).W))
+  val y = RegInit(0.U(log2Up(Fb.height).W))
+  val currAngle = RegInit(0.U(log2Up(360).W))
   when (RegNext(io.fbId) =/= io.fbId) {
-    diffInfo := diffInfos(angle)
-
-    e0 := diffInfos(angle).e0
-    e1 := diffInfos(angle).e1
-    e2 := diffInfos(angle).e2
-
-    r := diffInfos(angle).r
-    g := diffInfos(angle).g
-    b := diffInfos(angle).b
-
-    er := diffInfos(angle).er
-    eg := diffInfos(angle).eg
-    eb := diffInfos(angle).eb
-
+    drawId := 0.U
+    currAngle := angle
     row := 0.U
+    x := 0.U
+    y := 0.U
   }
 
   val tileWriter = Module(new TileWriter)
@@ -95,96 +102,45 @@ class Graphics extends Module {
   tileWriter.io.inReq.valid := valid
   when (valid && tileWriter.io.inReq.ready) {
     valid := false.B
-
-    e0  := e0 + diffInfo.dc0
-    e1  := e1 + diffInfo.dc1
-    e2  := e2 + diffInfo.dc2
-
-    val (rquo, rrem) = incrDiv(diffInfo.dquorc, diffInfo.dremrc, diffInfo.a, r, er)
-    r   := rquo
-    er  := rrem
-
-    val (gquo, grem) = incrDiv(diffInfo.dquogc, diffInfo.dremgc, diffInfo.a, g, eg)
-    g   := gquo
-    eg  := grem
-
-    val (bquo, brem) = incrDiv(diffInfo.dquobc, diffInfo.drembc, diffInfo.a, b, eb)
-    b   := bquo
-    eb  := brem
-
     col := col + 1.U
-
+    x := x + Tile.size.U
     when (col === (Tile.nrCols - 1).U) {
-      e0  := e0 + diffInfo.dr0
-      e1  := e1 + diffInfo.dr1
-      e2  := e2 + diffInfo.dr2
-
-      val (rquo, rrem) = incrDiv(diffInfo.dquorr, diffInfo.dremrr, diffInfo.a, r, er)
-      r   := rquo
-      er  := rrem
-
-      val (gquo, grem) = incrDiv(diffInfo.dquogr, diffInfo.dremgr, diffInfo.a, g, eg)
-      g   := gquo
-      eg  := grem
-
-      val (bquo, brem) = incrDiv(diffInfo.dquobr, diffInfo.drembr, diffInfo.a, b, eb)
-      b   := bquo
-      eb  := brem
-
       col := 0.U
       row := row + 1.U
+      x := 0.U
+      y := y + Tile.size.U
     }
   }
 
   val tileBuffer = Reg(Vec(Tile.size, Vec(Tile.size, FbRGB())))
   val i = RegInit(0.U(log2Up(Tile.size).W))
   val j = RegInit(0.U(log2Up(Tile.size).W))
-  val visible = e0 > 0.S && (e1 > 0.S && e2 > 0.S) || e0 < 0.S && (e1 < 0.S && e2 < 0.S)
   when (row =/= Tile.nrRows.U && !valid) {
-    val rgb = FbRGB(r.asUInt, g.asUInt, b.asUInt)
-    tileBuffer(i)(j) := Mux(visible, rgb, FbRGB(0))
+    val e0 = dx0v(drawId)(currAngle) * (y0v(drawId)(currAngle).zext - y.zext) - dy0v(drawId)(currAngle) * (x.zext - x0v(drawId)(currAngle).zext)
+    val e1 = dx1v(drawId)(currAngle) * (y1v(drawId)(currAngle).zext - y.zext) - dy1v(drawId)(currAngle) * (x.zext - x1v(drawId)(currAngle).zext)
+    val e2 = dx2v(drawId)(currAngle) * (y2v(drawId)(currAngle).zext - y.zext) - dy2v(drawId)(currAngle) * (x.zext - x2v(drawId)(currAngle).zext)
+    val visible = e0 > 0.S && e1 > 0.S && e2 > 0.S ||
+      e0 < 0.S && e1 < 0.S && e2 < 0.S ||
+      e0 === 0.S && e1 === 0.S && e2 === 0.S
+    when (visible) {
+      tileBuffer(i)(j) := FbRGB(color(drawId))
+    }
 
     j := j + 1.U
-
-    e0 := e0 + diffInfo.dj0
-    e1 := e1 + diffInfo.dj1
-    e2 := e2 + diffInfo.dj2
-
-    val (rquo, rrem) = incrDiv(diffInfo.dquorj, diffInfo.dremrj, diffInfo.a, r, er)
-    r   := rquo
-    er  := rrem
-
-    val (gquo, grem) = incrDiv(diffInfo.dquogj, diffInfo.dremgj, diffInfo.a, g, eg)
-    g   := gquo
-    eg  := grem
-
-    val (bquo, brem) = incrDiv(diffInfo.dquobj, diffInfo.drembj, diffInfo.a, b, eb)
-    b   := bquo
-    eb  := brem
-
+    x := x + 1.U
     when (j === (Tile.size - 1).U) {
       j := 0.U
       i := i + 1.U
-
-      e0  := e0 + diffInfo.di0
-      e1  := e1 + diffInfo.di1
-      e2  := e2 + diffInfo.di2
-
-      val (rquo, rrem) = incrDiv(diffInfo.dquori, diffInfo.dremri, diffInfo.a, r, er)
-      r   := rquo
-      er  := rrem
-
-      val (gquo, grem) = incrDiv(diffInfo.dquogi, diffInfo.dremgi, diffInfo.a, g, eg)
-      g   := gquo
-      eg  := grem
-
-      val (bquo, brem) = incrDiv(diffInfo.dquobi, diffInfo.drembi, diffInfo.a, b, eb)
-      b   := bquo
-      eb  := brem
-
+      x := x - (Tile.size - 1).U
+      y := y + 1.U
       when (i === (Tile.size - 1).U) {
         i := 0.U
-        valid := true.B
+        y := y - (Tile.size - 1).U
+        drawId := drawId + 1.U
+        when (drawId === (nrDraws - 1).U) {
+          drawId := 0.U
+          valid := true.B
+        }
       }
     }
   }

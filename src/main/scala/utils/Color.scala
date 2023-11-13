@@ -42,6 +42,14 @@ class RGBFactory(val rWidth: Int, val gWidth: Int, val bWidth: Int) {
     res
   }
 
+  def apply(x: UInt) = {
+    val res = Wire(new RGB(rWidth, gWidth, bWidth))
+    res.r := x
+    res.g := x
+    res.b := x
+    res
+  }
+
   def apply(r: UInt, g: UInt, b: UInt) = {
     val res = Wire(new RGB(rWidth, gWidth, bWidth))
     res.r := r
