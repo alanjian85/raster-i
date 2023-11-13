@@ -104,9 +104,9 @@ object DiffInfo {
 }
 
 class DiffInfo extends Bundle {
-  val e0 = SInt(32.W)
-  val e1 = SInt(32.W)
-  val e2 = SInt(32.W)
+  val e0 = SInt(24.W)
+  val e1 = SInt(24.W)
+  val e2 = SInt(24.W)
 
   val dj0 = SInt()
   val dj1 = SInt()
@@ -126,13 +126,13 @@ class DiffInfo extends Bundle {
 
   val a = SInt()
 
-  val r = SInt(32.W)
-  val g = SInt(32.W)
-  val b = SInt(32.W)
+  val r = SInt(24.W)
+  val g = SInt(24.W)
+  val b = SInt(24.W)
 
-  val er = SInt(32.W)
-  val eg = SInt(32.W)
-  val eb = SInt(32.W)
+  val er = SInt(24.W)
+  val eg = SInt(24.W)
+  val eb = SInt(24.W)
 
   val dquorj = SInt()
   val dquogj = SInt()

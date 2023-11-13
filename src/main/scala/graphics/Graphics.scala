@@ -6,15 +6,17 @@ import chisel3.util._
 
 class Graphics extends Module {
   def incrDiv(dquo: SInt, drem: SInt, divisor: SInt, quo: SInt, rem: SInt) = {
-    val rquo = WireDefault(quo + dquo)
-    val rrem = WireDefault(rem + drem)
+    val nquo = quo + dquo;
+    val nrem = rem + drem;
+    val rquo = WireDefault(nquo)
+    val rrem = WireDefault(nrem)
     when (drem > 0.S && rem >= divisor - drem) {
-      rquo := quo + dquo + 1.S
-      rrem := rem - divisor + drem
+      rquo := nquo + 1.S
+      rrem := nrem - divisor
     }
     when (drem < 0.S && rem <= -divisor - drem) {
-      rquo := quo + dquo - 1.S
-      rrem := rem + divisor + drem
+      rquo := nquo - 1.S
+      rrem := nrem + divisor
     }
     (rquo, rrem)
   }
