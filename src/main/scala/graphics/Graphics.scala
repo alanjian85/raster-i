@@ -22,10 +22,12 @@ class Graphics extends Module {
     }
   }
 
-  val nrDraws = 2
+  val nrDraws = 3
   val drawId = RegInit(0.U(log2Up(nrDraws).W))
 
-  val color = Wire(Vec(nrDraws, UInt(8.W)))
+  val r = Wire(Vec(nrDraws, UInt(8.W)))
+  val g = Wire(Vec(nrDraws, UInt(8.W)))
+  val b = Wire(Vec(nrDraws, UInt(8.W)))
 
   val x0v = Wire(Vec(nrDraws, Vec(360, UInt())))
   val y0v = Wire(Vec(nrDraws, Vec(360, UInt())))
@@ -41,7 +43,9 @@ class Graphics extends Module {
   val dx2v = Wire(Vec(nrDraws, Vec(360, SInt())))
   val dy2v = Wire(Vec(nrDraws, Vec(360, SInt())))
   for (i <- 0 until 360) {
-    color(0) := 0.U
+    r(0) := 0.U
+    g(0) := 0.U
+    b(0) := 0.U
 
     x0v(0)(i) := 0.U
     y0v(0)(i) := 0.U
@@ -67,13 +71,15 @@ class Graphics extends Module {
     val x2 = 512 + (222 * z2 * math.cos(angle)).toInt
     val y2 = 384 + (192 * z2).toInt
 
-    color(1) := 255.U
+    r(1) := 255.U
+    g(1) := 0.U
+    b(1) := 0.U
 
-    x0v(1)(i) := x0.U
+    x0v(1)(i) := (x0 - 200).U
     y0v(1)(i) := y0.U
-    x1v(1)(i) := x1.U
+    x1v(1)(i) := (x1 - 200).U
     y1v(1)(i) := y1.U
-    x2v(1)(i) := x2.U
+    x2v(1)(i) := (x2 - 200).U
     y2v(1)(i) := y2.U
 
     dx0v(1)(i) := (x1 - x0).S
@@ -82,6 +88,24 @@ class Graphics extends Module {
     dy0v(1)(i) := (y0 - y1).S
     dy1v(1)(i) := (y1 - y2).S
     dy2v(1)(i) := (y2 - y0).S
+
+    r(2) := 0.U
+    g(2) := 255.U
+    b(2) := 0.U
+
+    x0v(2)(i) := (x0 + 200).U
+    y0v(2)(i) := y0.U
+    x1v(2)(i) := (x1 + 200).U
+    y1v(2)(i) := y1.U
+    x2v(2)(i) := (x2 + 200).U
+    y2v(2)(i) := y2.U
+
+    dx0v(2)(i) := (x1 - x0).S
+    dx1v(2)(i) := (x2 - x1).S
+    dx2v(2)(i) := (x0 - x2).S
+    dy0v(2)(i) := (y0 - y1).S
+    dy1v(2)(i) := (y1 - y2).S
+    dy2v(2)(i) := (y2 - y0).S
   }
 
   val col = RegInit(0.U(log2Up(Tile.nrCols).W))
@@ -123,7 +147,7 @@ class Graphics extends Module {
       e0 < 0.S && e1 < 0.S && e2 < 0.S ||
       e0 === 0.S && e1 === 0.S && e2 === 0.S
     when (visible) {
-      tileBuffer(i)(j) := FbRGB(color(drawId))
+      tileBuffer(i)(j) := FbRGB(r(drawId), g(drawId), b(drawId))
     }
 
     j := j + 1.U
