@@ -108,6 +108,13 @@ class Graphics extends Module {
     dy2v(2)(i) := (y2 - y0).S
   }
 
+  val x0 = RegInit(x0v(0)(0))
+  val x1 = RegInit(x1v(0)(0))
+  val x2 = RegInit(x2v(0)(0))
+  val y0 = RegInit(y0v(0)(0))
+  val y1 = RegInit(y1v(0)(0))
+  val y2 = RegInit(y2v(0)(0))
+
   val col = RegInit(0.U(log2Up(Tile.nrCols).W))
   val row = RegInit(0.U(unsignedBitLength(Tile.nrRows).W))
   val x = RegInit(0.U(log2Up(Fb.width).W))
@@ -115,6 +122,12 @@ class Graphics extends Module {
   val currAngle = RegInit(0.U(log2Up(360).W))
   when (RegNext(io.fbId) =/= io.fbId) {
     drawId := 0.U
+    x0 := x0v(0)(angle)
+    x1 := x1v(0)(angle)
+    x2 := x2v(0)(angle)
+    y0 := y0v(0)(angle)
+    y1 := y1v(0)(angle)
+    y2 := y2v(0)(angle)
     currAngle := angle
     row := 0.U
     x := 0.U
@@ -140,9 +153,9 @@ class Graphics extends Module {
   val i = RegInit(0.U(log2Up(Tile.size).W))
   val j = RegInit(0.U(log2Up(Tile.size).W))
   when (row =/= Tile.nrRows.U && !valid) {
-    val e0 = dx0v(drawId)(currAngle) * (y0v(drawId)(currAngle).zext - y.zext) - dy0v(drawId)(currAngle) * (x.zext - x0v(drawId)(currAngle).zext)
-    val e1 = dx1v(drawId)(currAngle) * (y1v(drawId)(currAngle).zext - y.zext) - dy1v(drawId)(currAngle) * (x.zext - x1v(drawId)(currAngle).zext)
-    val e2 = dx2v(drawId)(currAngle) * (y2v(drawId)(currAngle).zext - y.zext) - dy2v(drawId)(currAngle) * (x.zext - x2v(drawId)(currAngle).zext)
+    val e0 = dx0v(drawId)(currAngle) * (y0.zext - y.zext) - dy0v(drawId)(currAngle) * (x.zext - x0.zext)
+    val e1 = dx1v(drawId)(currAngle) * (y1.zext - y.zext) - dy1v(drawId)(currAngle) * (x.zext - x1.zext)
+    val e2 = dx2v(drawId)(currAngle) * (y2.zext - y.zext) - dy2v(drawId)(currAngle) * (x.zext - x2.zext)
     val visible = e0 > 0.S && e1 > 0.S && e2 > 0.S ||
       e0 < 0.S && e1 < 0.S && e2 < 0.S ||
       e0 === 0.S && e1 === 0.S && e2 === 0.S
@@ -158,11 +171,18 @@ class Graphics extends Module {
       x := x - (Tile.size - 1).U
       y := y + 1.U
       when (i === (Tile.size - 1).U) {
+        val ndrawId = WireDefault(drawId + 1.U)
+        x0 := x0v(ndrawId)(currAngle)
+        x1 := x1v(ndrawId)(currAngle)
+        x2 := x2v(ndrawId)(currAngle)
+        y0 := y0v(ndrawId)(currAngle)
+        y1 := y1v(ndrawId)(currAngle)
+        y2 := y2v(ndrawId)(currAngle)
         i := 0.U
         y := y - (Tile.size - 1).U
-        drawId := drawId + 1.U
+        drawId := ndrawId
         when (drawId === (nrDraws - 1).U) {
-          drawId := 0.U
+          ndrawId := 0.U
           valid := true.B
         }
       }
