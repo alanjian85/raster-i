@@ -36,10 +36,10 @@ class Trinity extends Module {
   vram.io.aclkGraphics  := clkWiz.io.clkGraphics
   vram.io.arstnGraphics := graphicsSysRst.io.periArstn
   withClockAndReset(clkWiz.io.clkGraphics, graphicsSysRst.io.periRst) {
-    val graphics = Module(new Graphics)
-    vram.io.axiGraphics <> graphics.io.vram
-    graphics.io.fbId := RegNext(RegNext(fbSwapper.io.graphicsFbId))
-    graphicsDone     := RegNext(graphics.io.done)
+    val renderer = Module(new Renderer)
+    vram.io.axiGraphics <> renderer.io.vram
+    renderer.io.fbId := RegNext(RegNext(fbSwapper.io.graphicsFbId))
+    graphicsDone     := RegNext(renderer.io.done)
   }
 }
 

@@ -47,7 +47,7 @@ class vram extends BlackBox {
 
 class Vram extends Module {
   val io = IO(new Bundle {
-    val axiGraphics   = Flipped(new WrAxi(Vram.addrWidth, Vram.dataWidth))
+    val axiGraphics   = new WrAxiExtUpper(Vram.addrWidth, Vram.dataWidth)
     val aclkGraphics  = Input(Clock())
     val arstnGraphics = Input(Reset())
 
@@ -62,7 +62,7 @@ class Vram extends Module {
   vram.io.clk   := clock.asBool
   vram.io.reset := reset.asBool
 
-  vram.io.graphics_axi.connect(io.axiGraphics)
+  io.axiGraphics.connect(vram.io.graphics_axi)
   vram.io.graphics_aclk    := io.aclkGraphics.asBool
   vram.io.graphics_aresetn := io.arstnGraphics.asBool
 

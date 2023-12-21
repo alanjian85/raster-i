@@ -171,6 +171,58 @@ class WrAxiExt(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle 
   }
 }
 
+class WrAxiExtUpper(addrWidth: Int, dataWidth: Int, idWidth: Int = 0) extends Bundle {
+  val AWID     = Input(UInt(idWidth.W))
+  val AWADDR   = Input(UInt(addrWidth.W))
+  val AWLEN    = Input(UInt(8.W))
+  val AWSIZE   = Input(UInt(3.W))
+  val AWBURST  = Input(UInt(2.W))
+  val AWLOCK   = Input(Bool())
+  val AWCACHE  = Input(UInt(4.W))
+  val AWPROT   = Input(UInt(3.W))
+  val AWQOS    = Input(UInt(4.W))
+  val AWREGION = Input(UInt(4.W))
+  val AWVALID  = Input(Bool())
+  val AWREADY  = Output(Bool())
+
+  val WDATA  = Input(UInt(dataWidth.W))
+  val WSTRB  = Input(UInt((dataWidth / 8).W))
+  val WLAST  = Input(Bool())
+  val WVALID = Input(Bool())
+  val WREADY = Output(Bool())
+
+  val BID    = Output(UInt(idWidth.W))
+  val BRESP  = Output(UInt(2.W))
+  val BVALID = Output(Bool())
+  val BREADY = Input(Bool())
+
+  def connect(that: WrAxiExt) = {
+    that.awid     := AWID
+    that.awaddr   := AWADDR
+    that.awlen    := AWLEN
+    that.awsize   := AWSIZE
+    that.awburst  := AWBURST
+    that.awlock   := AWLOCK
+    that.awcache  := AWCACHE
+    that.awprot   := AWPROT
+    that.awqos    := AWQOS
+    that.awregion := AWREGION
+    that.awvalid  := AWVALID
+    AWREADY := that.awready
+
+    that.wdata  := WDATA
+    that.wstrb  := WSTRB
+    that.wlast  := WLAST
+    that.wvalid := WVALID
+    WREADY := that.wready
+
+    BID    := that.bid
+    BRESP  := that.bresp
+    BVALID := that.bvalid
+    that.bready := BREADY
+  }
+}
+
 class RdWrAxiExt(addrWidth: Int, dataWidth: Int, rdIdWidth: Int = 0, wrIdWidth: Int = 0) extends Bundle {
   val arid     = Input(UInt(rdIdWidth.W))
   val araddr   = Input(UInt(addrWidth.W))
