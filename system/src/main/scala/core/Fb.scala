@@ -129,7 +129,7 @@ class FbReader extends Module {
   val addr      = RegInit(0.U(Fb.addrWidth.W))
   io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.nrBytes)
+  io.vram.addr.bits.addr  := (io.fbId ## addr) << log2Up(FbRGB.nrBytes)
   io.vram.addr.bits.len   := Fb.maxIdx.U
   io.vram.addr.bits.size  := Vram.beatsSize
   io.vram.addr.bits.burst := Axi.Burst.incr
@@ -181,7 +181,7 @@ class FbWriter extends Module {
   val done      = RegInit(false.B)
   io.vram.addr.valid      := addrValid
   io.vram.addr.bits.id    := DontCare
-  io.vram.addr.bits.addr  := ((io.fbId << Fb.addrWidth) ## addr) << log2Up(FbRGB.nrBytes)
+  io.vram.addr.bits.addr  := (io.fbId ## addr) << log2Up(FbRGB.nrBytes)
   io.vram.addr.bits.len   := Fb.maxIdx.U
   io.vram.addr.bits.size  := Vram.beatsSize
   io.vram.addr.bits.burst := Axi.Burst.incr

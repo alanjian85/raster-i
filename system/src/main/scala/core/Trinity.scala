@@ -28,7 +28,7 @@ class Trinity extends Module {
     vram.io.axiDisplay <> display.io.vram
     io.vga             <> display.io.vga
     display.io.fbId := RegNext(RegNext(fbSwapper.io.displayFbId))
-    displayVsync    := RegNext(display.io.vga.vsync === VgaTiming.polarity.B)
+    displayVsync    := RegNext(display.io.vga.vsync === VgaTiming.polarity.B, false.B)
   }
 
   val graphicsSysRst = Module(new ProcSysRst)
@@ -39,7 +39,7 @@ class Trinity extends Module {
     val renderer = Module(new Renderer)
     vram.io.axiGraphics <> renderer.io.vram
     renderer.io.fbId := RegNext(RegNext(fbSwapper.io.graphicsFbId))
-    graphicsDone     := RegNext(renderer.io.done)
+    graphicsDone     := RegNext(renderer.io.done, false.B)
   }
 }
 

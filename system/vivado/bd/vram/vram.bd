@@ -1262,11 +1262,14 @@
           "BOARD_MIG_PARAM": {
             "value": "Custom"
           },
+          "MIG_DONT_TOUCH_PARAM": {
+            "value": "Custom"
+          },
           "RESET_BOARD_INTERFACE": {
             "value": "Custom"
           },
           "XML_INPUT_FILE": {
-            "value": "mig_a.prj"
+            "value": "mig_b.prj"
           }
         }
       },
