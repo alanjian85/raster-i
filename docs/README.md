@@ -10,7 +10,7 @@ The motivation is to build a full-featured and open-source GPU that can runs on 
 
 On the contrary with other open-source GPUs, the ambition of this project is to build a hardware that supports both 3D real-time rendering and programmable pipeline (in the form of [shader](https://en.wikipedia.org/wiki/Shader), a program that models the shading of objects with its parallel nature) at the same time. And the ultimate goal is to support modern graphics APIs such as [OpenGL 4](https://www.opengl.org/) and [Vulkan](https://www.vulkan.org/).
 
-<img src="demo.gif" width="300" height="300"/>
+<img src="demo1.gif" width="300" height="300"/> <img src="demo2.gif" width="300" height="300"/>
 
 ## Features
 * Support for any screen resolutions with width no greater than 1024
