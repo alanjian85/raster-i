@@ -6,3 +6,4 @@ generated
 project
 target
 verilator/obj_dir
+logs

@@ -15,3 +15,8 @@
 
 .bin
 .pdi
+
+hls
+.cache
+logs
+renderer
