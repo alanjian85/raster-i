@@ -3,22 +3,22 @@
     "directory": "/home/feedc0de/Desktop/trinitas/renderer",
     "arguments": [
       "/opt/Xilinx/Vitis_HLS/2023.2/tps/lnx64/gcc-8.3.0/bin/g++",
-      "-Iinc",
+      "-Iinclude",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/etc",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/ap_sysc",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/auto_cc/include",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/systemc/include",
       "--compile",
-      "/home/feedc0de/Desktop/trinitas/renderer/src/img.cpp"
+      "/home/feedc0de/Desktop/trinitas/renderer/src/texture.cpp"
     ],
-    "file": "/home/feedc0de/Desktop/trinitas/renderer/src/img.cpp"
+    "file": "/home/feedc0de/Desktop/trinitas/renderer/src/texture.cpp"
   },
   {
     "directory": "/home/feedc0de/Desktop/trinitas/renderer",
     "arguments": [
       "/opt/Xilinx/Vitis_HLS/2023.2/tps/lnx64/gcc-8.3.0/bin/g++",
-      "-Iinc",
+      "-Iinclude",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/etc",
       "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/ap_sysc",
@@ -28,5 +28,35 @@
       "/home/feedc0de/Desktop/trinitas/renderer/src/top.cpp"
     ],
     "file": "/home/feedc0de/Desktop/trinitas/renderer/src/top.cpp"
+  },
+  {
+    "directory": "/home/feedc0de/Desktop/trinitas/renderer",
+    "arguments": [
+      "/opt/Xilinx/Vitis_HLS/2023.2/tps/lnx64/gcc-8.3.0/bin/g++",
+      "-Iinclude",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/etc",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/ap_sysc",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/auto_cc/include",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/systemc/include",
+      "--compile",
+      "/home/feedc0de/Desktop/trinitas/renderer/src/mesh.cpp"
+    ],
+    "file": "/home/feedc0de/Desktop/trinitas/renderer/src/mesh.cpp"
+  },
+  {
+    "directory": "/home/feedc0de/Desktop/trinitas/renderer",
+    "arguments": [
+      "/opt/Xilinx/Vitis_HLS/2023.2/tps/lnx64/gcc-8.3.0/bin/g++",
+      "-Iinclude",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/etc",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/include/ap_sysc",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/auto_cc/include",
+      "-isystem/opt/Xilinx/Vitis_HLS/2023.2/lnx64/tools/systemc/include",
+      "--compile",
+      "/home/feedc0de/Desktop/trinitas/renderer/src/math/math.cpp"
+    ],
+    "file": "/home/feedc0de/Desktop/trinitas/renderer/src/math/math.cpp"
   }
 ]
