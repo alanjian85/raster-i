@@ -10,6 +10,8 @@
 
 void trinity_renderer(fb_id_t fb_id, uint32_t *vram, ap_uint<9> angle);
 
+static uint32_t vram[4 * 1024 * 1024];
+
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -40,7 +42,6 @@ int main() {
         SDL_RenderClear(renderer);
 
         Uint64 start = SDL_GetPerformanceCounter();
-        uint32_t vram[(1 << FB_ID_SHIFT) + FB_WIDTH * FB_HEIGHT];
         trinity_renderer(fb_id, vram, (SDL_GetTicks() / 14) % 360);
         Uint64 end = SDL_GetPerformanceCounter();
         float fps =
