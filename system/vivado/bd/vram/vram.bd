@@ -1,12 +1,12 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x3A58F1BC32486E6",
+      "boundary_crc": "0xC05517723E900136",
       "device": "xc7a100tcsg324-1",
       "name": "vram",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
-      "tool_version": "2023.2",
+      "tool_version": "2024.1",
       "validated": "true"
     },
     "design_tree": {
@@ -16,6 +16,7 @@
           "auto_cc": ""
         },
         "s01_couplers": {
+          "auto_us": "",
           "auto_cc": ""
         },
         "m00_couplers": {
@@ -50,7 +51,7 @@
             "value_src": "default"
           },
           "DATA_WIDTH": {
-            "value": "128"
+            "value": "32"
           },
           "FREQ_HZ": {
             "value": "50000000"
@@ -121,7 +122,7 @@
             "value": "0"
           },
           "SUPPORTS_NARROW_BURST": {
-            "value": "0"
+            "value": "1"
           },
           "WUSER_BITS_PER_BYTE": {
             "value": "0"
@@ -196,13 +197,13 @@
           "WDATA": {
             "physical_name": "graphics_axi_wdata",
             "direction": "I",
-            "left": "127",
+            "left": "31",
             "right": "0"
           },
           "WSTRB": {
             "physical_name": "graphics_axi_wstrb",
             "direction": "I",
-            "left": "15",
+            "left": "3",
             "right": "0"
           },
           "WLAST": {
@@ -806,7 +807,7 @@
         "components": {
           "xbar": {
             "vlnv": "xilinx.com:ip:axi_crossbar:2.1",
-            "ip_revision": "30",
+            "ip_revision": "32",
             "xci_name": "vram_xbar_0",
             "xci_path": "ip/vram_xbar_0/vram_xbar_0.xci",
             "inst_hier_path": "axi_interconnect_0/xbar",
@@ -888,7 +889,7 @@
             "components": {
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
-                "ip_revision": "28",
+                "ip_revision": "30",
                 "xci_name": "vram_auto_cc_1",
                 "xci_path": "ip/vram_auto_cc_1/vram_auto_cc_1.xci",
                 "inst_hier_path": "axi_interconnect_0/s00_couplers/auto_cc",
@@ -992,9 +993,33 @@
               }
             },
             "components": {
+              "auto_us": {
+                "vlnv": "xilinx.com:ip:axi_dwidth_converter:2.1",
+                "ip_revision": "31",
+                "xci_name": "vram_auto_us_0",
+                "xci_path": "ip/vram_auto_us_0_1/vram_auto_us_0.xci",
+                "inst_hier_path": "axi_interconnect_0/s01_couplers/auto_us",
+                "parameters": {
+                  "MI_DATA_WIDTH": {
+                    "value": "128"
+                  },
+                  "SI_DATA_WIDTH": {
+                    "value": "32"
+                  }
+                },
+                "interface_ports": {
+                  "S_AXI": {
+                    "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+                    "mode": "Slave",
+                    "bridges": [
+                      "M_AXI"
+                    ]
+                  }
+                }
+              },
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
-                "ip_revision": "28",
+                "ip_revision": "30",
                 "xci_name": "vram_auto_cc_2",
                 "xci_path": "ip/vram_auto_cc_2/vram_auto_cc_2.xci",
                 "inst_hier_path": "axi_interconnect_0/s01_couplers/auto_cc",
@@ -1016,10 +1041,16 @@
                   "auto_cc/M_AXI"
                 ]
               },
-              "s01_couplers_to_auto_cc": {
+              "auto_us_to_auto_cc": {
+                "interface_ports": [
+                  "auto_us/M_AXI",
+                  "auto_cc/S_AXI"
+                ]
+              },
+              "s01_couplers_to_auto_us": {
                 "interface_ports": [
                   "S_AXI",
-                  "auto_cc/S_AXI"
+                  "auto_us/S_AXI"
                 ]
               }
             },
@@ -1039,12 +1070,14 @@
               "S_ACLK_1": {
                 "ports": [
                   "S_ACLK",
+                  "auto_us/s_axi_aclk",
                   "auto_cc/s_axi_aclk"
                 ]
               },
               "S_ARESETN_1": {
                 "ports": [
                   "S_ARESETN",
+                  "auto_us/s_axi_aresetn",
                   "auto_cc/s_axi_aresetn"
                 ]
               }
@@ -1100,7 +1133,7 @@
             "components": {
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
-                "ip_revision": "28",
+                "ip_revision": "30",
                 "xci_name": "vram_auto_cc_0",
                 "xci_path": "ip/vram_auto_cc_0/vram_auto_cc_0.xci",
                 "inst_hier_path": "axi_interconnect_0/m00_couplers/auto_cc",
@@ -1275,7 +1308,7 @@
       },
       "clk_wiz_0": {
         "vlnv": "xilinx.com:ip:clk_wiz:6.0",
-        "ip_revision": "13",
+        "ip_revision": "14",
         "xci_name": "vram_clk_wiz_0_0",
         "xci_path": "ip/vram_clk_wiz_0_0/vram_clk_wiz_0_0.xci",
         "inst_hier_path": "clk_wiz_0",
@@ -1353,14 +1386,14 @@
       },
       "proc_sys_reset_0": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "ip_revision": "14",
+        "ip_revision": "15",
         "xci_name": "vram_proc_sys_reset_0_0",
         "xci_path": "ip/vram_proc_sys_reset_0_0/vram_proc_sys_reset_0_0.xci",
         "inst_hier_path": "proc_sys_reset_0"
       },
       "proc_sys_reset_1": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
-        "ip_revision": "14",
+        "ip_revision": "15",
         "xci_name": "vram_proc_sys_reset_1_0",
         "xci_path": "ip/vram_proc_sys_reset_1_0/vram_proc_sys_reset_1_0.xci",
         "inst_hier_path": "proc_sys_reset_1"
@@ -1465,22 +1498,22 @@
       "proc_sys_reset_1_peripheral_aresetn": {
         "ports": [
           "proc_sys_reset_1/peripheral_aresetn",
-          "mig_7series_0/aresetn",
-          "axi_interconnect_0/M00_ARESETN"
+          "axi_interconnect_0/M00_ARESETN",
+          "mig_7series_0/aresetn"
         ]
       },
       "reset_1": {
         "ports": [
           "reset",
-          "mig_7series_0/sys_rst",
-          "proc_sys_reset_0/ext_reset_in"
+          "proc_sys_reset_0/ext_reset_in",
+          "mig_7series_0/sys_rst"
         ]
       }
     },
     "addressing": {
       "/": {
         "address_spaces": {
-          "graphics_axi": {
+          "display_axi": {
             "range": "256M",
             "width": "28",
             "segments": {
@@ -1491,7 +1524,7 @@
               }
             }
           },
-          "display_axi": {
+          "graphics_axi": {
             "range": "256M",
             "width": "28",
             "segments": {

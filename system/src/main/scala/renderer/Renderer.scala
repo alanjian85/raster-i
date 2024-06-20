@@ -10,7 +10,7 @@ class renderer extends BlackBox {
     val ap_rst_n = Input(Bool())
     val fb_id = Input(UInt(Fb.idWidth.W))
     val angle = Input(UInt(9.W))
-    val m_axi_vram = Flipped(new WrAxiExtUpper(32, 128))
+    val m_axi_vram = Flipped(new WrAxiExtUpper(32, 32))
   })
 }
 
@@ -18,7 +18,7 @@ class Renderer extends Module {
   val io = IO(new Bundle {
     val done = Output(Bool())
     val fbId = Input(UInt(Fb.idWidth.W))
-    val vram = Flipped(new WrAxiExtUpper(32, 128))
+    val vram = Flipped(new WrAxiExtUpper(32, 32))
   })
   
   val start = RegInit(true.B)

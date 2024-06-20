@@ -49,7 +49,7 @@ int main() {
         SDL_SetWindowTitle(window,
                            ("Trinitas, FPS: " + std::to_string(fps)).c_str());
 
-        SDL_UpdateTexture(texture, nullptr, vram + ((fb_id - 1) % 1 << 20) / 4,
+        SDL_UpdateTexture(texture, nullptr, vram + ((fb_id - 1) % 1 << 20),
                           FB_WIDTH * 4);
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 

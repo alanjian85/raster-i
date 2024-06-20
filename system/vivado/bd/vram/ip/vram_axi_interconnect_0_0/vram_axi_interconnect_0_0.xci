@@ -4,7 +4,7 @@
     "xci_name": "vram_axi_interconnect_0_0",
     "cell_name": "axi_interconnect_0",
     "component_reference": "xilinx.com:ip:axi_interconnect:2.1",
-    "ip_revision": "30",
+    "ip_revision": "32",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
@@ -329,6 +329,7 @@
         "BASE_BOARD_PART": [ { "value": "digilentinc.com:arty-a7-100:part0:1.1" } ],
         "BOARD_CONNECTIONS": [ { "value": "" } ],
         "DEVICE": [ { "value": "xc7a100t" } ],
+        "NEXTGEN_VERSAL": [ { "value": "0" } ],
         "PACKAGE": [ { "value": "csg324" } ],
         "PREFHDL": [ { "value": "VERILOG" } ],
         "SILICON_REVISION": [ { "value": "" } ],
@@ -339,12 +340,12 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator_AppCore" } ],
-        "IPREVISION": [ { "value": "30" } ],
+        "IPREVISION": [ { "value": "32" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "../../ipshared" } ],
-        "SWVERSION": [ { "value": "2023.2" } ],
+        "SWVERSION": [ { "value": "2024.1" } ],
         "SYNTHESISFLOW": [ { "value": "GLOBAL" } ]
       }
     }

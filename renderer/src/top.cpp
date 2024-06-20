@@ -32,7 +32,9 @@ Vertex interpolate_vertices(int idx, Vec3f bary) {
     return vertex;
 }
 
-void draw_triangle(uint32_t *fb, float *zb, int idx) {
+#define fb(offset) vram[FB_OFFSET + (static_cast<uint32_t>(fb_id) << FB_ID_SHIFT) + offset]
+
+void draw_triangle(uint32_t *vram, fb_id_t fb_id, /*float *zb, */int idx) {
     Triangle2i triangle(transformed_vertices[idx],
                         transformed_vertices[idx + 1],
                         transformed_vertices[idx + 2]);
@@ -42,7 +44,7 @@ void draw_triangle(uint32_t *fb, float *zb, int idx) {
             std::pair<bool, Vec3f> bary = triangle.barycentric(Vec2i(x, y));
             if (bary.first) { // && vertex.pos.z < zb[y * FB_WIDTH + x]) {
                 Vertex vertex = interpolate_vertices(idx, bary.second);
-                fb[y * FB_WIDTH + x] = sample_texture(vertex.uv).encode();
+                fb(y * FB_WIDTH + x) = sample_texture(vertex.uv).encode();
                 // zb[y * FB_WIDTH + x] = vertex.pos.z;
             }
         }
@@ -53,12 +55,9 @@ void trinity_renderer(fb_id_t fb_id, uint32_t *vram, ap_uint<9> angle) {
 #pragma HLS INTERFACE mode = ap_ctrl_hs port = return
 #pragma HLS INTERFACE mode = m_axi port = vram offset = off
 
-    uint32_t *fb =
-        vram + (static_cast<uint32_t>(fb_id) << FB_ID_SHIFT) + FB_OFFSET;
-    float *zb = reinterpret_cast<float *>(vram + ZB_OFFSET);
     for (int y = 0; y < FB_HEIGHT; y++) {
         for (int x = 0; x < FB_WIDTH; x++) {
-            fb[y * FB_WIDTH + x] = RGB8(0, 0, 0).encode();
+            fb(y * FB_WIDTH + x) = RGB8(64, 64, 64).encode();
             // zb[y * FB_WIDTH + x] = FLT_MAX;
         }
     }
@@ -81,6 +80,6 @@ void trinity_renderer(fb_id_t fb_id, uint32_t *vram, ap_uint<9> angle) {
     }
 
     for (int i = 0; i < NR_MESH_VERTICES; i += 3) {
-        draw_triangle(fb, zb, i);
+        draw_triangle(vram, fb_id, /*zb, */i);
     }
 }
