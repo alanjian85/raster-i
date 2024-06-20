@@ -13,10 +13,14 @@
 static Vec2i transformed_vertices[NR_MESH_VERTICES];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 
-Vertex interpolate_vertices(int idx, Vec3f bary) {
-    Vertex vertex_a = MESH_VERTICES[idx];
-    Vertex vertex_b = MESH_VERTICES[idx + 1];
-    Vertex vertex_c = MESH_VERTICES[idx + 2];
+Vertex interpolate_vertices(int i, Vec3f bary) {
+    int idx0 = MESH_INDICES[i * 3];
+    int idx1 = MESH_INDICES[i * 3 + 1];
+    int idx2 = MESH_INDICES[i * 3 + 2];
+
+    Vertex vertex_a = MESH_VERTICES[idx0];
+    Vertex vertex_b = MESH_VERTICES[idx1];
+    Vertex vertex_c = MESH_VERTICES[idx2];
 
     Vertex vertex;
     vertex.uv =
@@ -24,16 +28,19 @@ Vertex interpolate_vertices(int idx, Vec3f bary) {
     return vertex;
 }
 
-void draw_triangle(Vec2i pos, uint32_t *tile, int idx) {
-    Triangle2i triangle(transformed_vertices[3 * idx],
-                        transformed_vertices[3 * idx + 1],
-                        transformed_vertices[3 * idx + 2]);
+void draw_triangle(Vec2i pos, uint32_t *tile, int i) {
+    int idx0 = MESH_INDICES[i * 3];
+    int idx1 = MESH_INDICES[i * 3 + 1];
+    int idx2 = MESH_INDICES[i * 3 + 2];
+    Triangle2i triangle(transformed_vertices[idx0],
+                        transformed_vertices[idx1],
+                        transformed_vertices[idx2]);
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
             std::pair<bool, Vec3f> bary =
                 triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
             if (bary.first) {
-                Vertex vertex = interpolate_vertices(idx, bary.second);
+                Vertex vertex = interpolate_vertices(i, bary.second);
                 tile[y * FB_TILE_WIDTH + x] =
                     sample_texture(vertex.uv).encode();
             }
@@ -65,7 +72,10 @@ void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle) {
     }
 
     for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
-        Triangle2i triangle(transformed_vertices[3 * i], transformed_vertices[3 * i + 1], transformed_vertices[3 * i + 2]);
+        int idx0 = MESH_INDICES[i * 3];
+        int idx1 = MESH_INDICES[i * 3 + 1];
+        int idx2 = MESH_INDICES[i * 3 + 2];
+        Triangle2i triangle(transformed_vertices[idx0], transformed_vertices[idx1], transformed_vertices[idx2]);
         bounding_boxes[i] = triangle.aabb();
     }
 
