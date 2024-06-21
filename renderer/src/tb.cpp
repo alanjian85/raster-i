@@ -1,6 +1,3 @@
-#include <SDL2/SDL_hints.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_timer.h>
 #include <cstddef>
 #include <string>
 
@@ -8,9 +5,9 @@
 
 #include <fb.hpp>
 
-void trinity_renderer(fb_id_t fb_id, uint32_t *vram, ap_uint<9> angle);
+void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle);
 
-static uint32_t vram[4 * 1024 * 1024];
+static ap_uint<128> vram[256 * 1024 * 1024 / 16];
 
 int main() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -49,7 +46,7 @@ int main() {
         SDL_SetWindowTitle(window,
                            ("Trinitas, FPS: " + std::to_string(fps)).c_str());
 
-        SDL_UpdateTexture(texture, nullptr, vram + ((fb_id - 1) % 1 << 20),
+        SDL_UpdateTexture(texture, nullptr, vram + ((fb_id - 1) % 1 << 18),
                           FB_WIDTH * 4);
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
 
