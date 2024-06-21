@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xC05517723E900136",
+      "boundary_crc": "0xABB359183CCA9CC5",
       "device": "xc7a100tcsg324-1",
       "name": "vram",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -16,7 +16,6 @@
           "auto_cc": ""
         },
         "s01_couplers": {
-          "auto_us": "",
           "auto_cc": ""
         },
         "m00_couplers": {
@@ -35,7 +34,7 @@
         "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
         "parameters": {
           "ADDR_WIDTH": {
-            "value": "28"
+            "value": "32"
           },
           "ARUSER_WIDTH": {
             "value": "0"
@@ -51,7 +50,7 @@
             "value_src": "default"
           },
           "DATA_WIDTH": {
-            "value": "32"
+            "value": "128"
           },
           "FREQ_HZ": {
             "value": "50000000"
@@ -122,7 +121,7 @@
             "value": "0"
           },
           "SUPPORTS_NARROW_BURST": {
-            "value": "1"
+            "value": "0"
           },
           "WUSER_BITS_PER_BYTE": {
             "value": "0"
@@ -134,14 +133,14 @@
         "address_space_ref": "graphics_axi",
         "base_address": {
           "minimum": "0x00000000",
-          "maximum": "0x0FFFFFFF",
-          "width": "28"
+          "maximum": "0xFFFFFFFF",
+          "width": "32"
         },
         "port_maps": {
           "AWADDR": {
             "physical_name": "graphics_axi_awaddr",
             "direction": "I",
-            "left": "27",
+            "left": "31",
             "right": "0"
           },
           "AWLEN": {
@@ -197,13 +196,13 @@
           "WDATA": {
             "physical_name": "graphics_axi_wdata",
             "direction": "I",
-            "left": "31",
+            "left": "127",
             "right": "0"
           },
           "WSTRB": {
             "physical_name": "graphics_axi_wstrb",
             "direction": "I",
-            "left": "3",
+            "left": "15",
             "right": "0"
           },
           "WLAST": {
@@ -246,7 +245,7 @@
         "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
         "parameters": {
           "ADDR_WIDTH": {
-            "value": "28"
+            "value": "32"
           },
           "ARUSER_WIDTH": {
             "value": "0"
@@ -345,14 +344,14 @@
         "address_space_ref": "display_axi",
         "base_address": {
           "minimum": "0x00000000",
-          "maximum": "0x0FFFFFFF",
-          "width": "28"
+          "maximum": "0xFFFFFFFF",
+          "width": "32"
         },
         "port_maps": {
           "ARADDR": {
             "physical_name": "display_axi_araddr",
             "direction": "I",
-            "left": "27",
+            "left": "31",
             "right": "0"
           },
           "ARLEN": {
@@ -993,30 +992,6 @@
               }
             },
             "components": {
-              "auto_us": {
-                "vlnv": "xilinx.com:ip:axi_dwidth_converter:2.1",
-                "ip_revision": "31",
-                "xci_name": "vram_auto_us_0",
-                "xci_path": "ip/vram_auto_us_0_1/vram_auto_us_0.xci",
-                "inst_hier_path": "axi_interconnect_0/s01_couplers/auto_us",
-                "parameters": {
-                  "MI_DATA_WIDTH": {
-                    "value": "128"
-                  },
-                  "SI_DATA_WIDTH": {
-                    "value": "32"
-                  }
-                },
-                "interface_ports": {
-                  "S_AXI": {
-                    "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
-                    "mode": "Slave",
-                    "bridges": [
-                      "M_AXI"
-                    ]
-                  }
-                }
-              },
               "auto_cc": {
                 "vlnv": "xilinx.com:ip:axi_clock_converter:2.1",
                 "ip_revision": "30",
@@ -1041,16 +1016,10 @@
                   "auto_cc/M_AXI"
                 ]
               },
-              "auto_us_to_auto_cc": {
-                "interface_ports": [
-                  "auto_us/M_AXI",
-                  "auto_cc/S_AXI"
-                ]
-              },
-              "s01_couplers_to_auto_us": {
+              "s01_couplers_to_auto_cc": {
                 "interface_ports": [
                   "S_AXI",
-                  "auto_us/S_AXI"
+                  "auto_cc/S_AXI"
                 ]
               }
             },
@@ -1070,14 +1039,12 @@
               "S_ACLK_1": {
                 "ports": [
                   "S_ACLK",
-                  "auto_us/s_axi_aclk",
                   "auto_cc/s_axi_aclk"
                 ]
               },
               "S_ARESETN_1": {
                 "ports": [
                   "S_ARESETN",
-                  "auto_us/s_axi_aresetn",
                   "auto_cc/s_axi_aresetn"
                 ]
               }
@@ -1514,23 +1481,23 @@
       "/": {
         "address_spaces": {
           "display_axi": {
-            "range": "256M",
-            "width": "28",
+            "range": "4G",
+            "width": "32",
             "segments": {
               "SEG_mig_7series_0_memaddr": {
                 "address_block": "/mig_7series_0/memmap/memaddr",
-                "offset": "0x0000000",
+                "offset": "0x00000000",
                 "range": "256M"
               }
             }
           },
           "graphics_axi": {
-            "range": "256M",
-            "width": "28",
+            "range": "4G",
+            "width": "32",
             "segments": {
               "SEG_mig_7series_0_memaddr": {
                 "address_block": "/mig_7series_0/memmap/memaddr",
-                "offset": "0x0000000",
+                "offset": "0x00000000",
                 "range": "256M"
               }
             }

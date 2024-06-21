@@ -2,7 +2,9 @@
   "workspaceRoot": "/home/feedc0de/workspace/trinitas",
   "mapping": {
     "renderer/src/texture.cpp": "renderer",
+    "renderer/src/fb.cpp": "renderer",
     "renderer/src/tb.cpp": "renderer",
+    "/home/feedc0de/Desktop/trinitas/renderer/src/fb.cpp": "renderer",
     "renderer/src/math/math.cpp": "renderer",
     "renderer/src/top.cpp": "renderer",
     "renderer/src/mesh.cpp": "renderer"

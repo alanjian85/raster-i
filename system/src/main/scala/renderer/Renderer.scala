@@ -10,7 +10,7 @@ class renderer extends BlackBox {
     val ap_rst_n = Input(Bool())
     val fb_id = Input(UInt(Fb.idWidth.W))
     val angle = Input(UInt(9.W))
-    val m_axi_vram = Flipped(new WrAxiExtUpper(32, 32))
+    val m_axi_vram = Flipped(new WrAxiExtUpper(32, 128))
   })
 }
 
@@ -18,7 +18,7 @@ class Renderer extends Module {
   val io = IO(new Bundle {
     val done = Output(Bool())
     val fbId = Input(UInt(Fb.idWidth.W))
-    val vram = Flipped(new WrAxiExtUpper(32, 32))
+    val vram = Flipped(new WrAxiExtUpper(32, 128))
   })
   
   val start = RegInit(true.B)
@@ -32,12 +32,12 @@ class Renderer extends Module {
   renderer.io.fb_id    := io.fbId
   renderer.io.m_axi_vram <> io.vram
 
+  when (renderer.io.ap_ready) {
+  	start := false.B
+  }
   when (io.fbId =/= RegNext(io.fbId)) {
   	start := true.B
   	done := false.B
-  }
-  when (renderer.io.ap_ready) {
-  	start := false.B
   }
   when (renderer.io.ap_done) {
   	done := true.B

@@ -25,9 +25,9 @@ Vertex interpolate_vertices(int idx, Vec3f bary) {
 }
 
 void draw_triangle(Vec2i pos, uint32_t *tile, int idx) {
-    Triangle2i triangle(transformed_vertices[idx],
-                        transformed_vertices[idx + 1],
-                        transformed_vertices[idx + 2]);
+    Triangle2i triangle(transformed_vertices[3 * idx],
+                        transformed_vertices[3 * idx + 1],
+                        transformed_vertices[3 * idx + 2]);
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
             std::pair<bool, Vec3f> bary =
@@ -62,13 +62,11 @@ void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle) {
         transformed_vertices[i] =
             Vec2i((1 + pos.x / pos.z * 0.75f) * FB_WIDTH / 2,
                   (1 - pos.y / pos.z) * FB_HEIGHT / 2);
+    }
 
-        if (i % 3 == 2) {
-            Triangle2i triangle(transformed_vertices[i - 2],
-                                transformed_vertices[i - 1],
-                                transformed_vertices[i]);
-            bounding_boxes[i / 3] = triangle.aabb();
-        }
+    for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
+        Triangle2i triangle(transformed_vertices[3 * i], transformed_vertices[3 * i + 1], transformed_vertices[3 * i + 2]);
+        bounding_boxes[i] = triangle.aabb();
     }
 
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
@@ -76,8 +74,8 @@ void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle) {
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT] = {};
             Aabb2i tile_aabb(Vec2i(x, y),
                              Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
-            for (int i = 0; i < NR_MESH_VERTICES; i += 3) {
-                if (!bounding_boxes[i / 3].overlap(tile_aabb))
+            for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
+                if (!bounding_boxes[i].overlap(tile_aabb))
                     continue;
                 draw_triangle(Vec2i(x, y), tile, i);
             }

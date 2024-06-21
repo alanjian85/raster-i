@@ -21,7 +21,7 @@ class Ddr3Ext extends Bundle {
 }
 
 object Vram {
-  val addrWidth = 28
+  val addrWidth = 32
   val dataWidth = 128
 
   val dataBytes = dataWidth / 8
