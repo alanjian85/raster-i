@@ -32,12 +32,12 @@ class Renderer extends Module {
   renderer.io.fb_id    := io.fbId
   renderer.io.m_axi_vram <> io.vram
 
-  when (renderer.io.ap_ready) {
-  	start := false.B
-  }
   when (io.fbId =/= RegNext(io.fbId)) {
   	start := true.B
   	done := false.B
+  }
+  when (renderer.io.ap_ready) {
+  	start := false.B
   }
   when (renderer.io.ap_done) {
   	done := true.B

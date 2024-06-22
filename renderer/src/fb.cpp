@@ -2,24 +2,30 @@
 
 static uint32_t tile_buf[FB_WIDTH * FB_TILE_HEIGHT];
 
-void fb_write_tile(ap_uint<128> *fb, Vec2i pos, const uint32_t *tile) {
+void fb_write_tile(Vec2i pos, const uint32_t *tile) {
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
             tile_buf[y * FB_WIDTH + pos.x + x] = tile[y * FB_TILE_WIDTH + x];
         }
     }
-    if (pos.x == FB_WIDTH - FB_TILE_WIDTH) {
-        for (int y = 0; y < FB_TILE_HEIGHT; y++) {
-            for (int x = 0; x < FB_WIDTH; x += 4) {
-                ap_uint<128> val = tile_buf[y * FB_WIDTH + x + 0];
-                val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 1])
-                       << 32;
-                val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 2])
-                       << 64;
-                val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 3])
-                       << 96;
-                fb[((pos.y + y) * FB_WIDTH + x) / 4] = val;
-            }
+}
+
+void fb_flush_tiles(hls::burst_maxi<ap_uint<128>> vram, fb_id_t fb_id,
+                    int line) {
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
+        vram.write_request((static_cast<uint32_t>(fb_id) << FB_ID_SHIFT) +
+                               (line + y) * FB_WIDTH / 4,
+                           FB_WIDTH / 4);
+        for (int x = 0; x < FB_WIDTH; x += 4) {
+            ap_uint<128> val = tile_buf[y * FB_WIDTH + x + 0];
+            val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 1])
+                   << 32;
+            val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 2])
+                   << 64;
+            val |= static_cast<ap_uint<128>>(tile_buf[y * FB_WIDTH + x + 3])
+                   << 96;
+            vram.write(val);
         }
+        vram.write_response();
     }
 }

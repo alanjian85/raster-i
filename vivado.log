@@ -1,0 +1,24 @@
+#-----------------------------------------------------------
+# Vivado v2024.1 (64-bit)
+# SW Build 5076996 on Wed May 22 18:36:09 MDT 2024
+# IP Build 5075265 on Wed May 22 21:45:21 MDT 2024
+# SharedData Build 5076995 on Wed May 22 18:29:18 MDT 2024
+# Start of session at: Sun Jun 23 19:47:52 2024
+# Process ID: 5840
+# Current directory: /home/feedc0de/workspace/trinitas
+# Command line: vivado
+# Log file: /home/feedc0de/workspace/trinitas/vivado.log
+# Journal file: /home/feedc0de/workspace/trinitas/vivado.jou
+# Running On        :enigma
+# Platform          :Arch
+# Operating System  :Arch Linux
+# Processor Detail  :13th Gen Intel(R) Core(TM) i7-1355U
+# CPU Frequency     :416.554 MHz
+# CPU Physical cores:10
+# CPU Logical cores :12
+# Host memory       :33336 MB
+# Swap memory       :4294 MB
+# Total Virtual     :37631 MB
+# Available Virtual :33982 MB
+#-----------------------------------------------------------
+start_gui
