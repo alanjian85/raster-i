@@ -12,7 +12,9 @@
 #include <utils/color.hpp>
 
 static Vec2i transformed_vertices[NR_MESH_VERTICES];
+static int num_triangles = 0;
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
+static int triangle_indices[NR_MESH_TRIANGLES * 3];
 
 static Vertex interpolate_vertices(int i, Vec3f bary) {
     int idx0 = MESH_INDICES[i * 3];
@@ -33,15 +35,14 @@ static void draw_triangle(uint32_t *tile, Vec2i pos, Aabb2i aabb, int i) {
     if (!bounding_boxes[i].overlap(aabb))
         return;
 
-    int idx0 = MESH_INDICES[i * 3];
-    int idx1 = MESH_INDICES[i * 3 + 1];
-    int idx2 = MESH_INDICES[i * 3 + 2];
+    int idx0 = triangle_indices[i * 3 + 0];
+    int idx1 = triangle_indices[i * 3 + 1];
+    int idx2 = triangle_indices[i * 3 + 2];
     Triangle2i triangle(transformed_vertices[idx0], transformed_vertices[idx1],
                         transformed_vertices[idx2]);
 
     for (int y = 0; y < FB_TILE_WIDTH; y++) {
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
-#pragma HLS LOOP_FLATTEN
 #pragma HLS UNROLL factor = 8
 #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
             std::pair<bool, Vec3f> bary =
@@ -85,7 +86,14 @@ void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
         Triangle2i triangle(transformed_vertices[idx0],
                             transformed_vertices[idx1],
                             transformed_vertices[idx2]);
-        bounding_boxes[i] = triangle.aabb();
+        if (triangle.signed_area() < 0)
+            continue;
+
+        int idx = num_triangles++;
+        bounding_boxes[idx] = triangle.aabb();
+        triangle_indices[idx * 3 + 0] = idx0;
+        triangle_indices[idx * 3 + 1] = idx1;
+        triangle_indices[idx * 3 + 2] = idx2;
     }
 
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
@@ -93,7 +101,7 @@ void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT] = {};
             Aabb2i aabb(Vec2i(x, y),
                         Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
-            for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
+            for (int i = 0; i < num_triangles; i++) {
                 draw_triangle(tile, Vec2i(x, y), aabb, i);
             }
             fb_write_tile(Vec2i(x, y), tile);

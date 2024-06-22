@@ -30,6 +30,13 @@ template <typename T> struct Triangle2 {
         return Aabb2<T>(Vec2<T>(min_x, min_y), Vec2<T>(max_x, max_y));
     }
 
+    T signed_area() const {
+        return (vertices[1].x - vertices[0].x) *
+                   (vertices[2].y - vertices[0].y) -
+               (vertices[1].y - vertices[0].y) *
+                   (vertices[2].x - vertices[0].x);
+    }
+
     std::pair<bool, Vec3f> barycentric(Vec2<T> p) const {
         T area = abs(
             (vertices[1].x - vertices[0].x) * (vertices[2].y - vertices[0].y) -
