@@ -43,14 +43,16 @@ template <typename T> struct Triangle2 {
                   (vertices[1].y - vertices[0].y) * (p.x - vertices[0].x);
         Vec3<T> edge(edge0, edge1, edge2);
 
-        if (edge0 >= 0) {
-            return std::make_pair(edge1 >= 0 && edge2 >= 0,
+        if (edge0 > 0) {
+            return std::make_pair(edge1 > 0 && edge2 > 0,
                                   Vec3f(edge) / static_cast<float>(area));
-        } else {
+        } else if (edge0 < 0) {
             edge = -edge;
             return std::make_pair(edge1 < 0 && edge2 < 0,
                                   Vec3f(edge) / static_cast<float>(area));
         }
+
+        return std::make_pair(false, Vec3f());
     }
 };
 

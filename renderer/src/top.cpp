@@ -12,8 +12,17 @@
 
 static Vec2i transformed_vertices[NR_MESH_VERTICES];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
+static uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
 
-Vertex interpolate_vertices(int i, Vec3f bary) {
+static void clear_tile() {
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
+        for (int x = 0; x < FB_TILE_WIDTH; x++) {
+            tile[y * FB_TILE_WIDTH + x] = 0;
+        }
+    }
+}
+
+static Vertex interpolate_vertices(int i, Vec3f bary) {
     int idx0 = MESH_INDICES[i * 3];
     int idx1 = MESH_INDICES[i * 3 + 1];
     int idx2 = MESH_INDICES[i * 3 + 2];
@@ -23,12 +32,12 @@ Vertex interpolate_vertices(int i, Vec3f bary) {
     Vertex vertex_c = MESH_VERTICES[idx2];
 
     Vertex vertex;
-    vertex.uv =
-        vertex_a.uv * bary.x + vertex_b.uv * bary.y + vertex_c.uv * bary.z;
+    //vertex.uv =
+    //    vertex_a.uv * bary.x + vertex_b.uv * bary.y + vertex_c.uv * bary.z;
     return vertex;
 }
 
-void draw_triangle(Vec2i pos, uint32_t *tile, int i) {
+static void draw_triangle(Vec2i pos, int i) {
     int idx0 = MESH_INDICES[i * 3];
     int idx1 = MESH_INDICES[i * 3 + 1];
     int idx2 = MESH_INDICES[i * 3 + 2];
@@ -40,11 +49,21 @@ void draw_triangle(Vec2i pos, uint32_t *tile, int i) {
             std::pair<bool, Vec3f> bary =
                 triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
             if (bary.first) {
-                Vertex vertex = interpolate_vertices(i, bary.second);
-                tile[y * FB_TILE_WIDTH + x] =
-                    sample_texture(vertex.uv).encode();
+                //Vertex vertex = interpolate_vertices(i, bary.second);
+                tile[y * FB_TILE_WIDTH + x] = 0xFFFFFFFF;
+                    //sample_texture(vertex.uv).encode();
             }
         }
+    }
+}
+
+static void draw_tile(Vec2i pos, Aabb2i aabb) {
+    for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
+//#pragma HLS PIPELINE
+#pragma HLS DEPENDENCE variable=tile type=inter false
+        if (!bounding_boxes[i].overlap(aabb))
+            continue;
+        draw_triangle(pos, i);
     }
 }
 
@@ -57,7 +76,7 @@ void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle) {
 
     float sine = SINE_TABLE[angle];
     float cosine = COSINE_TABLE[angle];
-    Vec3f axis(0.5f / sqrt(1.25f), 1.0f / sqrt(1.25f), 0.0f);
+    Vec3f axis(0.0f, 1.0f, 0.0f);
 
     for (int i = 0; i < NR_MESH_VERTICES; i++) {
         Vec3f pos = MESH_VERTICES[i].pos;
@@ -81,14 +100,10 @@ void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle) {
 
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
         for (int x = 0; x < FB_WIDTH; x += FB_TILE_WIDTH) {
-            uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT] = {};
-            Aabb2i tile_aabb(Vec2i(x, y),
+            clear_tile();
+            Aabb2i aabb(Vec2i(x, y),
                              Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
-            for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
-                if (!bounding_boxes[i].overlap(tile_aabb))
-                    continue;
-                draw_triangle(Vec2i(x, y), tile, i);
-            }
+            draw_tile(Vec2i(x, y), aabb);
             fb_write_tile(fb, Vec2i(x, y), tile);
         }
     }
