@@ -40,6 +40,7 @@ render_y:
     for (int y = 0; y < FB_TILE_WIDTH; y++) {
     render_x:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
+#pragma HLS PIPELINE rewind
 #pragma HLS UNROLL factor = 8
 #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
             std::pair<bool, Vec3f> bary =
