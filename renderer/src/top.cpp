@@ -31,10 +31,7 @@ static Vertex interpolate_vertices(int i, Vec3f bary) {
     return vertex;
 }
 
-static void render_triangle(uint32_t *tile, Vec2i pos, Aabb2i aabb, int i) {
-    if (!bounding_boxes[i].overlap(aabb))
-        return;
-
+static void render_triangle(uint32_t *tile, Vec2i pos, int i) {
     int idx0 = triangle_indices[i * 3 + 0];
     int idx1 = triangle_indices[i * 3 + 1];
     int idx2 = triangle_indices[i * 3 + 2];
@@ -46,7 +43,7 @@ render_y:
     render_x:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
 #pragma HLS UNROLL factor = 8
-#pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
+#pragma HLS ARRAY_PARTITION variable = tile dim = 1 type = complete factor = 8
             std::pair<bool, Vec3f> bary =
                 triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
             if (bary.first) {
@@ -104,6 +101,8 @@ render_tile_y:
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
     render_tile_x:
         for (int x = 0; x < FB_WIDTH; x += FB_TILE_WIDTH) {
+            Aabb2i aabb(Vec2i(x, y),
+                        Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
         clear_tile:
             for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
@@ -111,11 +110,12 @@ render_tile_y:
                 tile[i] = 0xFF000000;
             }
 
-            Aabb2i aabb(Vec2i(x, y),
-                        Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
         render_triangles:
             for (int i = 0; i < num_triangles; i++) {
-                render_triangle(tile, Vec2i(x, y), aabb, i);
+                if (!bounding_boxes[i].overlap(aabb))
+                    continue;
+
+                render_triangle(tile, Vec2i(x, y), i);
             }
 
             fb_write_tile(Vec2i(x, y), tile);
