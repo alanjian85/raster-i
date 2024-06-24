@@ -12,9 +12,7 @@
 #include <utils/color.hpp>
 
 static Vec2i transformed_vertices[NR_MESH_VERTICES];
-static int num_triangles = 0;
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
-static int triangle_indices[NR_MESH_TRIANGLES * 3];
 
 static Vertex interpolate_vertices(int i, Vec3f bary) {
     int idx0 = MESH_INDICES[i * 3];
@@ -32,9 +30,9 @@ static Vertex interpolate_vertices(int i, Vec3f bary) {
 }
 
 static void render_triangle(uint32_t *tile, Vec2i pos, int i) {
-    int idx0 = triangle_indices[i * 3 + 0];
-    int idx1 = triangle_indices[i * 3 + 1];
-    int idx2 = triangle_indices[i * 3 + 2];
+    int idx0 = MESH_INDICES[i * 3 + 0];
+    int idx1 = MESH_INDICES[i * 3 + 1];
+    int idx2 = MESH_INDICES[i * 3 + 2];
     Triangle2i triangle(transformed_vertices[idx0], transformed_vertices[idx1],
                         transformed_vertices[idx2]);
 
@@ -43,7 +41,7 @@ render_y:
     render_x:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
 #pragma HLS UNROLL factor = 8
-#pragma HLS ARRAY_PARTITION variable = tile dim = 1 type = complete factor = 8
+#pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
             std::pair<bool, Vec3f> bary =
                 triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
             if (bary.first) {
@@ -87,14 +85,7 @@ preproc_triangles:
         Triangle2i triangle(transformed_vertices[idx0],
                             transformed_vertices[idx1],
                             transformed_vertices[idx2]);
-        if (triangle.signed_area() < 0)
-            continue;
-
-        int idx = num_triangles++;
-        bounding_boxes[idx] = triangle.aabb();
-        triangle_indices[idx * 3 + 0] = idx0;
-        triangle_indices[idx * 3 + 1] = idx1;
-        triangle_indices[idx * 3 + 2] = idx2;
+        bounding_boxes[i] = triangle.aabb();
     }
 
 render_tile_y:
@@ -111,11 +102,10 @@ render_tile_y:
             }
 
         render_triangles:
-            for (int i = 0; i < num_triangles; i++) {
-                if (!bounding_boxes[i].overlap(aabb))
-                    continue;
-
-                render_triangle(tile, Vec2i(x, y), i);
+            for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
+                if (bounding_boxes[i].overlap(aabb)) {
+                    render_triangle(tile, Vec2i(x, y), i);
+                }
             }
 
             fb_write_tile(Vec2i(x, y), tile);
