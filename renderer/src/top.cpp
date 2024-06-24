@@ -31,7 +31,7 @@ static Vertex interpolate_vertices(int i, Vec3f bary) {
     return vertex;
 }
 
-static void draw_triangle(uint32_t *tile, Vec2i pos, Aabb2i aabb, int i) {
+static void render_triangle(uint32_t *tile, Vec2i pos, Aabb2i aabb, int i) {
     if (!bounding_boxes[i].overlap(aabb))
         return;
 
@@ -41,7 +41,9 @@ static void draw_triangle(uint32_t *tile, Vec2i pos, Aabb2i aabb, int i) {
     Triangle2i triangle(transformed_vertices[idx0], transformed_vertices[idx1],
                         transformed_vertices[idx2]);
 
+render_y:
     for (int y = 0; y < FB_TILE_WIDTH; y++) {
+    render_x:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
 #pragma HLS UNROLL factor = 8
 #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
@@ -65,6 +67,7 @@ void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
     float cosine = COSINE_TABLE[angle];
     Vec3f axis(0.0f, 1.0f, 0.0f);
 
+preproc_vertices:
     for (int i = 0; i < NR_MESH_VERTICES; i++) {
 #pragma HLS PIPELINE off
         Vec3f pos = MESH_VERTICES[i].pos;
@@ -78,6 +81,7 @@ void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
                   (1 - pos.y / pos.z) * FB_HEIGHT / 2);
     }
 
+preproc_triangles:
     for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
 #pragma HLS PIPELINE off
         int idx0 = MESH_INDICES[i * 3];
@@ -96,14 +100,24 @@ void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
         triangle_indices[idx * 3 + 2] = idx2;
     }
 
+render_tile_y:
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
+    render_tile_x:
         for (int x = 0; x < FB_WIDTH; x += FB_TILE_WIDTH) {
-            uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT] = {};
+            uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+        clear_tile:
+            for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
+#pragma HLS PIPELINE off
+                tile[i] = 0xFF000000;
+            }
+
             Aabb2i aabb(Vec2i(x, y),
                         Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
+        render_triangles:
             for (int i = 0; i < num_triangles; i++) {
-                draw_triangle(tile, Vec2i(x, y), aabb, i);
+                render_triangle(tile, Vec2i(x, y), aabb, i);
             }
+
             fb_write_tile(Vec2i(x, y), tile);
         }
         fb_flush_tiles(vram, fb_id, y);
