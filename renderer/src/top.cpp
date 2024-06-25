@@ -15,29 +15,17 @@ static Vec2i transformed_vertices[NR_MESH_VERTICES];
 static float transformed_depths[NR_MESH_VERTICES];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 
-static float interpolate_depth(int i, Vec3f bary) {
-    Vec3i idx = MESH_INDICES[i].vertices;
-
-    float z_a = transformed_depths[idx.x];
-    float z_b = transformed_depths[idx.y];
-    float z_c = transformed_depths[idx.z];
-
-    return bary.x * z_a + bary.y * z_b + bary.z * z_c;
-}
-
-static Vec3f interpolate_normal(int i, Vec3f bary) {
-    Vec3i idx = MESH_INDICES[i].normals;
-    Vec3f normal_a = MESH_NORMALS[idx.x];
-    Vec3f normal_b = MESH_NORMALS[idx.y];
-    Vec3f normal_c = MESH_NORMALS[idx.z];
-    return bary.x * normal_a + bary.y * normal_b + bary.z * normal_c;
-}
-
 static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
-    Vec3i idx = MESH_INDICES[i].vertices;
-    Triangle2i triangle(transformed_vertices[idx.x],
-                        transformed_vertices[idx.z],
-                        transformed_vertices[idx.y]);
+    MeshIndex idx = MESH_INDICES[i];
+    Triangle2i triangle(transformed_vertices[idx.vertices.x],
+                        transformed_vertices[idx.vertices.z],
+                        transformed_vertices[idx.vertices.y]);
+    Vec3f depths(transformed_depths[idx.vertices.x],
+                 transformed_depths[idx.vertices.y],
+                 transformed_depths[idx.vertices.z]);
+    Vec3<Vec3f> normals(MESH_NORMALS[idx.normals.x],
+                        MESH_NORMALS[idx.normals.y],
+                        MESH_NORMALS[idx.normals.z]);
 
 render_y:
     for (int y = 0; y < FB_TILE_WIDTH; y++) {
@@ -45,15 +33,17 @@ render_y:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
 #pragma HLS UNROLL factor = 8
 #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
+#pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic factor = 8
             std::pair<bool, Vec3f> bary =
                 triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
-            float z = interpolate_depth(i, bary.second);
+            float z = bary.second.x * depths.x + bary.second.y * depths.y +
+                      bary.second.z * depths.z;
             if (bary.first && z <= zbuf[y * FB_TILE_WIDTH + x]) {
-                Vec3f normal = interpolate_normal(i, bary.second);
-                RGB8 rgb;
-                rgb.r = (normal.x + 1) * 0.5 * 255;
-                rgb.g = (normal.y + 1) * 0.5 * 255;
-                rgb.b = (normal.z + 1) * 0.5 * 255;
+                Vec3f normal = bary.second.x * normals.x +
+                               bary.second.y * normals.y +
+                               bary.second.z * normals.z;
+                RGB8 rgb((normal.x + 1) * 0.5 * 255, (normal.y + 1) * 0.5 * 255,
+                         (normal.z + 1) * 0.5 * 255);
                 tile[y * FB_TILE_WIDTH + x] = rgb.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
             }
