@@ -62,6 +62,7 @@ render_y:
                 tile[y * FB_TILE_WIDTH + x] = n.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
             }
+
             bary = bary - Vec3i(d1, d3, d5);
             z = z - dz_u;
             n = n - dn_u;
