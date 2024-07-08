@@ -1,0 +1,3 @@
+renderer/src/mesh.cpp linguist-vendored
+renderer/src/texture.cpp linguist-vendored
+system/vivado/* linguist-vendored

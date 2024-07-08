@@ -27,27 +27,38 @@ static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
                         MESH_NORMALS[idx.normals.y],
                         MESH_NORMALS[idx.normals.z]);
 
+    Vec3i bary_row = triangle.barycentric(pos);
+    float inv_area = 1.0f / ((triangle.vertices[1].x - triangle.vertices[0].x) * (triangle.vertices[2].y - triangle.vertices[0].y) -
+                        (triangle.vertices[1].y - triangle.vertices[0].y) * (triangle.vertices[2].x - triangle.vertices[0].x));
+    int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
+    int d1 = triangle.vertices[2].x - triangle.vertices[1].x;
+    int d2 = triangle.vertices[0].x - triangle.vertices[2].x;
+    int d3 = triangle.vertices[0].x - triangle.vertices[2].x;
+    int d4 = triangle.vertices[1].x - triangle.vertices[0].x;
+    int d5 = triangle.vertices[1].x - triangle.vertices[0].x;
+
 render_y:
     for (int y = 0; y < FB_TILE_WIDTH; y++) {
+        Vec3i bary = bary_row;
     render_x:
         for (int x = 0; x < FB_TILE_HEIGHT; x++) {
-#pragma HLS UNROLL factor = 8
-#pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
-#pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic factor = 8
-            std::pair<bool, Vec3f> bary =
-                triangle.barycentric(Vec2i(pos.x + x, pos.y + y));
-            float z = bary.second.x * depths.x + bary.second.y * depths.y +
-                      bary.second.z * depths.z;
-            if (bary.first && z <= zbuf[y * FB_TILE_WIDTH + x]) {
-                Vec3f normal = bary.second.x * normals.x +
-                               bary.second.y * normals.y +
-                               bary.second.z * normals.z;
+//#pragma HLS UNROLL factor=8
+//#pragma HLS ARRAY_PARTITION variable=tile type=cyclic factor=8
+//#pragma HLS ARRAY_PARTITION variable=zbuf type=cyclic factor=8
+            float z = (depths.x * float(bary.x) + depths.y * float(bary.y) +
+                      depths.z * float(bary.z)) * inv_area;
+            if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0 && z <= zbuf[y * FB_TILE_WIDTH + x]) {
+                Vec3f normal = (normals.x * float(bary.x) +
+                               normals.y * float(bary.y) +
+                               normals.z * float(bary.z)) * inv_area;
                 RGB8 rgb((normal.x + 1) * 0.5 * 255, (normal.y + 1) * 0.5 * 255,
                          (normal.z + 1) * 0.5 * 255);
                 tile[y * FB_TILE_WIDTH + x] = rgb.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
             }
+            bary = bary - Vec3i(d1, d3, d5);
         }
+        bary_row = bary_row + Vec3i(d0, d2, d4);
     }
 }
 

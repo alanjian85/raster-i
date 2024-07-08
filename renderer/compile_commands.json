@@ -2,9 +2,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls",
-      "-hls-syn-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
+      "-hls-syn-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/fb.cpp"
@@ -14,9 +14,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls",
-      "-hls-syn-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
+      "-hls-syn-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/texture.cpp"
@@ -26,9 +26,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls",
-      "-hls-syn-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
+      "-hls-syn-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/math/math.cpp"
@@ -38,9 +38,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls",
-      "-hls-syn-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
+      "-hls-syn-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/mesh.cpp"
@@ -50,9 +50,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls",
-      "-hls-syn-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
+      "-hls-syn-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/common/technology/autopilot",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/top.cpp"
@@ -62,9 +62,9 @@
   {
     "directory": "/home/feedc0de/workspace/trinitas/renderer",
     "arguments": [
-      "/opt/Xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
+      "/opt/xilinx/Vitis_HLS/2024.1/vcxx/libexec/clang++",
       "-fhls-tb",
-      "-hls-sim-headers-dir=/opt/Xilinx/Vitis_HLS/2024.1/include",
+      "-hls-sim-headers-dir=/opt/xilinx/Vitis_HLS/2024.1/include",
       "-I include",
       "-c",
       "/home/feedc0de/workspace/trinitas/renderer/src/tb.cpp"
