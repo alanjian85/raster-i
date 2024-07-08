@@ -18,47 +18,58 @@ static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
     MeshIndex idx = MESH_INDICES[i];
     Triangle2i triangle(transformed_vertices[idx.vertices.x],
-                        transformed_vertices[idx.vertices.z],
-                        transformed_vertices[idx.vertices.y]);
-    Vec3f depths(transformed_depths[idx.vertices.x],
-                 transformed_depths[idx.vertices.y],
-                 transformed_depths[idx.vertices.z]);
-    Vec3<Vec3f> normals(MESH_NORMALS[idx.normals.x],
-                        MESH_NORMALS[idx.normals.y],
-                        MESH_NORMALS[idx.normals.z]);
+                        transformed_vertices[idx.vertices.y],
+                        transformed_vertices[idx.vertices.z]);
+    int area = ((triangle.vertices[1].x - triangle.vertices[0].x) * (triangle.vertices[2].y - triangle.vertices[0].y) - 
+               (triangle.vertices[1].y - triangle.vertices[0].y) * (triangle.vertices[2].x - triangle.vertices[0].x));
+    if (area <= 0)
+        return;
 
     Vec3i bary_row = triangle.barycentric(pos);
-    float inv_area = 1.0f / ((triangle.vertices[1].x - triangle.vertices[0].x) * (triangle.vertices[2].y - triangle.vertices[0].y) -
-                        (triangle.vertices[1].y - triangle.vertices[0].y) * (triangle.vertices[2].x - triangle.vertices[0].x));
-    int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
-    int d1 = triangle.vertices[2].x - triangle.vertices[1].x;
-    int d2 = triangle.vertices[0].x - triangle.vertices[2].x;
-    int d3 = triangle.vertices[0].x - triangle.vertices[2].x;
-    int d4 = triangle.vertices[1].x - triangle.vertices[0].x;
-    int d5 = triangle.vertices[1].x - triangle.vertices[0].x;
+    float z_row = transformed_depths[idx.vertices.x] * bary_row.x + transformed_depths[idx.vertices.y] * bary_row.y + transformed_depths[idx.vertices.z] * bary_row.z; 
+    RGB8 n_row = MESH_NORMALS[idx.normals.x] * bary_row.x + MESH_NORMALS[idx.normals.y] * bary_row.y + MESH_NORMALS[idx.normals.z] * bary_row.z;
 
+    int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
+    int d1 = triangle.vertices[2].y - triangle.vertices[1].y;
+    int d2 = triangle.vertices[0].x - triangle.vertices[2].x;
+    int d3 = triangle.vertices[0].y - triangle.vertices[2].y;
+    int d4 = triangle.vertices[1].x - triangle.vertices[0].x;
+    int d5 = triangle.vertices[1].y - triangle.vertices[0].y;
+
+    float dz_u = transformed_depths[idx.vertices.x] * d1 + transformed_depths[idx.vertices.y] * d3 + transformed_depths[idx.vertices.z] * d5;
+    float dz_v = transformed_depths[idx.vertices.x] * d0 + transformed_depths[idx.vertices.y] * d2 + transformed_depths[idx.vertices.z] * d4;
+
+    z_row /= area;
+    dz_u /= area;
+    dz_v /= area;
+
+    RGB8 dn_u = MESH_NORMALS[idx.normals.x] * d1 + MESH_NORMALS[idx.normals.y] * d3 + MESH_NORMALS[idx.normals.z] * d5;
+    RGB8 dn_v = MESH_NORMALS[idx.normals.x] * d0 + MESH_NORMALS[idx.normals.y] * d2 + MESH_NORMALS[idx.normals.z] * d4;
+
+    n_row = n_row / area;
+    dn_u = dn_u / area;
+    dn_v = dn_v /  area;
+    
 render_y:
-    for (int y = 0; y < FB_TILE_WIDTH; y++) {
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         Vec3i bary = bary_row;
+        float z = z_row;
+        RGB8 n = n_row;
+
     render_x:
-        for (int x = 0; x < FB_TILE_HEIGHT; x++) {
-//#pragma HLS UNROLL factor=8
-//#pragma HLS ARRAY_PARTITION variable=tile type=cyclic factor=8
-//#pragma HLS ARRAY_PARTITION variable=zbuf type=cyclic factor=8
-            float z = (depths.x * float(bary.x) + depths.y * float(bary.y) +
-                      depths.z * float(bary.z)) * inv_area;
+        for (int x = 0; x < FB_TILE_WIDTH; x++) {
             if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0 && z <= zbuf[y * FB_TILE_WIDTH + x]) {
-                Vec3f normal = (normals.x * float(bary.x) +
-                               normals.y * float(bary.y) +
-                               normals.z * float(bary.z)) * inv_area;
-                RGB8 rgb((normal.x + 1) * 0.5 * 255, (normal.y + 1) * 0.5 * 255,
-                         (normal.z + 1) * 0.5 * 255);
-                tile[y * FB_TILE_WIDTH + x] = rgb.encode();
+                tile[y * FB_TILE_WIDTH + x] = n.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
             }
             bary = bary - Vec3i(d1, d3, d5);
+            z = z - dz_u;
+            n = n - dn_u;
         }
+        
         bary_row = bary_row + Vec3i(d0, d2, d4);
+        z_row = z_row + dz_v;
+        n_row = n_row + dn_v;
     }
 }
 
