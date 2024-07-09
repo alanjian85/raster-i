@@ -8,9 +8,9 @@ struct MeshIndex {
     Vec3i normals;
 };
 
-#define NR_MESH_VERTICES 507
-#define NR_MESH_NORMALS 944
-#define NR_MESH_TRIANGLES 968
+#define NR_MESH_VERTICES 5000
+#define NR_MESH_NORMALS 9995
+#define NR_MESH_TRIANGLES 9996
 
 extern const Vec3f MESH_VERTICES[NR_MESH_VERTICES];
 extern const RGB8 MESH_NORMALS[NR_MESH_NORMALS];
