@@ -25,9 +25,9 @@ static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
     if (area <= 0)
         return;
 
-    Vec3i bary_row = triangle.barycentric(pos);
-    float z_row = transformed_depths[idx.vertices.x] * bary_row.x + transformed_depths[idx.vertices.y] * bary_row.y + transformed_depths[idx.vertices.z] * bary_row.z; 
-    RGB8 n_row = MESH_NORMALS[idx.normals.x] * bary_row.x + MESH_NORMALS[idx.normals.y] * bary_row.y + MESH_NORMALS[idx.normals.z] * bary_row.z;
+    Vec3i bary_orig = triangle.barycentric(pos);
+    float z_orig = transformed_depths[idx.vertices.x] * bary_orig.x + transformed_depths[idx.vertices.y] * bary_orig.y + transformed_depths[idx.vertices.z] * bary_orig.z; 
+    RGB8 n_orig = MESH_NORMALS[idx.normals.x] * bary_orig.x + MESH_NORMALS[idx.normals.y] * bary_orig.y + MESH_NORMALS[idx.normals.z] * bary_orig.z;
 
     int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
     int d1 = triangle.vertices[2].y - triangle.vertices[1].y;
@@ -39,38 +39,34 @@ static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
     float dz_u = transformed_depths[idx.vertices.x] * d1 + transformed_depths[idx.vertices.y] * d3 + transformed_depths[idx.vertices.z] * d5;
     float dz_v = transformed_depths[idx.vertices.x] * d0 + transformed_depths[idx.vertices.y] * d2 + transformed_depths[idx.vertices.z] * d4;
 
-    z_row /= area;
+    z_orig /= area;
     dz_u /= area;
     dz_v /= area;
 
     RGB8 dn_u = MESH_NORMALS[idx.normals.x] * d1 + MESH_NORMALS[idx.normals.y] * d3 + MESH_NORMALS[idx.normals.z] * d5;
     RGB8 dn_v = MESH_NORMALS[idx.normals.x] * d0 + MESH_NORMALS[idx.normals.y] * d2 + MESH_NORMALS[idx.normals.z] * d4;
 
-    n_row = n_row / area;
+    n_orig = n_orig / area;
     dn_u = dn_u / area;
     dn_v = dn_v /  area;
     
 render_y:
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
-        Vec3i bary = bary_row;
-        float z = z_row;
-        RGB8 n = n_row;
-
     render_x:
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
+#pragma HLS PIPELINE
+#pragma HLS UNROLL factor=8
+#pragma HLS ARRAY_PARTITION variable=tile type=cyclic factor=8
+#pragma HLS ARRAY_PARTITION variable=zbuf type=cyclic factor=8
+            Vec3i bary = bary_orig - Vec3i(d1, d3, d5) * x+ Vec3i(d0, d2, d4) * y;
+            float z = z_orig - dz_u * x + dz_v * y;
+            RGB8 n = n_orig - dn_u * x + dn_v * y;
+
             if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0 && z <= zbuf[y * FB_TILE_WIDTH + x]) {
                 tile[y * FB_TILE_WIDTH + x] = n.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
             }
-
-            bary = bary - Vec3i(d1, d3, d5);
-            z = z - dz_u;
-            n = n - dn_u;
         }
-        
-        bary_row = bary_row + Vec3i(d0, d2, d4);
-        z_row = z_row + dz_v;
-        n_row = n_row + dn_v;
     }
 }
 
