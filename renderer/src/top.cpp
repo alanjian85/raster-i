@@ -21,7 +21,8 @@ static Vec3f transformed_positions[NR_MESH_VERTICES];
 static Vec3f transformed_normals[NR_MESH_NORMALS];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 
-static void render_triangle(uint32_t *tile, float *zbuf, Vec2i pos, int i) {
+static void render_triangle(float *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
+                            int i) {
     MeshIndex idx = MESH_INDICES[i];
     Triangle2i triangle(screen_vertices[idx.vertices.x].pos,
                         screen_vertices[idx.vertices.y].pos,
@@ -92,9 +93,10 @@ render_y:
     render_x:
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
 #pragma HLS PIPELINE
-//#pragma HLS UNROLL factor = 8
-//#pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor = 8
-//#pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic factor = 8
+            // #pragma HLS UNROLL factor = 8
+            // #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor
+            // = 8 #pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic
+            // factor = 8
             Vec3i bary = bary_orig - dbary_u * x + dbary_v * y;
             float z = z_orig - dz_u * x + dz_v * y;
             Vec3f pos = pos_orig - dpos_u * x + dpos_v * y;
@@ -102,18 +104,31 @@ render_y:
 
             if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0 &&
                 z <= zbuf[y * FB_TILE_WIDTH + x]) {
-                Vec3f dir = Vec3f(0, 0, 0) - pos;
-                float intensity = std::max(0.0f, dot(dir, n));
-                intensity /= sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-
-                RGB8 rgb;
-                rgb.r = intensity * 255;
-                rgb.g = intensity * 255;
-                rgb.b = intensity * 255;
-
-                tile[y * FB_TILE_WIDTH + x] = rgb.encode();
                 zbuf[y * FB_TILE_WIDTH + x] = z;
+                posbuf[y * FB_TILE_WIDTH + x] = pos;
+                nbuf[y * FB_TILE_WIDTH + x] = n;
             }
+        }
+    }
+}
+
+static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
+        for (int x = 0; x < FB_TILE_WIDTH; x++) {
+#pragma HLS PIPELINE off
+            Vec3f pos = posbuf[y * FB_TILE_WIDTH + x];
+            Vec3f n = nbuf[y * FB_TILE_WIDTH + x];
+
+            Vec3f dir = Vec3f(0, 0, 0) - pos;
+            float intensity = std::max(0.0f, dot(dir, n));
+            intensity /= sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+
+            RGB8 rgb;
+            rgb.r = intensity * 255;
+            rgb.g = intensity * 255;
+            rgb.b = intensity * 255;
+
+            tile[y * FB_TILE_WIDTH + x] = rgb.encode();
         }
     }
 }
@@ -140,6 +155,7 @@ preproc_vertices:
             Vec2i((1 + pos.x / pos.z * 0.75f) * FB_WIDTH / 2,
                   (1 - pos.y / pos.z) * FB_HEIGHT / 2);
         screen_vertices[i].z = pos.z;
+        transformed_positions[i] = pos;
     }
 
 preproc_normals:
@@ -169,21 +185,27 @@ render_tile_y:
         for (int x = 0; x < FB_WIDTH; x += FB_TILE_WIDTH) {
             Aabb2i aabb(Vec2i(x, y),
                         Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
+
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
             float zbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+            Vec3f posbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+            Vec3f nbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+
         clear_tile:
             for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
 #pragma HLS PIPELINE off
-                tile[i] = 0xFF000000;
                 zbuf[i] = FLT_MAX;
+                nbuf[i] = Vec3f(0, 0, 0);
             }
 
         render_triangles:
             for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
                 if (bounding_boxes[i].overlap(aabb)) {
-                    render_triangle(tile, zbuf, Vec2i(x, y), i);
+                    render_triangle(zbuf, posbuf, nbuf, Vec2i(x, y), i);
                 }
             }
+
+            deferred_shading(tile, posbuf, nbuf);
 
             fb_write_tile(Vec2i(x, y), tile);
         }
