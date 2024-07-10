@@ -45,6 +45,13 @@ template <typename T> struct Vec3 {
     }
 
     Vec3 operator-() const { return Vec3(-x, -y, -z); }
+
+    template <typename U> Vec3 &operator/=(U rhs) {
+        x /= rhs;
+        y /= rhs;
+        z /= rhs;
+        return *this;
+    }
 };
 
 template <typename T>
@@ -57,7 +64,7 @@ Vec3<T> operator-(const Vec3<T> &lhs, const Vec3<T> &rhs) {
     return Vec3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 }
 
-template <typename T> Vec3<T> operator*(const Vec3<T> &lhs, T rhs) {
+template <typename T, typename U> Vec3<T> operator*(const Vec3<T> &lhs, U rhs) {
     return Vec3<T>(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
 }
 

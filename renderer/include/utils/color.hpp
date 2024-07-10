@@ -13,9 +13,7 @@ struct RGB8 {
         this->b = b;
     }
 
-    uint32_t encode() const {
-        return r | g << 8 | b << 16;
-    }
+    uint32_t encode() const { return r | g << 8 | b << 16; }
 
     static RGB8 decode(uint32_t val) { return RGB8(val, val >> 8, val >> 16); }
 };
