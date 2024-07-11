@@ -66,12 +66,12 @@ static void render_triangle(float *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
     dz_u /= area;
     dz_v /= area;
 
-    Vec3f dpos_u = transformed_normals[idx.vertices.x] * dbary_u.x +
-                   transformed_normals[idx.vertices.y] * dbary_u.y +
-                   transformed_normals[idx.vertices.z] * dbary_u.z;
-    Vec3f dpos_v = transformed_normals[idx.vertices.x] * dbary_v.x +
-                   transformed_normals[idx.vertices.y] * dbary_v.y +
-                   transformed_normals[idx.vertices.z] * dbary_v.z;
+    Vec3f dpos_u = transformed_positions[idx.vertices.x] * dbary_u.x +
+                   transformed_positions[idx.vertices.y] * dbary_u.y +
+                   transformed_positions[idx.vertices.z] * dbary_u.z;
+    Vec3f dpos_v = transformed_positions[idx.vertices.x] * dbary_v.x +
+                   transformed_positions[idx.vertices.y] * dbary_v.y +
+                   transformed_positions[idx.vertices.z] * dbary_v.z;
 
     pos_orig /= area;
     dpos_u /= area;
