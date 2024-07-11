@@ -115,7 +115,6 @@ render_y:
 static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
-#pragma HLS PIPELINE off
             Vec3f pos = posbuf[y * FB_TILE_WIDTH + x];
             Vec3f n = nbuf[y * FB_TILE_WIDTH + x];
 
