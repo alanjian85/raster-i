@@ -2,12 +2,12 @@
 #include <cstdlib>
 
 #include <fb.hpp>
+#include <hls_math.h>
 #include <math/math.hpp>
 #include <math/triangle.hpp>
 #include <mem_layout.hpp>
 #include <mesh.hpp>
 #include <utils/aabb.hpp>
-#include <hls_math.h>
 #include <utils/color.hpp>
 
 struct ScreenVertex {
@@ -20,7 +20,7 @@ static Vec3f transformed_positions[NR_MESH_VERTICES];
 static Vec3f transformed_normals[NR_MESH_NORMALS];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 
-static void render_triangle(fixed *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
+static bool render_triangle(fixed *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
                             int i) {
     MeshIndex idx = MESH_INDICES[i];
     Triangle2i triangle(screen_vertices[idx.vertices.x].pos,
@@ -31,7 +31,7 @@ static void render_triangle(fixed *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
                 (triangle.vertices[1].y - triangle.vertices[0].y) *
                     (triangle.vertices[2].x - triangle.vertices[0].x));
     if (area <= 0)
-        return;
+        return false;
 
     Vec3i bary_orig = triangle.barycentric(pos);
     fixed z_orig = screen_vertices[idx.vertices.x].z * bary_orig.x +
@@ -110,6 +110,8 @@ render_y:
             }
         }
     }
+
+    return true;
 }
 
 static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
@@ -123,7 +125,8 @@ static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
             fixed intensity = dot(dir, n);
             if (intensity < 0)
                 intensity = 0;
-            intensity /= hls::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+            intensity /=
+                hls::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 
             RGB8 rgb;
             rgb.r = intensity * 255;
@@ -198,19 +201,25 @@ render_tile_y:
 
         clear_tile:
             for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
-#pragma HLS PIPELINE off
+#pragma HLS PIPELINE
+                tile[i] = 0;
                 zbuf[i] = 1000;
                 nbuf[i] = Vec3f(0, 0, 0);
             }
 
+            bool visible = false;
+
         render_triangles:
             for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
                 if (bounding_boxes[i].overlap(aabb)) {
-                    render_triangle(zbuf, posbuf, nbuf, Vec2i(x, y), i);
+                    visible |=
+                        render_triangle(zbuf, posbuf, nbuf, Vec2i(x, y), i);
                 }
             }
 
-            deferred_shading(tile, posbuf, nbuf);
+            if (visible) {
+                deferred_shading(tile, posbuf, nbuf);
+            }
 
             fb_write_tile(Vec2i(x, y), tile);
         }

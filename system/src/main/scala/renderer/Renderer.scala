@@ -43,10 +43,10 @@ class Renderer extends Module {
   	done := true.B
   }
   
-  val cntReg = RegInit(0.U(unsignedBitLength(1851848).W))
+  val cntReg = RegInit(0.U(unsignedBitLength(925924).W))
   val angleReg = RegInit(0.U(9.W))
   cntReg := cntReg + 1.U
-  when (cntReg === 1851848.U) {
+  when (cntReg === 925924.U) {
     cntReg := 0.U
     angleReg := angleReg + 1.U
     when (angleReg === 359.U) {
