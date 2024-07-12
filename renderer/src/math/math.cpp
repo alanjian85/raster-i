@@ -1,6 +1,6 @@
-#include <math.h>
+#include <math/math.hpp>
 
-extern const float SINE_TABLE[360] = {
+extern const fixed SINE_TABLE[360] = {
     0,
     0.0174524,
     0.0348995,
@@ -363,7 +363,7 @@ extern const float SINE_TABLE[360] = {
     -0.0174577,
 };
 
-extern const float COSINE_TABLE[360] = {
+extern const fixed COSINE_TABLE[360] = {
     1,          0.999848,      0.999391,       0.99863,
     0.997564,   0.996195,      0.994522,       0.992546,
     0.990268,   0.987688,      0.984808,       0.981627,

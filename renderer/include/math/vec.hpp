@@ -1,5 +1,7 @@
 #pragma once
 
+#include <types.hpp>
+
 template <typename T> struct Vec2 {
     T x, y;
 
@@ -12,7 +14,7 @@ template <typename T> struct Vec2 {
 };
 
 using Vec2i = Vec2<int>;
-using Vec2f = Vec2<float>;
+using Vec2f = Vec2<fixed>;
 
 template <typename T>
 Vec2<T> operator+(const Vec2<T> &lhs, const Vec2<T> &rhs) {
@@ -86,4 +88,4 @@ template <typename T> Vec3<T> cross(const Vec3<T> &lhs, const Vec3<T> &rhs) {
 }
 
 using Vec3i = Vec3<int>;
-using Vec3f = Vec3<float>;
+using Vec3f = Vec3<fixed>;

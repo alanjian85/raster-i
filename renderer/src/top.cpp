@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cfloat>
 #include <cstdlib>
 
 #include <fb.hpp>
@@ -7,13 +6,13 @@
 #include <math/triangle.hpp>
 #include <mem_layout.hpp>
 #include <mesh.hpp>
-#include <texture.hpp>
 #include <utils/aabb.hpp>
+#include <hls_math.h>
 #include <utils/color.hpp>
 
 struct ScreenVertex {
     Vec2i pos;
-    float z;
+    fixed z;
 };
 
 static ScreenVertex screen_vertices[NR_MESH_VERTICES];
@@ -21,7 +20,7 @@ static Vec3f transformed_positions[NR_MESH_VERTICES];
 static Vec3f transformed_normals[NR_MESH_NORMALS];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
 
-static void render_triangle(float *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
+static void render_triangle(fixed *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
                             int i) {
     MeshIndex idx = MESH_INDICES[i];
     Triangle2i triangle(screen_vertices[idx.vertices.x].pos,
@@ -35,7 +34,7 @@ static void render_triangle(float *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
         return;
 
     Vec3i bary_orig = triangle.barycentric(pos);
-    float z_orig = screen_vertices[idx.vertices.x].z * bary_orig.x +
+    fixed z_orig = screen_vertices[idx.vertices.x].z * bary_orig.x +
                    screen_vertices[idx.vertices.y].z * bary_orig.y +
                    screen_vertices[idx.vertices.z].z * bary_orig.z;
     Vec3f pos_orig = transformed_positions[idx.vertices.x] * bary_orig.x +
@@ -55,10 +54,10 @@ static void render_triangle(float *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
     Vec3i dbary_u(d1, d3, d5);
     Vec3i dbary_v(d0, d2, d4);
 
-    float dz_u = screen_vertices[idx.vertices.x].z * dbary_u.x +
+    fixed dz_u = screen_vertices[idx.vertices.x].z * dbary_u.x +
                  screen_vertices[idx.vertices.y].z * dbary_u.y +
                  screen_vertices[idx.vertices.z].z * dbary_u.z;
-    float dz_v = screen_vertices[idx.vertices.x].z * dbary_v.x +
+    fixed dz_v = screen_vertices[idx.vertices.x].z * dbary_v.x +
                  screen_vertices[idx.vertices.y].z * dbary_v.y +
                  screen_vertices[idx.vertices.z].z * dbary_v.z;
 
@@ -93,12 +92,13 @@ render_y:
     render_x:
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
 #pragma HLS PIPELINE
-            // #pragma HLS UNROLL factor = 8
-            // #pragma HLS ARRAY_PARTITION variable = tile type = cyclic factor
-            // = 8 #pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic
-            // factor = 8
+#pragma HLS UNROLL factor = 8
+#pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic factor = 8
+#pragma HLS ARRAY_PARTITION variable = posbuf type = cyclic factor = 8
+#pragma HLS ARRAY_PARTITION variable = nbuf type = cyclic factor = 8
+
             Vec3i bary = bary_orig - dbary_u * x + dbary_v * y;
-            float z = z_orig - dz_u * x + dz_v * y;
+            fixed z = z_orig - dz_u * x + dz_v * y;
             Vec3f pos = pos_orig - dpos_u * x + dpos_v * y;
             Vec3f n = n_orig - dn_u * x + dn_v * y;
 
@@ -115,12 +115,15 @@ render_y:
 static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
     for (int y = 0; y < FB_TILE_HEIGHT; y++) {
         for (int x = 0; x < FB_TILE_WIDTH; x++) {
+#pragma HLS PIPELINE
             Vec3f pos = posbuf[y * FB_TILE_WIDTH + x];
             Vec3f n = nbuf[y * FB_TILE_WIDTH + x];
 
             Vec3f dir = Vec3f(0, 0, 0) - pos;
-            float intensity = std::max(0.0f, dot(dir, n));
-            intensity /= sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+            fixed intensity = dot(dir, n);
+            if (intensity < 0)
+                intensity = 0;
+            intensity /= hls::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
 
             RGB8 rgb;
             rgb.r = intensity * 255;
@@ -132,26 +135,25 @@ static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
     }
 }
 
-void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
-                      ap_uint<9> angle) {
-#pragma HLS INTERFACE mode = ap_ctrl_hs port = return
-#pragma HLS INTERFACE mode = m_axi port = vram offset = off
+static Vec3f rotate_vec(Vec3f v, Vec3f axis, fixed sine, fixed cosine) {
+    Vec3f vc = axis * dot(v, axis);
+    Vec3f v1 = v - vc;
+    Vec3f v2 = cross(v1, axis);
+    return vc + v1 * cosine + v2 * sine;
+}
 
-    float sine = SINE_TABLE[angle];
-    float cosine = COSINE_TABLE[angle];
+static void preproc(ap_uint<9> angle) {
+    fixed sine = SINE_TABLE[angle];
+    fixed cosine = COSINE_TABLE[angle];
     Vec3f axis(0.0f, 1.0f, 0.0f);
 
 preproc_vertices:
     for (int i = 0; i < NR_MESH_VERTICES; i++) {
 #pragma HLS PIPELINE off
-        Vec3f pos = MESH_VERTICES[i];
-        Vec3f vc = axis * dot(pos, axis);
-        Vec3f v1 = pos - vc;
-        Vec3f v2 = cross(v1, axis);
-        pos = vc + v1 * cosine + v2 * sine;
+        Vec3f pos = rotate_vec(MESH_VERTICES[i], axis, sine, cosine);
         pos.z += 2;
         screen_vertices[i].pos =
-            Vec2i((1 + pos.x / pos.z * 0.75f) * FB_WIDTH / 2,
+            Vec2i((1 + pos.x / pos.z * 3 / 4) * FB_WIDTH / 2,
                   (1 - pos.y / pos.z) * FB_HEIGHT / 2);
         screen_vertices[i].z = pos.z;
         transformed_positions[i] = pos;
@@ -160,11 +162,7 @@ preproc_vertices:
 preproc_normals:
     for (int i = 0; i < NR_MESH_NORMALS; i++) {
 #pragma HLS PIPELINE off
-        Vec3f normal = MESH_NORMALS[i];
-        Vec3f vc = axis * dot(normal, axis);
-        Vec3f v1 = normal - vc;
-        Vec3f v2 = cross(v1, axis);
-        normal = vc + v1 * cosine + v2 * sine;
+        Vec3f normal = rotate_vec(MESH_NORMALS[i], axis, sine, cosine);
         transformed_normals[i] = normal;
     }
 
@@ -177,6 +175,14 @@ preproc_triangles:
                             screen_vertices[idx.z].pos);
         bounding_boxes[i] = triangle.aabb();
     }
+}
+
+void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
+                      ap_uint<9> angle) {
+#pragma HLS INTERFACE mode = ap_ctrl_hs port = return
+#pragma HLS INTERFACE mode = m_axi port = vram offset = off
+
+    preproc(angle);
 
 render_tile_y:
     for (int y = 0; y < FB_HEIGHT; y += FB_TILE_HEIGHT) {
@@ -186,14 +192,14 @@ render_tile_y:
                         Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
 
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
-            float zbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+            fixed zbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
             Vec3f posbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
             Vec3f nbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
 
         clear_tile:
             for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
 #pragma HLS PIPELINE off
-                zbuf[i] = FLT_MAX;
+                zbuf[i] = 1000;
                 nbuf[i] = Vec3f(0, 0, 0);
             }
 
