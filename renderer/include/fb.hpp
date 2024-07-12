@@ -13,7 +13,7 @@
 
 using fb_id_t = ap_uint<1>;
 
-#define FB_TILE_WIDTH 32
+#define FB_TILE_WIDTH 64
 #define FB_TILE_HEIGHT 32
 
 void fb_write_tile(Vec2i pos, const uint32_t *tile);
