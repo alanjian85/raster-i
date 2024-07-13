@@ -10,6 +10,13 @@
 #include <utils/aabb.hpp>
 #include <utils/color.hpp>
 
+static Vec3f rotate_vec(Vec3f v, Vec3f axis, fixed sine, fixed cosine) {
+    Vec3f vc = axis * dot(v, axis);
+    Vec3f v1 = v - vc;
+    Vec3f v2 = cross(v1, axis);
+    return vc + v1 * cosine + v2 * sine;
+}
+
 struct ScreenVertex {
     Vec2i pos;
     fixed z;
@@ -19,129 +26,6 @@ static ScreenVertex screen_vertices[NR_MESH_VERTICES];
 static Vec3f transformed_positions[NR_MESH_VERTICES];
 static Vec3f transformed_normals[NR_MESH_NORMALS];
 static Aabb2i bounding_boxes[NR_MESH_TRIANGLES];
-
-static void render_triangle(fixed *zbuf, Vec3f *posbuf, Vec3f *nbuf, Vec2i pos,
-                            int i) {
-    MeshIndex idx = MESH_INDICES[i];
-    Triangle2i triangle(screen_vertices[idx.vertices.x].pos,
-                        screen_vertices[idx.vertices.y].pos,
-                        screen_vertices[idx.vertices.z].pos);
-    int area = ((triangle.vertices[1].x - triangle.vertices[0].x) *
-                    (triangle.vertices[2].y - triangle.vertices[0].y) -
-                (triangle.vertices[1].y - triangle.vertices[0].y) *
-                    (triangle.vertices[2].x - triangle.vertices[0].x));
-    if (area <= 0)
-        return;
-
-    Vec3i bary_orig = triangle.barycentric(pos);
-    fixed z_orig = screen_vertices[idx.vertices.x].z * bary_orig.x +
-                   screen_vertices[idx.vertices.y].z * bary_orig.y +
-                   screen_vertices[idx.vertices.z].z * bary_orig.z;
-    Vec3f pos_orig = transformed_positions[idx.vertices.x] * bary_orig.x +
-                     transformed_positions[idx.vertices.y] * bary_orig.y +
-                     transformed_positions[idx.vertices.z] * bary_orig.z;
-    Vec3f n_orig = transformed_normals[idx.normals.x] * bary_orig.x +
-                   transformed_normals[idx.normals.y] * bary_orig.y +
-                   transformed_normals[idx.normals.z] * bary_orig.z;
-
-    int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
-    int d1 = triangle.vertices[2].y - triangle.vertices[1].y;
-    int d2 = triangle.vertices[0].x - triangle.vertices[2].x;
-    int d3 = triangle.vertices[0].y - triangle.vertices[2].y;
-    int d4 = triangle.vertices[1].x - triangle.vertices[0].x;
-    int d5 = triangle.vertices[1].y - triangle.vertices[0].y;
-
-    Vec3i dbary_u(d1, d3, d5);
-    Vec3i dbary_v(d0, d2, d4);
-
-    fixed dz_u = screen_vertices[idx.vertices.x].z * dbary_u.x +
-                 screen_vertices[idx.vertices.y].z * dbary_u.y +
-                 screen_vertices[idx.vertices.z].z * dbary_u.z;
-    fixed dz_v = screen_vertices[idx.vertices.x].z * dbary_v.x +
-                 screen_vertices[idx.vertices.y].z * dbary_v.y +
-                 screen_vertices[idx.vertices.z].z * dbary_v.z;
-
-    z_orig /= area;
-    dz_u /= area;
-    dz_v /= area;
-
-    Vec3f dpos_u = transformed_positions[idx.vertices.x] * dbary_u.x +
-                   transformed_positions[idx.vertices.y] * dbary_u.y +
-                   transformed_positions[idx.vertices.z] * dbary_u.z;
-    Vec3f dpos_v = transformed_positions[idx.vertices.x] * dbary_v.x +
-                   transformed_positions[idx.vertices.y] * dbary_v.y +
-                   transformed_positions[idx.vertices.z] * dbary_v.z;
-
-    pos_orig /= area;
-    dpos_u /= area;
-    dpos_v /= area;
-
-    Vec3f dn_u = transformed_normals[idx.normals.x] * dbary_u.x +
-                 transformed_normals[idx.normals.y] * dbary_u.y +
-                 transformed_normals[idx.normals.z] * dbary_u.z;
-    Vec3f dn_v = transformed_normals[idx.normals.x] * dbary_v.x +
-                 transformed_normals[idx.normals.y] * dbary_v.y +
-                 transformed_normals[idx.normals.z] * dbary_v.z;
-
-    n_orig /= area;
-    dn_u /= area;
-    dn_v /= area;
-
-render_y:
-    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
-    render_x:
-        for (int x = 0; x < FB_TILE_WIDTH; x++) {
-#pragma HLS PIPELINE
-#pragma HLS UNROLL factor = 8
-#pragma HLS ARRAY_PARTITION variable = zbuf type = cyclic factor = 8
-#pragma HLS ARRAY_PARTITION variable = posbuf type = cyclic factor = 8
-#pragma HLS ARRAY_PARTITION variable = nbuf type = cyclic factor = 8
-
-            Vec3i bary = bary_orig - dbary_u * x + dbary_v * y;
-            fixed z = z_orig - dz_u * x + dz_v * y;
-            Vec3f pos = pos_orig - dpos_u * x + dpos_v * y;
-            Vec3f n = n_orig - dn_u * x + dn_v * y;
-
-            if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0 &&
-                z <= zbuf[y * FB_TILE_WIDTH + x]) {
-                zbuf[y * FB_TILE_WIDTH + x] = z;
-                posbuf[y * FB_TILE_WIDTH + x] = pos;
-                nbuf[y * FB_TILE_WIDTH + x] = n;
-            }
-        }
-    }
-}
-
-static void deferred_shading(uint32_t *tile, Vec3f *posbuf, Vec3f *nbuf) {
-    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
-        for (int x = 0; x < FB_TILE_WIDTH; x++) {
-#pragma HLS PIPELINE
-            Vec3f pos = posbuf[y * FB_TILE_WIDTH + x];
-            Vec3f n = nbuf[y * FB_TILE_WIDTH + x];
-
-            Vec3f dir = Vec3f(0, 0, 0) - pos;
-            fixed intensity = dot(dir, n);
-            if (intensity < 0)
-                intensity = 0;
-            intensity /=
-                hls::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
-
-            RGB8 rgb;
-            rgb.r = intensity * 255;
-            rgb.g = intensity * 255;
-            rgb.b = intensity * 255;
-
-            tile[y * FB_TILE_WIDTH + x] = rgb.encode();
-        }
-    }
-}
-
-static Vec3f rotate_vec(Vec3f v, Vec3f axis, fixed sine, fixed cosine) {
-    Vec3f vc = axis * dot(v, axis);
-    Vec3f v1 = v - vc;
-    Vec3f v2 = cross(v1, axis);
-    return vc + v1 * cosine + v2 * sine;
-}
 
 static void preproc(ap_uint<9> angle) {
     fixed sine = SINE_TABLE[angle];
@@ -178,6 +62,182 @@ preproc_triangles:
     }
 }
 
+struct PixAttrib {
+    Vec3f pos;
+    Vec3f n;
+};
+
+static void render_triangle(fixed (*zbuf)[FB_SAMPLES_PER_PIXEL],
+                            PixAttrib (*buf)[FB_SAMPLES_PER_PIXEL], Vec2i pos,
+                            MeshIndex idx) {
+    Triangle2i triangle(screen_vertices[idx.vertices.x].pos,
+                        screen_vertices[idx.vertices.y].pos,
+                        screen_vertices[idx.vertices.z].pos);
+    int area = ((triangle.vertices[1].x - triangle.vertices[0].x) *
+                    (triangle.vertices[2].y - triangle.vertices[0].y) -
+                (triangle.vertices[1].y - triangle.vertices[0].y) *
+                    (triangle.vertices[2].x - triangle.vertices[0].x));
+    if (area <= 0)
+        return;
+
+    Vec3i bary_orig = triangle.barycentric(pos);
+    fixed z_orig = screen_vertices[idx.vertices.x].z * bary_orig.x +
+                   screen_vertices[idx.vertices.y].z * bary_orig.y +
+                   screen_vertices[idx.vertices.z].z * bary_orig.z;
+    Vec3f pos_orig = transformed_positions[idx.vertices.x] * bary_orig.x +
+                     transformed_positions[idx.vertices.y] * bary_orig.y +
+                     transformed_positions[idx.vertices.z] * bary_orig.z;
+    Vec3f n_orig = transformed_normals[idx.normals.x] * bary_orig.x +
+                   transformed_normals[idx.normals.y] * bary_orig.y +
+                   transformed_normals[idx.normals.z] * bary_orig.z;
+
+    int d0 = triangle.vertices[2].x - triangle.vertices[1].x;
+    int d1 = triangle.vertices[2].y - triangle.vertices[1].y;
+    int d2 = triangle.vertices[0].x - triangle.vertices[2].x;
+    int d3 = triangle.vertices[0].y - triangle.vertices[2].y;
+    int d4 = triangle.vertices[1].x - triangle.vertices[0].x;
+    int d5 = triangle.vertices[1].y - triangle.vertices[0].y;
+
+    Vec3i dbary_x(d1, d3, d5);
+    Vec3i dbary_y(d0, d2, d4);
+    Vec3i dbary_u = dbary_x / 2;
+    Vec3i dbary_v = dbary_y / 2;
+
+    fixed dz_x = screen_vertices[idx.vertices.x].z * dbary_x.x +
+                 screen_vertices[idx.vertices.y].z * dbary_x.y +
+                 screen_vertices[idx.vertices.z].z * dbary_x.z;
+    fixed dz_y = screen_vertices[idx.vertices.x].z * dbary_y.x +
+                 screen_vertices[idx.vertices.y].z * dbary_y.y +
+                 screen_vertices[idx.vertices.z].z * dbary_y.z;
+
+    z_orig /= area;
+    dz_x /= area;
+    dz_y /= area;
+    fixed dz_u = dz_x / 2;
+    fixed dz_v = dz_y / 2;
+
+    Vec3f dpos_x = transformed_positions[idx.vertices.x] * dbary_x.x +
+                   transformed_positions[idx.vertices.y] * dbary_x.y +
+                   transformed_positions[idx.vertices.z] * dbary_x.z;
+    Vec3f dpos_y = transformed_positions[idx.vertices.x] * dbary_y.x +
+                   transformed_positions[idx.vertices.y] * dbary_y.y +
+                   transformed_positions[idx.vertices.z] * dbary_y.z;
+
+    pos_orig /= area;
+    dpos_x /= area;
+    dpos_y /= area;
+
+    Vec3f dn_x = transformed_normals[idx.normals.x] * dbary_x.x +
+                 transformed_normals[idx.normals.y] * dbary_x.y +
+                 transformed_normals[idx.normals.z] * dbary_x.z;
+    Vec3f dn_y = transformed_normals[idx.normals.x] * dbary_y.x +
+                 transformed_normals[idx.normals.y] * dbary_y.y +
+                 transformed_normals[idx.normals.z] * dbary_y.z;
+
+    n_orig /= area;
+    dn_x /= area;
+    dn_y /= area;
+
+render_y:
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
+    render_x:
+        for (int x = 0; x < FB_TILE_WIDTH; x++) {
+#pragma HLS PIPELINE
+#pragma HLS UNROLL factor = 8
+#pragma HLS ARRAY_PARTITION variable = zbuf dim = 1 type = cyclic factor = 8
+#pragma HLS ARRAY_PARTITION variable = buf dim = 1 type = cyclic factor = 8
+
+            Vec3i bary = bary_orig - dbary_x * x + dbary_y * y;
+            fixed z = z_orig - dz_x * x + dz_y * y;
+
+            ap_uint<FB_SAMPLES_PER_PIXEL> we = 0;
+
+            Vec3i bary00 = bary;
+            fixed z00 = z;
+            if (bary00.x >= 0 && bary00.y >= 0 && bary00.z >= 0 &&
+                z00 <= zbuf[y * FB_TILE_WIDTH + x][0]) {
+                zbuf[y * FB_TILE_WIDTH + x][0] = z00;
+                we |= 1;
+            }
+
+            Vec3i bary10 = bary00 - dbary_u;
+            fixed z10 = z00 - dz_u;
+            if (bary10.x >= 0 && bary10.y >= 0 && bary10.z >= 0 &&
+                z10 <= zbuf[y * FB_TILE_WIDTH + x][1]) {
+                zbuf[y * FB_TILE_WIDTH + x][1] = z10;
+                we |= 2;
+            }
+
+            Vec3i bary11 = bary10 + dbary_v;
+            fixed z11 = z10 + dz_v;
+            if (bary11.x >= 0 && bary11.y >= 0 && bary11.z >= 0 &&
+                z11 <= zbuf[y * FB_TILE_WIDTH + x][2]) {
+                zbuf[y * FB_TILE_WIDTH + x][2] = z11;
+                we |= 4;
+            }
+
+            Vec3i bary01 = bary11 + dbary_u;
+            fixed z01 = z11 + dz_u;
+            if (bary01.x >= 0 && bary01.y >= 0 && bary01.z >= 0 &&
+                z01 <= zbuf[y * FB_TILE_WIDTH + x][3]) {
+                zbuf[y * FB_TILE_WIDTH + x][3] = z01;
+                we |= 8;
+            }
+
+            if (we) {
+#pragma HLS ARRAY_PARTITION variable = buf dim = 2 type = complete
+
+                PixAttrib attrib;
+                attrib.pos = pos_orig - dpos_x * x + dpos_y * y;
+                attrib.n = n_orig - dn_x * x + dn_y * y;
+
+                for (int i = 0; i < FB_SAMPLES_PER_PIXEL; i++) {
+                    if (we & 1 << i) {
+                        buf[y * FB_TILE_WIDTH + x][i] = attrib;
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void deferred_shading(uint32_t *tile,
+                             PixAttrib (*buf)[FB_SAMPLES_PER_PIXEL]) {
+    for (int y = 0; y < FB_TILE_HEIGHT; y++) {
+        for (int x = 0; x < FB_TILE_WIDTH; x++) {
+            RGB8 rgb(0, 0, 0);
+            for (int i = 0; i < FB_SAMPLES_PER_PIXEL; i++) {
+#pragma HLS PIPELINE
+                Vec3f pos = buf[y * FB_TILE_WIDTH + x][i].pos;
+                Vec3f n = buf[y * FB_TILE_WIDTH + x][i].n;
+
+                Vec3f dir = Vec3f(0, 0, 0) - pos;
+                fixed intensity = dot(dir, n);
+                if (intensity < 0)
+                    intensity = 0;
+                intensity /=
+                    hls::sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+
+                fixed factor = intensity * 255;
+
+                int r = (n.x + 1) / 2 * factor;
+                int g = (n.y + 1) / 2 * factor;
+                int b = (n.z + 1) / 2 * factor;
+
+                rgb.r += r;
+                rgb.g += g;
+                rgb.b += b;
+            }
+
+            rgb.r /= FB_SAMPLES_PER_PIXEL;
+            rgb.g /= FB_SAMPLES_PER_PIXEL;
+            rgb.b /= FB_SAMPLES_PER_PIXEL;
+
+            tile[y * FB_TILE_WIDTH + x] = rgb.encode();
+        }
+    }
+}
+
 void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
                       ap_uint<9> angle) {
 #pragma HLS INTERFACE mode = ap_ctrl_hs port = return
@@ -193,26 +253,26 @@ render_tile_y:
                         Vec2i(x + FB_TILE_WIDTH, y + FB_TILE_HEIGHT));
 
             uint32_t tile[FB_TILE_WIDTH * FB_TILE_HEIGHT];
-            fixed zbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
-            Vec3f posbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
-            Vec3f nbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT];
+            fixed zbuf[FB_TILE_WIDTH * FB_TILE_HEIGHT][FB_SAMPLES_PER_PIXEL];
+            PixAttrib buf[FB_TILE_WIDTH * FB_TILE_HEIGHT][FB_SAMPLES_PER_PIXEL];
 
         clear_tile:
             for (int i = 0; i < FB_TILE_WIDTH * FB_TILE_HEIGHT; i++) {
-#pragma HLS PIPELINE
                 tile[i] = 0;
-                zbuf[i] = 1000;
-                nbuf[i] = Vec3f(0, 0, 0);
+                for (int j = 0; j < FB_SAMPLES_PER_PIXEL; j++) {
+                    zbuf[i][j] = 1000;
+                    buf[i][j].n = Vec3f(0, 0, 0);
+                }
             }
 
         render_triangles:
             for (int i = 0; i < NR_MESH_TRIANGLES; i++) {
                 if (bounding_boxes[i].overlap(aabb)) {
-                    render_triangle(zbuf, posbuf, nbuf, Vec2i(x, y), i);
+                    render_triangle(zbuf, buf, Vec2i(x, y), MESH_INDICES[i]);
                 }
             }
 
-            deferred_shading(tile, posbuf, nbuf);
+            deferred_shading(tile, buf);
 
             fb_write_tile(Vec2i(x, y), tile);
         }

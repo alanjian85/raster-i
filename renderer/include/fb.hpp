@@ -9,6 +9,7 @@
 
 #define FB_WIDTH 1024
 #define FB_HEIGHT 768
+#define FB_SAMPLES_PER_PIXEL 4
 #define FB_ID_SHIFT 18
 
 using fb_id_t = ap_uint<1>;
