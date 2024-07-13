@@ -2,6 +2,8 @@
 .metals
 .vscode
 .bsp
+.lock
+.wsdata
 generated
 project
 target

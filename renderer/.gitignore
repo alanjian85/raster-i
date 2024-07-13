@@ -20,3 +20,4 @@ hls
 .cache
 logs
 renderer
+compile_commands.json
