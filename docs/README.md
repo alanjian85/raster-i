@@ -1,67 +1,22 @@
 <img src="logo.svg" align="right" width="125" height="125"/>
 
-# Project Trinity
-A rasterization-based GPU created for real-time rendering
+# Raster I
+Raster I, also known as Raster Primus, is a hardware renderer specialized in real-time rasterization. While Chisel HDL (Scala) is used to precisely describe the logic of the VGA controller, framebuffer reader, and Vsync mechanisms. The primary graphics pipeline, which contribute to the majority of computations, is implemented in Vitis HLS (C++) to enhance productivity.
 
-## Overview
-The project Trinity, as its name implies, is not only an open-source hardware implementation of a [graphics processing unit (GPU)](https://en.wikipedia.org/wiki/Graphics_processing_unit). In essence, It consists of a GPU hardware together with its driver and architecture (and tools targeting the architecture). They are all a piece of Trinity.
+Currently, a [Pineda](https://www.cs.drexel.edu/~deb39/Classes/Papers/comp175-06-pineda.pdf) style rasterizer is implemented with modern techniques such as tiled rendering and tile-based deferred rendering (TBDR). The resolution can be configured to 1024x768 (each scanline thus represents the maximum amount of data that an AXI write burst can send), and tiles of size 64x32 are rendered successively. Furthermore, 8 parallel pipelines are in charge of interpolating pixel attributes in each tile, while another hardware pipeline that implements a deferred shader shades the surface using the Phong shading model and determines the color of each pixel based on the interpolated data. Finally, ordered dithering is supported for transferring 24 bpp frames via a 12 bpp VGA adaptor, and anti-aliasing is achieved using MSAA 4x with almost no overhead.
 
-The motivation is to build a full-featured and open-source GPU that can runs on common FPGA platforms. Presently, It is primarily written in [Scala](https://scala-lang.org/) and [Chisel](https://www.chisel-lang.org/), an open-source and relatively high-level (in comparison with Verilog, SystemVerilog and VHDL) hardware description language (HDL) that can be used to describe combinational and synchronous circuits.
+In conclusion, implementing the following features result in an efficient GPU that is capable of rendering a reduced [Stanford Lucy](https://github.com/alecjacobson/common-3d-test-models/blob/master/data/lucy.obj) model, composed of 1501 vertices and 2998 triangles, at nearly 30 FPS.
 
-On the contrary with other open-source GPUs, the ambition of this project is to build a hardware that supports both 3D real-time rendering and programmable pipeline (in the form of [shader](https://en.wikipedia.org/wiki/Shader), a program that models the shading of objects with its parallel nature) at the same time. And the ultimate goal is to support modern graphics APIs such as [OpenGL 4](https://www.opengl.org/) and [Vulkan](https://www.vulkan.org/).
+* Incremental version of Pineda's parallel algorithm for rasterization
+* Interpolation of pixel attributes based on barycentric coordinates
+* Tiled rendering and tile-based deferred rendering (TBDR)
+* Phong shading and Lambertian reflectance
+* Ordered dithering converting RGB888 to RGB444
+* Vsync making the render passes synchronous with the VGA signal
+* MSAA 4x with very low performance overhead (thanks to tiled rendering)
+
+Note also that this project is just the first iteration of Project Raster, which aims to provide a full-featured, open-source GPU suitable for deployment on widely available FPGA platforms. The ultimate goal is to incorporate a 3D graphics engine and a programmable shader pipeline into the architecture, resulting in an IP that is compatible with modern graphics APIs like OpenGL 4 and Vulkan (which is uncommon in current open-source GPUs). While currently in the experimental phase, ongoing development is expected to progress in the coming years, potentially resulting in a fully functional and high-performance GPU implemented entirely in HDL and using only open-source toolchains.
 
 |<img src="demo1.gif" width="180" height="300"/>|<img src="demo2.gif" width="300" height="300"/>|
 |-----------------------------------------------|-----------------------------------------------|
 |<img src="demo3.gif" width="300" height="300"/>|<img src="demo4.gif" width="300" height="300"/>|
-
-## Features
-* Support for any screen resolutions with width no greater than 1024
-* Support for any RGB format whose channel width is a power of two greater or an arbitrary integer less than 4
-
-## Build instructions
-
-### Vivado
-Before building this project, the EDA tool [AMD Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) must be installed and the required platform files must be downloaded and put to the appropriate place (See [Installing Vivado, Vitis, and Digilent Board Files](https://digilent.com/reference/programmable-logic/guides/installing-vivado-and-vitis)). Additionally, instructions in [the Chisel setup manual](https://github.com/chipsalliance/chisel/blob/main/SETUP.md) should be followed to have the correct environment for Chisel.
-
-If all dependencies are installed and set up properly, the first step is to clone the GitHub repository and compile the Chisel code in the project directory:
-
-```sh
-git clone https://github.com/alanjian85/trinity && cd trinity
-sbt run
-```
-
-There should now be some SystemVerilog files in the `generated` directory. And the second step is to run Vivado in the `vivado` directory and execute the TCL script `build.tcl`. If you click the `Generate Bitstream` button now, you will get a file that can be loaded into FPGA. Then you can see the result on the screen connected to your FPGA board.
-
-### Verilator
-Trinity also offers simulation option through the use of [Verilator](https://www.veripool.org/verilator/), a program that converts Verilog source code to C++ code. A C++ test bench displaying the output of Trinity using [SDL2](https://www.libsdl.org/) is also included and can be used in conjunction with the code generated by Verilator.
-
-```sh
-git clone https://github.com/alanjian85/trinity && cd trinity
-sbt "run --verilator"
-cd verilator
-make
-```
-
-An executable file `trinity` will then be generated in the `obj_dir` directory. Run it and you will see a window shows up and displays the execution result of this GPU.
-
-## References
-* [Zynq-7000 SoC and 7 Series Devices Memory Interface Solutions (UG586)](https://docs.xilinx.com/v/u/en-US/ug586_7Series_MIS)
-* [7 Series FPGAs AXI Multi-Port Memory Controller Using the Vivado IP Integrator Tool (XAPP1164)](https://docs.xilinx.com/v/u/en-US/xapp1164)
-
-## License (MIT)
-<a href="https://opensource.org/licenses/MIT" target="_blank">
-<img align="right" src="osi.png">
-</a>
-
-```
-MIT License
-
-Copyright (c) 2023 Alan Jian
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-```
