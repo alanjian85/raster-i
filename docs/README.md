@@ -1,7 +1,7 @@
 <img src="logo.svg" align="right" width="125" height="125"/>
 
 # Raster I
-Raster I, also known as Raster Primus, is a hardware renderer specialized in real-time rasterization. While Chisel HDL (Scala) is used to precisely describe the logic of the VGA controller, framebuffer reader, and Vsync mechanisms. The primary graphics pipeline, which contribute to the majority of computations, is implemented in Vitis HLS (C++) to enhance productivity.
+Raster I, also known as Raster Primus, is a hardware renderer specialized in real-time rasterization. While Chisel HDL (Scala) is used to precisely describe the logic of the VGA controller, framebuffer reader, and Vsync mechanisms. The primary graphics pipeline, which contributes to the majority of computations, is implemented in Vitis HLS (C++) to enhance productivity.
 
 Currently, a [Pineda](https://www.cs.drexel.edu/~deb39/Classes/Papers/comp175-06-pineda.pdf) style rasterizer is implemented with modern techniques such as tiled rendering and tile-based deferred rendering (TBDR). The resolution can be configured up to 1024x768 (each scanline thus represents the maximum amount of data that an AXI write burst can send), and tiles of size 64x32 are rendered successively. Furthermore, 8 parallel pipelines are in charge of interpolating pixel attributes in each tile, while another hardware pipeline that implements a deferred shader shades the surface using the Phong shading model and determines the color of each pixel based on the interpolated data. Finally, ordered dithering is supported for transferring 24 bpp frames via a 12 bpp VGA adaptor, and anti-aliasing is achieved using MSAA 4x with almost no overhead.
 
