@@ -11,6 +11,7 @@ In conclusion, implementing the following features result in an efficient GPU th
 * Interpolation of pixel attributes based on barycentric coordinates
 * Tiled rendering and tile-based deferred rendering (TBDR)
 * Phong shading and Lambertian reflectance
+* Back-face culling for skipping invisible primitives
 * Ordered dithering converting RGB888 to RGB444
 * Vsync making the render passes synchronous with the VGA signal
 * MSAA 4x with very low performance overhead (thanks to tiled rendering)

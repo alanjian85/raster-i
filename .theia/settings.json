@@ -1,0 +1,10 @@
+{
+    "clangd.fallbackFlags": [
+        "-I/home/feedc0de/workspace/raster-i/renderer/include",
+        "-I/opt/xilinx/Vitis_HLS/2024.1/include",
+        "-I/opt/xilinx/Vitis_HLS/2024.1/include/etc",
+        "-I/opt/xilinx/Vitis_HLS/2024.1/include/ap_sysc",
+        "-I/opt/xilinx/Vitis_HLS/2024.1/lnx64/tools/auto_cc/include",
+        "-I/opt/xilinx/Vitis_HLS/2024.1/lnx64/tools/systemc/include"
+    ]
+}

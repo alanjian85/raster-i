@@ -220,9 +220,9 @@ static void deferred_shading(uint32_t *tile,
 
                 fixed factor = intensity * 255;
 
-                int r = (n.x + 1) / 2 * factor;
-                int g = (n.y + 1) / 2 * factor;
-                int b = (n.z + 1) / 2 * factor;
+                int r = factor;
+                int g = factor;
+                int b = factor;
 
                 rgb.r += r;
                 rgb.g += g;
