@@ -15,6 +15,7 @@ As a result, this GPU utilizes 69% LUT, 97% BRAM, and 88% DSP from [Digilent Art
 
 ## Architecture
 
-![Architecture Diagram](diagram.png)
+![System Architecture](system-architecture.png)
+![Rendering Unit Architecture](rendering-unit.png)
 
 The architecture of Raster I can be mainly viewed as 3 clock domains: system, graphics and display (their frequencies are currently 100MHz, 100MHz and 65MHz). While the components in the graphics clock domain is responsible for executing traditional rendering processes, the display clock domain is in charge of reading the framebuffer in DRAM, applying effects like dithering and putting it onto the screen synchronously. At the heart of the system, there sits a framebuffer swapper which behaves as a coordinator between the graphics and display clock domains.
