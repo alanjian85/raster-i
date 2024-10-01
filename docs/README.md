@@ -1,35 +1,20 @@
 <img src="logo.svg" align="right" width="125" height="125"/>
 
 # Raster I
-Raster I, also known as Raster Primus, is a hardware renderer specialized in real-time rasterization. While Chisel HDL (Scala) is used to precisely describe the logic of the VGA controller, framebuffer reader, and Vsync mechanisms. The primary graphics pipeline, which contributes to the majority of computations, is implemented in Vitis HLS (C++) to enhance productivity.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
-Currently, a [Pineda](https://www.cs.drexel.edu/~deb39/Classes/Papers/comp175-06-pineda.pdf) style rasterizer is implemented with modern techniques such as tiled rendering and tile-based deferred rendering (TBDR). The resolution can be configured up to 1024x768 (each scanline thus represents the maximum amount of data that an AXI write burst can send), and tiles of size 64x32 are rendered successively. Furthermore, 8 parallel pipelines are in charge of interpolating pixel attributes in each tile, while another hardware pipeline that implements a deferred shader shades the surface using the Phong shading model and determines the color of each pixel based on the interpolated data. Finally, ordered dithering is supported for transferring 24 bpp frames via a 12 bpp VGA adaptor, and anti-aliasing is achieved using MSAA 4x with almost no overhead.
+Raster I is a hardware renderer that specializes in real-time rasterization and is based on the [Tile-Based Deferred Rendering (TBDR)](https://en.wikipedia.org/wiki/Tiled_rendering) architecture. Currently, several crucial features are implemented along with a tiled [Pineda](https://www.cs.drexel.edu/~deb39/Classes/Papers/comp175-06-pineda.pdf) style rasterizer, including hardware-accelerated transform and lighting (T&L), deferred Phong shading, double buffering, VSync, MSAA anti-aliasing, ordered dithering and back-face culling. Its implementation is divided into two parts, one is written in [Chisel HDL](https://www.chisel-lang.org/), and the other is based on [Xilinx Vitis HLS](https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vitis/vitis-hls.html). 
 
-In conclusion, implementing the following features result in an efficient GPU that is capable of rendering a reduced [Stanford Lucy](https://github.com/alecjacobson/common-3d-test-models/blob/master/data/lucy.obj) model, composed of 1501 vertices and 2998 triangles, at nearly 30 FPS.
+Furthermore, Raster I consists of a multi-cycle vertex transformer, 8 parallel interpolator pipelines, and a deferred shading pipeline that employs the Phong shading model (internal calculations use Q11.13 fixed point numbers). The output VGA signal can be configured up to 1024x768 @ 60Hz, and tiles of size 64x32 are rendered sequentially. Visual enhancements are also supported with minimal overhead, such as ordered dithering for displaying pseudo 24bpp pixels and MSAA 4x anti-aliasing. If there is enough BRAM left over for texture storage, an optional texture sampling unit is also available.
 
-* Incremental version of Pineda's parallel algorithm for rasterization
-* Interpolation of pixel attributes based on barycentric coordinates
-* Tiled rendering and tile-based deferred rendering (TBDR)
-* Phong shading and Lambertian reflectance
-* Back-face culling for skipping invisible primitives
-* Ordered dithering converting RGB888 to RGB444
-* Vsync making the render passes synchronous with the VGA signal
-* MSAA 4x with very low performance overhead (thanks to tiled rendering)
+As a result, this GPU utilizes 69% LUT, 97% BRAM, and 88% DSP from [Digilent Arty A7-100T](https://digilent.com/shop/arty-a7-100t-artix-7-fpga-development-board/) and can render a 3D model with 3K faces at a screen resolution of 1024x768 and a clock frequency of 100MHz at about 30FPS. It is also worth mentioning that this is only the first iteration of Project Raster, with key features like GPGPU ISA yet to be implemented. Therefore, in future releases, it will eventually evolve into a fully-fledged open-source hardware that supports practically all of the typical features of modern GPUs.
 
 |<img src="demo1.gif" width="180" height="300"/>|<img src="demo2.gif" width="300" height="300"/>|
 |-----------------------------------------------|-----------------------------------------------|
 |<img src="demo3.gif" width="300" height="300"/>|<img src="demo4.gif" width="300" height="300"/>|
 
-Note also that this project is just the first iteration of Project Raster, which aims to provide a full-featured, open-source GPU suitable for deployment on widely available FPGA platforms. The ultimate goal is to incorporate a 3D graphics engine and a programmable shader pipeline into the architecture, resulting in an IP that is compatible with modern graphics APIs like OpenGL 4 and Vulkan (which is uncommon in current open-source GPUs). While currently in the experimental phase, ongoing development is expected to progress in the coming years, potentially resulting in a fully functional and high-performance GPU implemented entirely in HDL and using only open-source toolchains.
+## Architecture
 
-## Build Instructions
-To build Raster I, three components must be built sequentially: Chisel HDL modules, the HLS graphics pipeline and eventually Raster I itself. All the Chisel HDL source code is placed at `system/src/main/scala`. Therefore, you need to first go to the `system` directory and execute the following command. 
-```shell
-sbt run
-```
+![Architecture Diagram](diagram.png)
 
-After Scala finishes executing, a SystemVerilog file, which defines the structure of the whole system and several crucial modules, will be available under `system/generated`. Then, run Vitis IDE and open the directory of this project as workspace. You will see a HLS component available in the index, which is the main graphics pipeline and renderer. Click `Synthesis` and `Package` to generate HDL files from HLS source code.
-
-Now open Vivado at `system/vivado` and run `build.tcl` (`Tools` -> `Run Tcl Script`). If done successfully, the project will be initialized with all source files included and Arty A7-100T set as the FPGA board (the board package must be installed in advance). Note that the IP version of the HLS kernel referenced in the Vivado project must be updated, which can be done by refreshing the IP Catalog and clicking `Upgrade Selected` in IP Status.
-
-After clicking `Generate Bitstream`, it will take several minutes (up to the speed of your computer) to generate the FPGA bitstream. If no error is generated, you can now open hardware manager and program the device.
+The architecture of Raster I can be mainly viewed as 3 clock domains: system, graphics and display (their frequencies are currently 100MHz, 100MHz and 65MHz). While the components in the graphics clock domain is responsible for executing traditional rendering processes, the display clock domain is in charge of reading the framebuffer in DRAM, applying effects like dithering and putting it onto the screen synchronously. At the heart of the system, there sits a framebuffer swapper which behaves as a coordinator between the graphics and display clock domains.
