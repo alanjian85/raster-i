@@ -238,8 +238,13 @@ static void deferred_shading(uint32_t *tile,
     }
 }
 
+#ifdef __SYNTHESIS__
 void trinity_renderer(fb_id_t fb_id, hls::burst_maxi<ap_uint<128>> vram,
-                      ap_uint<9> angle) {
+                      ap_uint<9> angle)
+#else
+void trinity_renderer(fb_id_t fb_id, ap_uint<128> *vram, ap_uint<9> angle)
+#endif
+{
 #pragma HLS INTERFACE mode = ap_ctrl_hs port = return
 #pragma HLS INTERFACE mode = m_axi port = vram offset = off
 
@@ -274,8 +279,31 @@ render_tile_y:
 
             deferred_shading(tile, buf);
 
+#ifdef __SYNTHESIS__
             fb_write_tile(Vec2i(x, y), tile);
+#else
+            for (int i = 0; i < FB_TILE_HEIGHT; i++) {
+                uint32_t offset =
+                    (static_cast<uint32_t>(fb_id) << FB_ID_SHIFT) +
+                    ((y + i) * FB_WIDTH + x) / 4;
+                for (int j = 0; j < FB_TILE_WIDTH; j += 4) {
+                    ap_uint<128> val = tile[i * FB_TILE_WIDTH + j + 0];
+                    val |= static_cast<ap_uint<128>>(
+                               tile[i * FB_TILE_WIDTH + j + 1])
+                           << 32;
+                    val |= static_cast<ap_uint<128>>(
+                               tile[i * FB_TILE_WIDTH + j + 2])
+                           << 64;
+                    val |= static_cast<ap_uint<128>>(
+                               tile[i * FB_TILE_WIDTH + j + 3])
+                           << 96;
+                    vram[offset + j / 4] = val;
+                }
+            }
+#endif
         }
+#ifdef __SYNTHESIS__
         fb_flush_tiles(vram, fb_id, y);
+#endif
     }
 }

@@ -4,6 +4,7 @@
 .bsp
 .lock
 .wsdata
+.theia
 generated
 project
 target
