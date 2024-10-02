@@ -34,3 +34,16 @@ When a new frame begins, the rendering unit reads the rotation angle of the fram
 The display unit operates in sync with the output VGA signal and issues AXI read requests to the VRAM controller upon reaching the [horizontal blanking interval](https://en.wikipedia.org/wiki/Horizontal_blanking_interval). Each pixel of a scanline is then loaded and processed in advance, making it available for display in the scanline buffer when the VGA signal timing arrives. This strategy exempts the renderer from the duty of "racing the beam" and enables it to run at the desired speed, as long as the framebuffer serves as the synchronizer for the two different timings.
 
 Moreover, two optional post-processing effects are also applied in the display unit: ordered dithering uses a threshold matrix, known as bayer matrix, to approximate RGB888 pixel colors in the RGB444 format, which is the limitation of the VGA adaptor I'm using, and [gamma correction](https://en.wikipedia.org/wiki/Gamma_correction) normalizes the result when the internal lighting calculations are performed in the linear [sRGB](https://en.wikipedia.org/wiki/SRGB) color space.
+
+## Build Instructions
+To build Raster I, three components must be compiled successively: Chisel HDL modules, the HLS graphics pipeline, and finally the entire system. All of the Chisel HDL source code is in `system/src/main/scala`. Therefore, you must first navigate to the `system` directory and execute the following command.
+
+```shell
+sbt run
+```
+
+After Scala has completed its execution, a SystemVerilog file will be available under `system/generated`, defining the structure of the entire system as well as some critical modules. Then, launch Vitis IDE and select the directory containing this project as your workspace. The index contains an HLS component that serves as the main graphics pipeline and renderer. To produce HDL files from HLS source code, click **Synthesis** followed by **Package**.
+
+Now launch Vivado from `system/vivado` and execute `build.tcl` (**Tools** -> **Run Tcl Script**). If completed successfully, the project will be initialized with all source files included and Arty A7-100T selected as the FPGA board (the board package must be installed first). It is important to note that the IP version of the HLS kernel specified in the Vivado project must be upgraded. This can be accomplished by refreshing the **IP Catalog** and pressing **Upgrade Selected** in **IP Status**.
+
+After clicking **Generate Bitstream**, it will take several minutes (depending on the speed of your computer) to build the FPGA bitstream. If no errors are generated, you can now launch the hardware manager and program the device.
