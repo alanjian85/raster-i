@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0xABB359187F58104F",
+      "boundary_crc": "0xABB359183DFDF3C8",
       "device": "xc7a100tcsg324-1",
       "name": "vram",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
@@ -93,13 +93,13 @@
             "value": "256"
           },
           "NUM_READ_OUTSTANDING": {
-            "value": "1"
+            "value": "16"
           },
           "NUM_READ_THREADS": {
             "value": "1"
           },
           "NUM_WRITE_OUTSTANDING": {
-            "value": "1"
+            "value": "16"
           },
           "NUM_WRITE_THREADS": {
             "value": "1"
