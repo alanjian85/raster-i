@@ -3,7 +3,7 @@
   "ip_inst": {
     "xci_name": "renderer",
     "component_reference": "xilinx.com:hls:trinity_renderer:1.0",
-    "ip_revision": "2113761905",
+    "ip_revision": "2113762428",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
@@ -23,8 +23,8 @@
         "clk_period": [ { "value": "10", "enabled": false, "usage": "all" } ],
         "machine": [ { "value": "64", "enabled": false, "usage": "all" } ],
         "combinational": [ { "value": "0", "enabled": false, "usage": "all" } ],
-        "latency": [ { "value": "10434962", "enabled": false, "usage": "all" } ],
-        "II": [ { "value": "10434963 ~ 483510675", "enabled": false, "usage": "all" } ]
+        "latency": [ { "value": "6518147", "enabled": false, "usage": "all" } ],
+        "II": [ { "value": "6518148 ~ 86390148", "enabled": false, "usage": "all" } ]
       },
       "model_parameters": {
         "C_M_AXI_VRAM_ID_WIDTH": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
@@ -55,7 +55,7 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
-        "IPREVISION": [ { "value": "2113761905" } ],
+        "IPREVISION": [ { "value": "2113762428" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],

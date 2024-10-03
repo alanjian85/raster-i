@@ -9,9 +9,9 @@ Furthermore, Raster I consists of a multi-cycle vertex transformer, 8 parallel i
 
 As a result, this GPU utilizes 69% LUT, 97% BRAM, and 88% DSP from [Digilent Arty A7-100T](https://digilent.com/shop/arty-a7-100t-artix-7-fpga-development-board/) and can render a 3D model with 3K faces at a screen resolution of 1024x768 and a clock frequency of 100MHz at about 30FPS. It is also worth mentioning that this is only the first iteration of Project Raster, with key features like GPGPU ISA yet to be implemented. Therefore, in future releases, it will eventually evolve into a fully-fledged open-source hardware that supports practically all of the typical features of modern GPUs.
 
-|<img src="demo1.gif" width="180" height="300"/>|<img src="demo2.gif" width="300" height="300"/>|
-|-----------------------------------------------|-----------------------------------------------|
-|<img src="demo3.gif" width="300" height="300"/>|<img src="demo4.gif" width="300" height="300"/>|
+|<img src="suzanne.gif" width="300" height="300"/>|<img src="lucy.gif" width="180" height="300"/> |
+|-------------------------------------------------|-----------------------------------------------|
+|<img src="ferris.gif" width="300" height="300"/> |<img src="cube.gif" width="300" height="300"/> |
 
 ## Architecture
 
