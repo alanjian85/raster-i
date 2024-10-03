@@ -11,6 +11,12 @@ template <typename T> struct Vec2 {
         this->x = x;
         this->y = y;
     }
+
+    template <typename U> Vec2 &operator/=(U rhs) {
+        x /= rhs;
+        y /= rhs;
+        return *this;
+    }
 };
 
 using Vec2i = Vec2<int>;
@@ -21,12 +27,21 @@ Vec2<T> operator+(const Vec2<T> &lhs, const Vec2<T> &rhs) {
     return Vec2<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-template <typename T> Vec2<T> operator*(const Vec2<T> &lhs, T rhs) {
+template <typename T>
+Vec2<T> operator-(const Vec2<T> &lhs, const Vec2<T> &rhs) {
+    return Vec2<T>(lhs.x - rhs.x, lhs.y - rhs.y);
+}
+
+template <typename T, typename U> Vec2<T> operator*(const Vec2<T> &lhs, U rhs) {
     return Vec2<T>(lhs.x * rhs, lhs.y * rhs);
 }
 
 template <typename T> Vec2<T> operator*(T lhs, const Vec2<T> &rhs) {
     return Vec2<T>(lhs * rhs.x, lhs * rhs.y);
+}
+
+template <typename T> Vec2<T> operator/(const Vec2<T> &lhs, T rhs) {
+    return Vec2<T>(lhs.x / rhs, lhs.y / rhs);
 }
 
 template <typename T> struct Vec3 {

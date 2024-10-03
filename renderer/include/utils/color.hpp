@@ -33,3 +33,7 @@ inline RGB8 operator*(const RGB8 &lhs, int rhs) {
 inline RGB8 operator/(const RGB8 &lhs, int rhs) {
     return RGB8(lhs.r / rhs, lhs.g / rhs, lhs.b / rhs);
 }
+
+inline RGB8 operator>>(const RGB8 &lhs, int rhs) {
+    return RGB8(lhs.r >> rhs, lhs.g >> rhs, lhs.b >> rhs);
+}
